@@ -1,6 +1,8 @@
-konsultant (0.1-1) unstable; urgency=low
+konsultant (0.1-1) common; urgency=low
 
   * Initial Release.
+  * moving to common
+  * using cdbs
 
- -- Joseph Rawson <umeboshi@gregscomputerservice.com>  Mon, 27 Sep 2004 17:52:57 -0500
+ -- Joseph Rawson <umeboshi@gregscomputerservice.com>  Mon, 27 Sep 2004 19:41:43 -0500
 

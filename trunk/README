@@ -1,9 +1,22 @@
 Description:
-Konsultant is a KDE application for a small team of consultants
-to manage clients, tickets, and projects.  A working postgres server
-is required for operation.  The design goal is to create both a working
+Konsultant is a KDE application for a small team of consultants to
+manage clients, tickets, and projects.  A working postgres server is
+required for operation.  The design goal is to create both a working
 application, but also a simple application framework.  The framework
-should be adequate for creating small customized database applications,
-but not extravagant/complex enough to require much overhead in the 
-initial customization, yet flexible enough to allow for the obligatory schematic
-changes that occur when managing a deployed system.
+should be adequate for creating small customized database
+applications, but not extravagant/complex enough to require much
+overhead in the  initial customization, yet flexible enough to allow
+for the obligatory schematic changes that occur when managing a
+deployed system.
+
+Installation:
+python setup.py install
+Konsultant uses a standard distutils setup.
+The configuration has to be edited by hand right now.
+run konsultant first, then the config file should be in,
+.kde/share/config/konsultantrc
+You will also need to create the database on the server, although it
+is not used at the moment, your will also need to have plpgsql enabled
+in the database
+createlang -d $dbname plpgsql
+I usually do this in template1 so all databases contain it by default.

@@ -2,16 +2,13 @@ Source: konsultant
 Section: unknown
 Priority: optional
 Maintainer: Joseph Rawson <umeboshi@gregscomputerservice.com>
-Build-Depends: debhelper (>= 4.0.0)
+Build-Depends: debhelper (>= 4.0.0), cdbs, python-dev
 Standards-Version: 3.6.1
 
 Package: konsultant
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: python-pgsql, python-kde3, libqt3c102-qt-psql
+Recommends: postgresql-client, pgpool
+Description: a simple kde application to manage clients
+ Konsultant is a blablabla.
 
-Package: konsultant-doc
-Architecture: all
-Description: Documentation for konsultant
- <insert long description, indented with spaces>
