@@ -64,30 +64,34 @@ class KonsultantMainApplication(KApplication):
 class KonsultantMainWindow(KMainWindow):
     def __init__(self, app, *args):
         KMainWindow.__init__(self, *args)
+        self.app = app
         self.icons = KIconLoader()
-        self.systray = KSystemTray(self)
-        self.systray.setPixmap(self.icons.loadIcon('connect_no', 1))
-        self.systray.show()
+        if self.app.pgpool is not None:
+            self.systray = KSystemTray(self)
+            self.systray.setPixmap(self.icons.loadIcon('connect_no', 1))
+            self.systray.show()
         self.initActions()
         self.initMenus()
         self.initToolbar()
-        self.app = app
         self.db = app.db
         self.cfg = app.cfg
         
     def initActions(self):
-        collection = self.systray.actionCollection()
+        collection = self.actionCollection()
         self.editaddressAction = EditAddresses(self.slotEditAddresses, collection)
         self.manageclientsAction = ManageClients(self.slotManageClients, collection)
         self.manageticketsAction = ManageTickets(self.slotManageTickets, collection)
         self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
         
     def initMenus(self):
-        trayMenu = self.systray.contextMenu()
         mainMenu = KPopupMenu(self)
+        menus = [mainMenu]
+        if self.app.pgpool is not None:
+            trayMenu = self.systray.contextMenu()
+            menus.append(trayMenu)
         self.menuBar().insertItem('&Main', mainMenu)
         self.menuBar().insertItem('&Help', self.helpMenu(''))
-        for menu in [trayMenu, mainMenu]:
+        for menu in menus:
             self.editaddressAction.plug(menu)
             self.manageclientsAction.plug(menu)
             self.manageticketsAction.plug(menu)
