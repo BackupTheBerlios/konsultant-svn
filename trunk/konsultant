@@ -2,15 +2,59 @@
 import sys
 from qt import QApplication
 from kdecore import KApplication, KCmdLineArgs, KAboutData
+from kdecore import KIconLoader
+from kdeui import KSystemTray, KMainWindow
+
+from konsultant.base.config import BaseConfig
+from konsultant.base.gui import MainWindow
+from konsultant.base.gui import EditAddresses, ManageClients
 
 from konsultant.db import BaseDatabase
-
-from konsultant.base.gui import MainWindow
+from konsultant.db.gui import AddressSelector
 from konsultant.clientmanager import ClientManager
 
+class KonsultantMainApplication(KApplication):
+    def __init__(self, *args):
+        KApplication.__init__(self)
+        cfg = BaseConfig()
+        self.db = BaseDatabase(cfg, 'Konsultant', self)
+        
+
+class KonsultantMainWindow(KMainWindow):
+    def __init__(self, db, *args):
+        KMainWindow.__init__(self, *args)
+        self.icons = KIconLoader()
+        self.systray = KSystemTray(self)
+        self.systray.setPixmap(self.icons.loadIcon('connect_no', 1))
+        self.systray.show()
+        self.initActions()
+        self.initMenus()
+        self.db = db
+        
+    def initActions(self):
+        collection = self.systray.actionCollection()
+        self.editaddressAction = EditAddresses(self.slotEditAddresses, collection)
+        self.manageclientsAction = ManageClients(self.slotManageClients, collection)
+        
+    def initMenus(self):
+        mainMenu = self.systray.contextMenu()
+        self.editaddressAction.plug(mainMenu)
+        self.manageclientsAction.plug(mainMenu)
+        
+    def slotEditAddresses(self):
+        AddressSelector(self, self.db, 'AddressBrowser', modal=False)
+
+    def slotManageClients(self):
+        win = ClientManager(self, self.db)
+        win.show()
+        
 if __name__ == '__main__':
     aboutData = KAboutData('', '', '0.0', 'test', 0, 'nobody')
     KCmdLineArgs.init(sys.argv, aboutData)
-    app = KApplication()
-    win = ClientManager()
+    #app = KApplication()
+    app = KonsultantMainApplication()
+    #app.db = BaseDatabase('Konsultant', app)
+    #win = ClientManager(app.db)
+    win = KonsultantMainWindow(app.db)
+    #win.hide()
     app.exec_loop()

@@ -8,6 +8,15 @@ StateName = ColumnType('varchar', 2)
 sequences = ['address_ident', 'contact_ident', 'ticket_ident',
              'location_ident', 'client_ident']
 
+class ConfigTable(Table):
+    def __init__(self):
+        uname = PkName('username')
+        section = PkName('section')
+        option = PkBigname('option')
+        value = Text('value')
+        cols = [uname, section, option, value]
+        Table.__init__(self, 'config', cols)
+        
 class AddressTable(Table):
     def __init__(self):
         idcol = PkNum('addressid')

@@ -17,13 +17,13 @@ class BaseDriver(QSqlDriver):
 
 
 class BaseDatabase(QSqlDatabase):
-    def __init__(self, name, parent=None, objname=None):
-        self.cfg = Config()
-        self.cfg.change('database')
+    def __init__(self, cfg, name, parent=None, objname=None):
+        self.cfg = cfg
+        self.cfg.setGroup('database')
         QSqlDatabase.__init__(self, 'QPSQL7', name, parent, objname)
-        dbname = self.cfg['dbname']
-        dbhost = self.cfg['dbhost']
-        dbuser = self.cfg['dbusername']
+        dbname = str(self.cfg.readEntry('dbname'))
+        dbhost = str(self.cfg.readEntry('dbhost'))
+        dbuser = str(self.cfg.readEntry('dbuser'))
         self.conn = BasicConnection(dbuser, dbhost, dbname)
         self.setDatabaseName(dbname)
         self.setHostName(dbhost)
@@ -99,12 +99,15 @@ class BaseDatabase(QSqlDatabase):
     def stdclause(self, data):
         return reduce(and_, [Eq(k, v) for k,v in data.items()])
 
-    def identifyData(self, idcol, table, data):
+    def insertData(self, idcol, table, data):
         clause = self.stdclause(data)
         try:
             self.mcursor.select_row(fields=[idcol], table=table, clause=clause)
         except NoExistError:
             self.mcursor.insert(table=table, data=data)
             self.conn.commit()
+
+    def identifyData(self, idcol, table, data):
+        self.insertData(idcol, table, data)
         return self.mcursor.select_row(fields=['*'], table=table, clause=clause)
         

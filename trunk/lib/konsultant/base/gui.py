@@ -1,9 +1,21 @@
 from qt import QSplitter, QPixmap, QGridLayout
-from qt import QLabel, QFrame
+from qt import QLabel, QFrame, QString
+from qt import SIGNAL, SLOT, Qt
+from qt import QMimeSourceFactory
+
 from kdeui import KMainWindow, KEdit
 from kdeui import KMessageBox, KAboutDialog
 from kdeui import KConfigDialog, KListView
 from kdeui import KDialogBase, KLineEdit
+from kdeui import KTextBrowser
+
+from konsultant.base.actions import EditAddresses, ManageClients
+
+class MimeSources(QMimeSourceFactory):
+    def __init__(self):
+        QMimeSourceFactory.__init__(self)
+        self.addFilePath('/usr/share/wallpapers')
+        
 
 class AboutDialog(KAboutDialog):
     def __init__(self, parent, *args):
@@ -11,28 +23,11 @@ class AboutDialog(KAboutDialog):
         self.setTitle('Konsultant Database')
         self.setAuthor('Joseph Rawson')
         self.show()
-        
-class MainEditWindow(KMainWindow):
-    def __init__(self, *args):
-        KMainWindow.__init__(self, *args)
-        self.setGeometry (0, 0, 400, 600)
-
-        self.edit = KEdit (self)
-        self.setCentralWidget (self.edit)
-        lines = file('/etc/profile').readlines()
-        map(self.edit.insertLine, lines)
-        self.show()
 
 class MainWindow(KMainWindow):
-    def __init__(self, *args):
-        KMainWindow.__init__(self, *args)
-        self.setGeometry (0, 0, 400, 600)
-        self.mainView = QSplitter(self, 'main view')
-        self.listView = KListView(self.mainView, 'listView')
-        self.setCentralWidget (self.mainView)
-        self.show()
-
-
+    def __init__(self, parent, name='MainWindow'):
+        KMainWindow.__init__(self, parent, name, Qt.WType_Dialog)
+        
         
 class SimpleRecord(QGridLayout):
     def __init__(self, parent, fields, text=None, name='SimpleRecord'):
@@ -65,5 +60,4 @@ class SimpleRecordDialog(KDialogBase):
         self.showButtonApply(False)
         self.setButtonOKText('insert', 'insert')
         self.show()
-
 

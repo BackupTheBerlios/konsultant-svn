@@ -31,7 +31,7 @@ class Anchor(TextElement):
 
 class TableBaseElement(BaseElement):
     def appendRowDataElement(self, parent, data, align='right'):
-        element  = Element('td')
+        element  = BaseElement('td')
         element.setAttribute('align', align)
         elementd = Text()
         if type(data) == str:
@@ -41,7 +41,7 @@ class TableBaseElement(BaseElement):
                     e = Text()
                     e.data = line
                     element.appendChild(e)
-                    element.appendChild(Element('br'))
+                    element.appendChild(BaseElement('br'))
             else:
                 elementd.data = data
                 element.appendChild(elementd)
@@ -54,7 +54,7 @@ class TableBaseElement(BaseElement):
         parent.appendChild(element)
 
     def appendRowElement(self, parent, row, align='right'):
-        element = Element('tr')
+        element = BaseElement('tr')
         for r in row:            
             self.appendRowDataElement(element, r, align)
         parent.appendChild(element)
@@ -63,7 +63,7 @@ class TableElement(TableBaseElement):
     def __init__(self, cols, align='right', border='1'):
         TableBaseElement.__init__(self, 'table')
         self.setAttribute('border', border)
-        labels = Element('tr')
+        labels = BaseElement('tr')
         self.appendRowElement(labels, cols, align)
         self.appendChild(labels)
 
@@ -74,9 +74,9 @@ class TableRowElement(TableBaseElement):
 
 class Html(BaseElement):
     def __init__(self):
-        Element.__init__(self, 'html')
+        BaseElement.__init__(self, 'html')
 
 class Body(BaseElement):
     def __init__(self):
-        Element.__init__(self, 'body')
+        BaseElement.__init__(self, 'body')
         

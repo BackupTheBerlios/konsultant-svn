@@ -11,7 +11,7 @@ from konsultant.base.xmlgen import BaseElement
 #db is BaseDatabase from konsultant.db
 class BaseDbElement(BaseElement):
     def __init__(self, db, tagname):
-        Element.__init__(self, tagname)
+        BaseElement.__init__(self, tagname)
         self.db = db
         
 class BaseDocument(BaseDbElement):
@@ -63,13 +63,26 @@ class AddressSelectDoc(BaseDocument):
 
 class ClientHeaderElement(BaseElement):
     def __init__(self, client):
-        Element.__init__(self, 'h3')
+        BaseElement.__init__(self, 'h3')
         self.client = client
         #anchor = Anchor('foo.bar.-1', client)
         node = Text()
         node.data = '%s:' % client
         self.appendChild(node)
 
+class ClientSectionHeader(BaseElement):
+    def __init__(self, clientid, section, text):
+        BaseElement.__init__(self, 'h2')
+        node = Text()
+        node.data = text
+        self.appendChild(node)
+        p = BaseElement('p')
+        self.new = Anchor('new.%s.%s' % (section, clientid), 'new')
+        p.appendChild(self.new)
+        self.appendChild(p)
+        
+        
+        
 class LocationTableElement(TableElement):
     def __init__(self, db=None):
         cols = ['address', 'isp', 'connection', 'ip', 'static', 'serviced']
@@ -80,6 +93,11 @@ class ContactTableElement(TableElement):
         cols = ['name', 'address', 'email', 'description']
         TableElement.__init__(self, cols)
 
+class TicketTableElement(TableElement):
+    def __init__(self, db=None):
+        cols = ['title', 'status']
+        TableElement.__init__(self, cols)
+        
 class ClientInfoDoc(BaseDocument):
     def __init__(self, db):
         BaseDocument.__init__(self, db)
@@ -88,11 +106,14 @@ class ClientInfoDoc(BaseDocument):
         self.body.setAttribute('background', 'Time-For-Lunch-2.jpg')
 
     def set_client(self, clientid):
+        clause = Eq('clientid', clientid)
+        self.current = clientid
+        self.set_clause(clause)
+        
+    def set_clause(self, clause):
         while self.body.hasChildNodes():
             del self.body.childNodes[0]
-        clause = Eq('clientid', clientid)
         inforows = self.db.select(table='clientinfo', clause=clause)
-        self.current = clientid
 
         #make header
         row = self.db.select_row(table='clients', clause=clause)
@@ -100,24 +121,30 @@ class ClientInfoDoc(BaseDocument):
         self.body.appendChild(self.header)
 
         #append contacts header
-        conheader = Element('h2')
-        conheader.appendChild(Anchor('new.contact.%d' % clientid, 'Contacts:'))
+        conheader = ClientSectionHeader(self.current, 'contact', 'Contacts:')
         self.body.appendChild(conheader)
         self.contacts = ContactTableElement()
         self.body.appendChild(self.contacts)
 
         #append locations header
-        locheader = Element('h2')
-        locheader.appendChild(Anchor('new.location.%d' % clientid, 'Locations:'))
+        locheader = ClientSectionHeader(self.current, 'location', 'Locations:')
         self.body.appendChild(locheader)
         self.locations = LocationTableElement()
         self.body.appendChild(self.locations)
 
-        #insert the contacts and locations
+        #append tickets header
+        tickheader = ClientSectionHeader(self.current, 'ticket', 'Tickets:')
+        self.body.appendChild(tickheader)
+        self.tickets = TicketTableElement()
+        self.body.appendChild(self.tickets)
+        
+        #insert the contacts, locations and tickets
         locs = [r.locationid for r in inforows if r.locationid]
         contacts = [r.contactid for r in inforows if r.contactid]
+        tickets = [r.ticketid for r in inforows if r.ticketid]
         self.appendLocations(locs)
         self.appendContacts(contacts)
+        self.appendTickets(tickets)
         
     def _appendRows(self, ids, fields, table, idcol, element):
         if len(ids):
@@ -139,4 +166,11 @@ class ClientInfoDoc(BaseDocument):
             table = 'contacts'
             element = self.contacts
             self._appendRows(contacts, fields, table, 'contactid', element)
-        
+
+    def appendTickets(self, tickets):
+        if len(tickets):
+            fields = ['title', 'status']
+            tables = ['tickets', 'ticketstatus']
+            table = ' natural join '.join(tables)
+            element = self.tickets
+            self._appendRows(tickets, fields, tables, 'ticketid', element)
