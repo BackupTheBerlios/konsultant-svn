@@ -88,7 +88,13 @@ class ClientView(ViewBrowser):
         elif context == 'client':
             print url
             if action == 'edit':
-                dlg = ClientEditDialog(self.app, self, self.doc.records['client'])
+                record = dict(client=self.doc.records['client'],
+                              clientid=self.doc.current)
+                print record, 'record'
+                dlg = ClientEditDialog(self.app, self, record)
+                dlg.connect(dlg, SIGNAL('okClicked()'), self.updateClient)
+                dlg.connect(dlg, PYSIGNAL('updated()'), self.set_client)
+                self.dialogs['edit-client'] = dlg
         else:
             KMessageBox.error(self, 'bad call %s' % url)
 
@@ -111,6 +117,13 @@ class ClientView(ViewBrowser):
         locationid = self.manager.insertLocation(dlg.clientid, dlg.addressid, data)
         self.set_client(dlg.clientid)
 
+    def updateClient(self):
+        dlg = self.dialogs['edit-client']
+        data = dlg.grid.getRecordData()
+        clientid = dlg.clientid
+        self.manager.updateClient(clientid, data['client'])
+        self.set_client(clientid)
+        
 class ClientManagerWidget(BaseManagerWidget):
     def __init__(self, app, parent, *args):
         BaseManagerWidget.__init__(self, app, parent, ClientView, 'ClientManager')
@@ -167,7 +180,7 @@ class ClientManagerWidget(BaseManagerWidget):
         ConfigureDialog(self)
     
     def slotNew(self):
-        dlg = ClientDialog(self, self.db)
+        dlg = ClientDialog(self.app, self)
         dlg.connect(dlg, SIGNAL('okClicked()'), self.insertClientok)
         self.dialogs['new-client'] = dlg
         

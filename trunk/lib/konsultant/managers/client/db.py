@@ -124,3 +124,8 @@ class ClientManager(object):
         return clientid
     
         
+    def updateClient(self, clientid, name):
+        data = dict(client=name)
+        self.db.update(table='clients', data=data, clause=Eq('clientid', clientid))
+        
+        

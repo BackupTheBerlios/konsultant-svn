@@ -212,7 +212,7 @@ class AddressSelector(KDialogBase):
         self.app = app
         self.db = app.db
         self.fields = ['street1', 'street2', 'city', 'state', 'zip']
-        self.mainView = RecordSelector(self, self.app, 'addresses', self.fields,
+        self.mainView = RecordSelector(self.app, self, 'addresses', self.fields,
                                        'addressid', ['state', 'city'], AddressSelectView, name=name)
         self.setMainWidget(self.mainView)
         self.showButtonApply(False)

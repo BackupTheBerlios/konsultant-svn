@@ -82,7 +82,7 @@ class SimpleRecord(QGridLayout):
             print child
             #child.close()
         refdata = None
-        if self.record is not None:
+        if self.record is not None and hasattr(self.record, '_refdata'):
             print 'record is not None', self.record
             refdata = self.record._refdata
         for f in range(len(self.fields)):

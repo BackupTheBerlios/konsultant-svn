@@ -12,7 +12,7 @@ class AddressData(RefData):
 
 class _HasAddressDialog(object):
     def selAddress(self):
-        dlg = AddressSelector(self, self.app, modal=True)
+        dlg = AddressSelector(self.app, self, modal=True)
         dlg.setSource(self.addressidSelected)
         self.dialogs['address'] = dlg
     
@@ -61,6 +61,7 @@ class ClientDialog(SimpleRecordDialog):
 class ClientEditDialog(EditRecordDialog):
     def __init__(self, app, parent, record):
         EditRecordDialog.__init__(self, parent, ['client'], record, 'ClientEditDialog')
+        self.clientid = record['clientid']
         
 class LocationDialog(WithAddressIdRecDialog):
     def __init__(self, app, parent, name='LocationDialog'):
