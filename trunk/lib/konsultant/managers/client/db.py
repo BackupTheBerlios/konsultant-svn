@@ -95,4 +95,12 @@ class ClientManager(object):
         locations, ignore = self.getLocations(clientid, False)
         return dict(client=client, contacts=contacts,
                     locations=locations, addresses=addresses)
+
+    def insertClient(self, client):
+        clientid = self.db.select_row(fields=["nextval('client_ident')"]).nextval
+        data = dict(clientid=clientid, client=client)
+        self.db.insert(table='clients', data=data)
+        self.db.conn.commit()
+        return clientid
+    
         

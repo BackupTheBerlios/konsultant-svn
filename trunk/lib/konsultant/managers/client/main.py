@@ -24,6 +24,7 @@ from kdeui import KAction, KGuiItem
 from konsultant.base import NoExistError, Error
 from konsultant.sqlgen.clause import Eq, In
 from konsultant.base.actions import EditAddresses, ConfigureKonsultant
+from konsultant.base.actions import ManageTickets
 from konsultant.base.gui import MainWindow
 from konsultant.base.gui import ConfigureDialog
 
@@ -33,6 +34,8 @@ from konsultant.db.gui import AddressSelectView, RecordSelector
 from konsultant.db.gui import SimpleRecordDialog, AddressSelector
 from konsultant.db.gui import WithAddressIdRecDialog, BaseManagerWidget
 from konsultant.db.gui import ViewBrowser
+
+from konsultant.managers.ticket import TicketManagerWidget
 
 from xmlgen import ClientInfoDoc
 from db import ClientManager
@@ -79,6 +82,11 @@ class ClientView(ViewBrowser):
         locationid = self.manager.insertLocation(dlg.clientid, dlg.addressid, data)
         self.set_client(dlg.clientid)
 
+class ClientDialog(SimpleRecordDialog):
+    def __init__(self, parent, db, name='ClientDialog'):
+        fields = ['client']
+        SimpleRecordDialog.__init__(self, parent, fields, name='ClientDialog')
+        
 class ContactDialog(WithAddressIdRecDialog):
     def __init__(self, parent, db, name='ContactDialog'):
         fields = ['name', 'addressid', 'email', 'description']
@@ -92,26 +100,32 @@ class LocationDialog(WithAddressIdRecDialog):
 
 
 class ClientManagerWidget(BaseManagerWidget):
-    def __init__(self, parent, db, *args):
-        BaseManagerWidget.__init__(self, parent, db, ClientView, 'ClientManager')
-        self.cfg = parent.app.cfg
+    def __init__(self, parent, app, db, *args):
+        BaseManagerWidget.__init__(self, parent, app, db, ClientView, 'ClientManager')
+        self.cfg = self.app.cfg
         self.cfg.setGroup('client-gui')
         size = self.cfg.readEntry('mainwinsize')
         w, h = [int(x.strip()) for x in str(size).split(',')]
         self.resize(QSize(w, h))
+        self.dialogs  = {}
+        self.manager = ClientManager(self.db)
+        self.initToolbar()
         
     def initActions(self):
         collection = self.actionCollection()
         self.newAction = KStdAction.openNew(self.slotNew, collection)
+        self.quitAction = KStdAction.quit(self.app.quit, collection)
         self.editaddressAction = EditAddresses(self.slotEditAddresses, collection)
         self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
-        
+        self.manageTicketsAction = ManageTickets(self.slotManageTickets, collection)
         print self.editaddressAction
 
     def initMenus(self):
         mainMenu = KPopupMenu(self)
         self.newAction.plug(mainMenu)
+        self.manageTicketsAction.plug(mainMenu)
         self.editaddressAction.plug(mainMenu)
+        self.quitAction.plug(mainMenu)
         self.configureAction.plug(mainMenu)
         self.menuBar().insertItem('&Main', mainMenu)
         self.menuBar().insertItem('&Help', self.helpMenu(''))
@@ -119,6 +133,17 @@ class ClientManagerWidget(BaseManagerWidget):
     def initlistView(self):
         self.listView.addColumn('client')
         self.listView.setRootIsDecorated(True)
+        self.refreshlistView()
+        
+    def initToolbar(self):
+        toolbar = self.toolBar()
+        actions = [self.newAction, self.manageTicketsAction,
+                   self.editaddressAction, self.quitAction]
+        for action in actions:
+            action.plug(toolbar)
+        
+    def refreshlistView(self):
+        self.listView.clear()
         clients = KListViewItem(self.listView, 'clients')
         rows = self.db.mcursor.select(fields=['clientid', 'client'], table='clients')
         for row in rows:
@@ -129,8 +154,10 @@ class ClientManagerWidget(BaseManagerWidget):
         ConfigureDialog(self)
     
     def slotNew(self):
-        self.testAction('new')
-
+        dlg = ClientDialog(self, self.db)
+        dlg.connect(dlg, SIGNAL('okClicked()'), self.insertClientok)
+        self.dialogs['new-client'] = dlg
+        
     def slotEditAddresses(self):
         print 'hello'
         AddressSelector(self, self.db)
@@ -145,9 +172,16 @@ class ClientManagerWidget(BaseManagerWidget):
         else:
             self.view.setText('<b>clients</b>')
 
-        
+
+    def insertClientok(self):
+        dlg = self.dialogs['new-client']
+        data = dict([(k,v.text()) for k,v in dlg.grid.entries.items()])
+        clientid = self.manager.insertClient(str(dlg.grid.entries['client'].text()))
+        self.setClientView(clientid)
+        self.refreshlistView()
     def setClientView(self, clientid):
         self.view.set_client(clientid)
 
 
-
+    def slotManageTickets(self):
+        TicketManagerWidget(self, self.app, self.db)

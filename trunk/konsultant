@@ -10,7 +10,7 @@ from konsultant.base import DeadParrotObject
 from konsultant.base.gui import AboutData
 from konsultant.main import KonsultantMainApplication
 from konsultant.main import KonsultantMainWindow
-
+from konsultant.managers.client import ClientManagerWidget
         
 if __name__ == '__main__':
     aboutData = AboutData()
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     #bo.db = app.db
     #app.db = BaseDatabase('Konsultant', app)
     #win = ClientManager(app.db)
-    win = KonsultantMainWindow(app)
+    win = ClientManagerWidget(None, app, app.db)
     win.show()
     #win.lower()
     

@@ -118,6 +118,7 @@ class ClientTable(Table):
         idcol = PkNum('clientid')
         idcol.set_auto_increment('client_ident')
         client = Name('client')
+        client.constraint.unique = True
         Table.__init__(self, 'clients', [idcol, client])
         
 class ClientTicketTable(Table):

@@ -135,12 +135,12 @@ class TicketView(ViewBrowser):
                 win.show()
                 
 class TicketManagerWidgetNew(BaseManagerWidget):
-    def __init__(self, parent, db, *args):
+    def __init__(self, parent, app, db, *args):
         self.db = db
         self.manager = TicketManager(self.db)
-        BaseManagerWidget.__init__(self, parent, db, TicketView, 'TicketManager')
+        BaseManagerWidget.__init__(self, parent, app, db, TicketView, 'TicketManager')
         self.dialogs = {}
-
+        
     def initActions(self):
         collection = self.actionCollection()
         self.newAction = KStdAction.openNew(self.slotNew, collection)

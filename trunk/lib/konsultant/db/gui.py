@@ -20,8 +20,9 @@ from konsultant.base.gui import SimpleRecord, SimpleRecordDialog
 from konsultant.db.xmlgen import AddressSelectDoc, AddressLink
 
 class BaseManagerWidget(MainWindow):
-    def __init__(self, parent, db, view, name):
+    def __init__(self, parent, app, db, view, name):
         MainWindow.__init__(self, parent, name)
+        self.app = app
         self.db = db
         self.mainView = QSplitter(self, 'main view')
         self.listView = KListView(self.mainView)
