@@ -26,8 +26,9 @@ class TicketManager(object):
     def append_action(self, ticketid, subject, action, parent=None):
         data = dict(ticketid=ticketid, subject=subject, action=action)
         data['author'] = self.db.dbuser
-        row = self.db.identifyData('actionid', 'ticketactions', data)
-        actionid = row.actionid
+        actionid = self.db.select_row(fields=["nextval('action_ident')"]).nextval
+        data['actionid'] = actionid
+        self.db.insert(table='ticketactions', data=data)
         if parent is not None:
             self.db.insert(table='ticketactionparent',
                            data=dict(actionid=actionid, parent=parent))
@@ -83,8 +84,7 @@ class TicketManager(object):
     
     def get_actions(self, ticketid, actionids=False):
         allrows, toprows, childrows = self.get_actionids(ticketid)
-        ids = [r.actionid for r in allrows]
-        clause = Eq('ticketid', ticketid) & In('actionid', ids)
+        clause = Eq('ticketid', ticketid)
         actions = self.db.select(fields=self.afields, table=self.atable, clause=clause)
         if not actionids:
             return actions

@@ -45,6 +45,11 @@ class TicketView(ViewBrowser):
                 dlg = TicketDialog(self, 'ActionDialog')
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertAction)
                 dlg.ticketid = self.doc.current
+                if id == 'none':
+                    dlg.actionid = None
+                else:
+                    dlg.actionid = int(id)
+                print 'dlg.actionid', dlg.actionid
                 self.dialogs['new-action'] = dlg
                 
     def setID(self, ticketid):
@@ -56,7 +61,8 @@ class TicketView(ViewBrowser):
         subject = str(dlg.titleEdit.text())
         action = str(dlg.dataEdit.text())
         ticketid = dlg.ticketid
-        actionid = self.manager.append_action(ticketid, subject, action)
+        actionid = self.manager.append_action(ticketid, subject, action,
+                                              parent=dlg.actionid)
         self.setID(ticketid)
         
         

@@ -27,7 +27,7 @@ class TicketHeader(BaseElement):
 class TicketFooter(BaseElement):
     def __init__(self, ticketid):
         BaseElement.__init__(self, 'h3')
-        self.respond = Anchor('new.action.%d' % ticketid, 'respond')
+        self.respond = Anchor('new.action.none', 'respond')
         self.appendChild(self.respond)
         
 class TicketTableElement(TableElement):
@@ -47,14 +47,25 @@ class ListItem(TextElement):
 class UnorderedList(BaseElement):
     def __init__(self):
         BaseElement.__init__(self, 'ul')
+
+class ActionItem(ListItem):
+    def __init__(self, row):
+        url = 'new.action.%d' % row.actionid
+        element = Anchor(url, row.subject)
+        ListItem.__init__(self, element)
+
         
 class ActionThreads(UnorderedList):
-    def __init__(self, parent, rows, trows, crows):
+    def __init__(self, parent, actions, trows, crows):
         UnorderedList.__init__(self)
+        self._actiondata = {}
+        for a in actions:
+            self._actiondata[a.actionid] = a
         self.actions = {}
         for row in trows:
             element = UnorderedList()
-            li = ListItem('action-%d' % row.actionid)
+            #li = ListItem('action-%d' % row.actionid)
+            li = ActionItem(self._actiondata[row.actionid])
             element.appendChild(li)
             self.actions[row.actionid] = element
             self.appendChild(element)
@@ -68,17 +79,15 @@ class ActionThreads(UnorderedList):
             element = UnorderedList()
             #element = ListItem('actionid %d' % row.actionid)
             if not row.parent:
-                print row.parent, 'is a not'
                 parent.appendChild(element)
                 #element.appendChild(ListItem('actionid--%d' % row.actionid))
-                print 'bumping back'
             elif not self.actions.has_key(row.parent):
                 print row.parent, 'is not there'
                 rows.append(row)
             else:
                 self.actions[row.parent].appendChild(element)
                 print row.actionid, 'appended to ', row.parent
-                element.appendChild(ListItem('actionid--%d' % row.actionid))
+                element.appendChild(ActionItem(self._actiondata[row.actionid]))
             self.actions[row.actionid] = element
             del rows[0]
             
@@ -106,7 +115,7 @@ class TicketInfoDoc(BaseDocument):
         #append ticket footer
         self.tfooter = TicketFooter(ticketid)
         self.body.appendChild(self.tfooter)
-        rows, trows, crows = self.manager.get_actionids(ticketid)
-        athreads = ActionThreads(self.body, rows, trows, crows)
+        actions, rows, trows, crows = self.manager.get_actions(ticketid, True)
+        athreads = ActionThreads(self.body, actions, trows, crows)
         self.body.appendChild(athreads)
         
