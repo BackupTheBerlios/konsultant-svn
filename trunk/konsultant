@@ -1,0 +1,16 @@
+#!/usr/bin/python
+import sys
+from qt import QApplication
+from kdecore import KApplication, KCmdLineArgs, KAboutData
+
+from konsultant.db import BaseDatabase
+
+from konsultant.base.gui import MainWindow
+from konsultant.clientmanager import ClientManager
+
+if __name__ == '__main__':
+    aboutData = KAboutData('', '', '0.0', 'test', 0, 'nobody')
+    KCmdLineArgs.init(sys.argv, aboutData)
+    app = KApplication()
+    win = ClientManager()
+    app.exec_loop()

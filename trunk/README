@@ -1,0 +1,9 @@
+Description:
+Konsultant is a KDE application for a small team of consultants
+to manage clients, tickets, and projects.  A working postgres server
+is required for operation.  The design goal is to create both a working
+application, but also a simple application framework.  The framework
+should be adequate for creating small customized database applications,
+but not extravagant/complex enough to require much overhead in the 
+initial customization, yet flexible enough to allow for the obligatory schematic
+changes that occur when managing a deployed system.

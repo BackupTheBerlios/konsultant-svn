@@ -1,0 +1,9 @@
+#configuration file for konsultant
+[DEFAULT]
+
+[database]
+dbhost:			zathras
+dbname:			konsultant
+dbusername:		umeboshi
+dbpassword:		apassword
+autocommit:		false
