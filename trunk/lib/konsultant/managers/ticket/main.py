@@ -55,7 +55,7 @@ class ActionDialog(VboxDialog):
         self.show()
 
 class TicketAssigner(VboxDialog):
-    def __init__(self, parent, app, ticketid):
+    def __init__(self, app, parent, ticketid):
         KMainWindow.__init__(self, parent, 'TicketAssigner')
         self.resize(400, 300)
         self.listBox = KActionSelector(self)
@@ -122,7 +122,7 @@ class TicketActionView(ViewBrowser):
         elif context == 'ticket':
             if action == 'assign':
                 print 'assign in TicketActionView'
-                TicketAssigner(self, self.app, id)
+                TicketAssigner(self.app, self, id)
                 
     def setID(self, ticketid):
         self.current = ticketid
@@ -178,11 +178,11 @@ class TicketView(ViewBrowser):
                 win.show()
             elif action == 'assign':
                 print 'need to assign ticket'
-                TicketAssigner(self, self.app, id)
+                TicketAssigner(self.app, self, id)
                 
 class TicketManagerWidgetNew(BaseManagerWidget):
-    def __init__(self, parent, app, *args):
-        BaseManagerWidget.__init__(self, parent, app, TicketView, 'TicketManager')
+    def __init__(self, app, parent, *args):
+        BaseManagerWidget.__init__(self, app, parent, TicketView, 'TicketManager')
         self.setCaption('TicketManager')
         self.manager = TicketManager(self.app)
         self.dialogs = {}
@@ -267,114 +267,3 @@ class TicketManagerWidgetNew(BaseManagerWidget):
             self.view.setID(clause=clause)
             
             
-#################################################
-        
-class TicketViewOrig(ViewBrowser):
-    def __init__(self, db, parent):
-        ViewBrowser.__init__(self, db, parent, TicketInfoDoc)
-        self.dialogs = {}
-        self.manager = TicketManager(self.db)
-
-    def setSource(self, url):
-        action, context, id = str(url).split('.')
-        print action, context, id
-        if context == 'action':
-            if action == 'new':
-                dlg = ActionDialog(self, 'ActionDialog')
-                dlg.connect(dlg, SIGNAL('okClicked()'), self.insertAction)
-                dlg.ticketid = self.doc.current
-                if id == 'none':
-                    dlg.actionid = None
-                else:
-                    dlg.actionid = int(id)
-                self.dialogs['new-action'] = dlg
-            elif action == 'show':
-                element = self.doc.threads.actions[int(id)]
-                self.doc.showActionData(int(id))
-                self.setText(self.doc.toxml())
-            elif action == 'hide':
-                self.doc.hideActionData(int(id))
-                self.setText(self.doc.toxml())
-                
-    def setID(self, ticketid):
-        self.doc.setID(ticketid)
-        self.setText(self.doc.toxml())
-
-    def insertAction(self):
-        dlg = self.dialogs['new-action']
-        subject = str(dlg.subjEdit.text())
-        action = str(dlg.actionEdit.text())
-        data = str(dlg.dataEdit.text())
-        ticketid = dlg.ticketid
-        actionid = self.manager.append_action(ticketid, subject, action,
-                                              data, parent=dlg.actionid)
-        self.setID(ticketid)
-        
-        
-
-class TicketManagerWidgetOrig(BaseManagerWidget):
-    def __init__(self, parent, db, *args):
-        self.db = db
-        self.manager = TicketManager(self.db)
-        BaseManagerWidget.__init__(self, parent, db, TicketViewOrig, 'TicketManager')
-        self.initToolbar()
-        self.dialogs = {}
-        
-    def initlistView(self):
-        self.listView.setRootIsDecorated(True)
-        fields = ['title', 'author', 'created']
-        for field in fields:
-            self.listView.addColumn(field)
-        self.refreshlistView()
-        
-    def refreshlistView(self):
-        self.listView.clear()
-        fields = ['title', 'author', 'created']
-        rows = self.manager.get_tickets()
-        for row in rows:
-            drow = [str(row[field]) for field in fields]
-            item = KListViewItem(self.listView, *drow)
-            item.ticketid = row.ticketid
-                
-
-    def initActions(self):
-        collection = self.actionCollection()
-        self.newAction = KStdAction.openNew(self.slotNew, collection)
-
-    def initMenus(self):
-        menu = KPopupMenu(self)
-        self.newAction.plug(menu)
-        self.menuBar().insertItem('&Main', menu)
-        self.menuBar().insertItem('&Help', self.helpMenu(''))
-        
-    def initToolbar(self):
-        toolbar = self.toolBar()
-        actions = [self.newAction]
-        for action in actions:
-            action.plug(toolbar)
-            
-    def selectionChanged(self):
-        current = self.listView.currentItem()
-        if hasattr(current, 'ticketid'):
-            self.view.setID(current.ticketid)
-        else:
-            self.view.setID(None)
-        
-        
-    def slotNew(self):
-        dlg = TicketDialog(self)
-        self.connect(dlg, SIGNAL('okClicked()'), self.create_ticket)
-        self.dialogs['new-ticket'] = dlg
-        
-    def create_ticket(self):
-        dlg = self.dialogs['new-ticket']
-        title = str(dlg.titleEdit.text())
-        data = str(dlg.dataEdit.text())
-        if data:
-            self.manager.create_ticket(title, data)
-            self.refreshlistView()
-        else:
-            KMessageBox.error(self, "just a title won't do.")
-    
-
-

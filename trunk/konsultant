@@ -20,7 +20,7 @@ if __name__ == '__main__':
     #app.connect(app, SIGNAL('lastWindowClosed()'), app.quit)
     dcop = app.dcopClient()
     appid = dcop.registerAs('konsultant')
-    win = ClientManagerWidget(None, app)
+    win = ClientManagerWidget(app, None)
     win.show()
     app.setMainWidget(win)
     app.exec_loop()

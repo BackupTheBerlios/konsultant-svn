@@ -6,6 +6,7 @@ from qt import QStringList, QListView, QLabel
 from qt import QVariant, QPixmap
 from qt import QSize
 from qt import SIGNAL, SLOT, Qt
+from qt import PYSIGNAL
 
 from qt import QMimeSourceFactory, QGridLayout
 from qt import QFrame, QPushButton
@@ -45,38 +46,12 @@ from xmlgen import ClientInfoDoc
 from contact import ContactEditorWin
 from location import LocationEditorWin
 from db import ClientManager
+from gui import ClientDialog, ContactDialog, LocationDialog
+from gui import ClientEditDialog
 
 class AddressData(RefData):
     def __init__(self):
         RefData.__init__(self, dict(address='addressid'))
-        
-class WithAddressIdRecDialog(SimpleRecordDialog):
-    def __init__(self, app, parent, fields, name):
-        record = EmptyRefRecord(fields, AddressData())
-        SimpleRecordDialog.__init__(self, parent, fields, record=record, name=name)
-        self.app = app
-        self.connect(self.refbuttons['address'],
-                     SIGNAL('clicked()'), self.selAddress)
-        self.enableButtonOK(False)
-
-    def selAddress(self):
-        dlg = AddressSelector(self, self.app, modal=True)
-        dlg.setSource(self.addressidSelected)
-        self.dialogs['address'] = dlg
-
-    def addressidSelected(self, url):
-        addressid = int(str(url).split('.')[2])
-        self.enableButtonOK(True)
-        self.dialogs['address'].done(0)
-        #self.refbuttons['address'].close()
-        n = self.grid.fields.index('address') + 1
-        text = AddressLink(self.app.db, addressid).firstChild.data
-        #lbl = QLabel(text, self.page)
-        #lbl.show()
-        self.refbuttons['address'].setText(text)
-        self.grid.addMultiCellWidget(lbl, n, n, 1, 1)
-        self.addressid = addressid
-        
         
 class ClientStyleSheet(QStyleSheet):
     def __init__(self, parent=None, name='ClientStyleSheet'):
@@ -99,7 +74,8 @@ class ClientView(ViewBrowser):
                 dlg.clientid = self.doc.current
                 self.dialogs['new-contact'] = dlg
             elif action == 'edit':
-                ContactEditorWin(self, self.app, self.doc.records['contacts'])
+                dlg = ContactEditorWin(self.app, self, self.doc.records['contacts'])
+                self.connect(dlg, PYSIGNAL('updated()'), self.set_client)
         elif context == 'location':
             if action == 'new':
                 dlg = LocationDialog(self.app, self)
@@ -107,11 +83,18 @@ class ClientView(ViewBrowser):
                 dlg.clientid = self.doc.current
                 self.dialogs['new-location'] = dlg
             elif action == 'edit':
-                LocationEditorWin(self, self.app, self.doc.records['locations'])
+                dlg = LocationEditorWin(self.app, self, self.doc.records['locations'])
+                self.connect(dlg, PYSIGNAL('updated()'), self.set_client)
+        elif context == 'client':
+            print url
+            if action == 'edit':
+                dlg = ClientEditDialog(self.app, self, self.doc.records['client'])
         else:
             KMessageBox.error(self, 'bad call %s' % url)
 
-    def set_client(self, clientid):
+    def set_client(self, clientid=None):
+        if clientid is None:
+            clientid = self.doc.current
         clause = Eq('clientid', clientid)
         self.doc.setID(clientid)
         self.setText(self.doc.toxml())
@@ -128,30 +111,9 @@ class ClientView(ViewBrowser):
         locationid = self.manager.insertLocation(dlg.clientid, dlg.addressid, data)
         self.set_client(dlg.clientid)
 
-class ClientDialog(SimpleRecordDialog):
-    def __init__(self, parent, db, name='ClientDialog'):
-        fields = ['client']
-        SimpleRecordDialog.__init__(self, parent, fields, name='ClientDialog')
-        
-class ContactDialogOrig(WithAddressIdRecDialog):
-    def __init__(self, parent, db, name='ContactDialog'):
-        fields = ['name', 'addressid', 'email', 'description']
-        WithAddressIdRecDialog.__init__(self, parent, db, fields, name=name)
-        
-class LocationDialog(WithAddressIdRecDialog):
-    def __init__(self, app, parent, name='LocationDialog'):
-        fields = ['name', 'address', 'isp', 'connection',
-                  'ip', 'static', 'serviced']
-        WithAddressIdRecDialog.__init__(self, app, parent, fields, name=name)
-        
-class ContactDialog(WithAddressIdRecDialog):
-    def __init__(self, app, parent, name='ContactDialog'):
-        fields = ['name', 'address', 'email', 'description']
-        WithAddressIdRecDialog.__init__(self, app, parent, fields, name=name)
-        
 class ClientManagerWidget(BaseManagerWidget):
-    def __init__(self, parent, app, *args):
-        BaseManagerWidget.__init__(self, parent, app, ClientView, 'ClientManager')
+    def __init__(self, app, parent, *args):
+        BaseManagerWidget.__init__(self, app, parent, ClientView, 'ClientManager')
         self.setCaption('ClientManager')
         self.cfg = self.app.cfg
         self.cfg.setGroup('client-gui')
@@ -210,10 +172,10 @@ class ClientManagerWidget(BaseManagerWidget):
         self.dialogs['new-client'] = dlg
         
     def slotEditAddresses(self):
-        AddressSelector(self, self.app)
+        AddressSelector(self.app, self)
 
     def slotAdministerDatabase(self):
-        AdminWidget(self, self.app)
+        AdminWidget(self.app, self)
         
     def testAction(self, action):
         KMessageBox.error(self, QString('<html>action <b>%s</b> not ready</html>' % action))
@@ -239,4 +201,4 @@ class ClientManagerWidget(BaseManagerWidget):
 
 
     def slotManageTickets(self):
-        TicketManagerWidget(self, self.app, self.db)
+        TicketManagerWidget(self.app, self, self.db)

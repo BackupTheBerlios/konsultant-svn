@@ -85,7 +85,7 @@ class AddGroupDialog(SimpleRecordDialog):
         SimpleRecordDialog.__init__(self, parent, fields, name=name)
 
 class AdminWidget(KMainWindow):
-    def __init__(self, parent, app):
+    def __init__(self, app, parent):
         KMainWindow.__init__(self, parent, 'AdminWidget')
         self.app = app
         self.db = app.db

@@ -25,7 +25,7 @@ class SimpleWindow(MainWindow):
         self.db = app.db
         
 class BaseManagerWidget(SimpleWindow):
-    def __init__(self, parent, app, view, name):
+    def __init__(self, app, parent, view, name):
         SimpleWindow.__init__(self, parent, app, name)
         self.mainView = QSplitter(self, 'main view')
         self.listView = KListView(self.mainView)
@@ -71,7 +71,7 @@ class currentobject(object):
       self.id = None
       
 class RecordSelector(QSplitter):
-    def __init__(self, parent, app, table, fields, idcol, groupfields, view, name='RecordSelector'):
+    def __init__(self, app, parent, table, fields, idcol, groupfields, view, name='RecordSelector'):
         QSplitter.__init__(self, parent, name)
         self.current = currentobject()
         self.app = app
@@ -205,41 +205,9 @@ class WithAddressIdRecord(SimpleRecord):
                 self.addWidget(entry, f + 1, 1)
                 label = QLabel(entry, self.fields[f], parent, self.fields[f])
                 self.addWidget(label, f + 1, 0)
-        
-class WithAddressIdRecDialog(KDialogBase):
-    def __init__(self, parent, db, fields, name='WithAddressIdRecDialog'):
-        KDialogBase.__init__(self, parent, name)
-        self.db = db
-        self.page = QFrame(self)
-        self.setMainWidget(self.page)
-        text = 'this is a <em>simple</em> record dialog'
-        self.grid = WithAddressIdRecord(self.page, fields, text, name=name)
-        self.connect(self.grid.selButton, SIGNAL('clicked()'), self.selButtonClicked)
-        self.showButtonApply(False)
-        self.setButtonOKText('insert', 'insert')
-        self.enableButtonOK(False)
-        self.dialogs = {}
-        self.show()
-        
-    def selButtonClicked(self):
-        dlg = AddressSelector(self, self.db.app, modal=True)
-        dlg.setSource(self.addressidSelected)
-        self.dialogs['address'] = dlg
 
-    def addressidSelected(self, url):
-        addressid = int(str(url).split('.')[2])
-        self.enableButtonOK(True)
-        self.dialogs['address'].done(0)
-        self.grid.selButton.close()
-        n = self.grid.fields.index('addressid') + 1
-        text = AddressLink(self.db, addressid).toxml()
-        lbl = QLabel(text, self.page)
-        lbl.show()
-        self.grid.addMultiCellWidget(lbl, n, n, 1, 1)
-        self.addressid = addressid
-        
 class AddressSelector(KDialogBase):
-    def __init__(self, parent, app, name='AddressSelector', modal=True):
+    def __init__(self, app, parent, name='AddressSelector', modal=True):
         KDialogBase.__init__(self, parent, name, modal)
         self.app = app
         self.db = app.db

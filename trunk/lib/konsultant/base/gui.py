@@ -105,7 +105,7 @@ class SimpleRecord(QGridLayout):
         self.addMultiCellWidget(QLabel(text, parent), 0, 0, 0, 1)
 
     def getRecordData(self):
-        return dict([(k,v.text()) for k,v in self.entries.items()])
+        return dict([(k,str(v.text())) for k,v in self.entries.items()])
 
 class SimpleRecordDialog(KDialogBase):
     def __init__(self, parent, fields, record=None, name='SimpleRecordDialog'):
