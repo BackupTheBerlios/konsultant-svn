@@ -2,9 +2,9 @@ from pyPgSQL import PgSQL
 from pyPgSQL.PgSQL import Connection, Cursor, PgLargeObject
 from pyPgSQL.libpq import IntegrityError, OperationalError
 
-from konsultant.base import Error
-from konsultant.sqlgen.select import complex_select as select
-from konsultant.sqlgen.write import insert, delete, update
+from kommon.base import Error
+from kommon.sqlgen.select import complex_select as select
+from kommon.sqlgen.write import insert, delete, update
 
 
 tquery_lite = "SELECT name from sqlite_master where type='table'"
@@ -101,14 +101,15 @@ class _Simple(object):
     
 class FakeCursor(_Simple):
     def __init__(self, conn, name=None):
+        #default to pg
+        self.__dbtype__ = 'pg'
+        self.__tquery__ = tquery_pg
         if issubclass(conn.__class__, BasicConnection):
             self.__dbtype__ = 'pg'
             self.__tquery__ = tquery_pg
         elif conn.__class__.__name__ == 'LocalConnection':
             self.__dbtype__ = 'lite'
             self.__tquery__ = tquery_lite
-        else:
-            print 'WARNING NO CURSOR', conn.__class__
         self.__real_cursor__ = conn.cursor()
         self._already_selected = False
         

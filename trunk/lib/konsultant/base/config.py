@@ -1,7 +1,7 @@
 import os
 from ConfigParser import RawConfigParser as ConfigParser
 
-from konsultant.pdb.midlevel import Environment
+from kommon.pdb.midlevel import Environment
 
 from kdecore import KConfigBackEnd
 from kdecore import KConfig, KConfigBase       

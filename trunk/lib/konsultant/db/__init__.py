@@ -4,11 +4,11 @@ from qtsql import QSqlDatabase, QSqlDriver
 from dcopexport import DCOPExObj
 
 
-from konsultant.base import NoExistError
-from konsultant.sqlgen.clause import Eq, In
-from konsultant.sqlgen.statement import Statement
-from konsultant.pdb.lowlevel import BasicConnection
-from konsultant.pdb.midlevel import StatementCursor
+from kommon.base import NoExistError
+from kommon.sqlgen.clause import Eq, In
+from kommon.sqlgen.statement import Statement
+from kommon.pdb.lowlevel import BasicConnection
+from kommon.pdb.midlevel import StatementCursor
 
 class BaseDriver(QSqlDriver):
     def __init__(self, parent=None, name=None):

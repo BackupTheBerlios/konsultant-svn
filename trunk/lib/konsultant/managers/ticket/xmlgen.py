@@ -1,16 +1,16 @@
 #from operator import and_
 from xml.dom.minidom import Element, Text
 
-from konsultant.base import NoExistError
-from konsultant.sqlgen.clause import Eq, In
+from kommon.base import NoExistError
+from kommon.sqlgen.clause import Eq, In
 
-from konsultant.base.xmlgen import Html, Body, Anchor
-from konsultant.base.xmlgen import TextElement
-from konsultant.base.xmlgen import TableElement
-from konsultant.base.xmlgen import BaseElement
-from konsultant.base.xmlgen import UnorderedList, ListItem
-from konsultant.db.xmlgen import BaseDocument
-from konsultant.db.xmlgen import BaseParagraph
+from kommon.base.xmlgen import Html, Body, Anchor
+from kommon.base.xmlgen import TextElement
+from kommon.base.xmlgen import TableElement
+from kommon.base.xmlgen import BaseElement
+from kommon.base.xmlgen import UnorderedList, ListItem
+from kommon.db.xmlgen import BaseDocument
+from kommon.db.xmlgen import BaseParagraph
 
 from db import TicketManager
 

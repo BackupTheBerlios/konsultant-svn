@@ -4,9 +4,9 @@ from qt import QSplitter
 from kdeui import KStdAction, KPopupMenu
 
 
-from konsultant.base.gui import EditRecordDialog
-from konsultant.db.gui import ViewBrowser, RecordSelector
-from konsultant.db.gui import SimpleWindow, RecordView
+from kommon.base.gui import EditRecordDialog
+from kommon.db.gui import ViewBrowser, RecordSelector
+from kommon.db.gui import SimpleWindow, RecordView
 
 from xmlgen import LocationDoc
 from db import ClientManager

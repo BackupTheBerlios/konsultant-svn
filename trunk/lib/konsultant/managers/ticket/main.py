@@ -9,11 +9,11 @@ from kdeui import KMessageBox, KActionSelector
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KTextEdit, KMainWindow
 
-from konsultant.base.gui import MainWindow
-from konsultant.db import BaseDatabase
-from konsultant.db.gui import BaseManagerWidget, ViewBrowser
+from kommon.base.gui import MainWindow
+from kommon.db import BaseDatabase
+from kommon.db.gui import BaseManagerWidget, ViewBrowser
 
-from konsultant.sqlgen.clause import Eq, In, NotIn
+from kommon.sqlgen.clause import Eq, In, NotIn
 
 from xmlgen import TicketInfoDoc
 from xmlgen import TicketDocument

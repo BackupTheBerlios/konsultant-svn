@@ -1,28 +1,6 @@
 from qt import QString, QStringList
 from dcopexport import DCOPExObj
 
-class Error(Exception):
-    pass
-
-class ExistsError(Error):
-    pass
-
-class NoExistError(Error):
-    pass
-class NoFileError(NoExistError):
-    pass
-
-class UnbornError(NoExistError):
-    pass
-
-class KeyError(ExistsError):
-    pass
-
-class TableError(ExistsError):
-    pass
-
-
-
 class DeadParrotObject (DCOPExObj):
     def __init__ (self, db, id = 'dead parrot'):
         DCOPExObj.__init__ (self, id)

@@ -1,10 +1,10 @@
 from pyPgSQL.libpq import PgQuoteString as quote
 from pyPgSQL.libpq import OperationalError
 
-from konsultant.base import Error, NoExistError
-from konsultant.sqlgen.statement import Statement
-from konsultant.sqlgen.classes import Table, Sequence
-from konsultant.sqlgen.defaults import ActionIdentifier, LogTable, ActionTrigger
+from kommon.base import Error, NoExistError
+from kommon.sqlgen.statement import Statement
+from kommon.sqlgen.classes import Table, Sequence
+from kommon.sqlgen.defaults import ActionIdentifier, LogTable, ActionTrigger
 
 from lowlevel import CommandCursor
 from midlevel import StatementCursor

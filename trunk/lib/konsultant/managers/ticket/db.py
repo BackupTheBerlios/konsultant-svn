@@ -1,4 +1,4 @@
-from konsultant.sqlgen.clause import Eq, In, NotIn
+from kommon.sqlgen.clause import Eq, In, NotIn
 
 
 class TicketManager(object):

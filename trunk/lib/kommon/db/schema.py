@@ -1,9 +1,9 @@
-from konsultant.sqlgen.classes import Table, Sequence, ColumnType, Column
-from konsultant.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
-from konsultant.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
-from konsultant.sqlgen.defaults import DateTime
-from konsultant.sqlgen.statement import Statement
-from konsultant.sqlgen.admin import grant_public, grant_group
+from kommon.sqlgen.classes import Table, Sequence, ColumnType, Column
+from kommon.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
+from kommon.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
+from kommon.sqlgen.defaults import DateTime
+from kommon.sqlgen.statement import Statement
+from kommon.sqlgen.admin import grant_public, grant_group
 
 
 ZipName = ColumnType('varchar', 5)
@@ -208,11 +208,11 @@ def create_schema(cursor, group):
     
 if __name__ == '__main__':
     import os
-    from konsultant.base.config import Config
-    from konsultant.db.lowlevel import BasicConnection
-    from konsultant.db.midlevel import StatementCursor
-    from konsultant.base.config import BaseConfig
-    from konsultant.db import BaseDatabase
+    from kommon.base.config import Config
+    from kommon.db.lowlevel import BasicConnection
+    from kommon.db.midlevel import StatementCursor
+    from kommon.base.config import BaseConfig
+    from kommon.db import BaseDatabase
     cfg = Configuration('database', os.path.expanduser('~/.kde/share/config/konsultantrc'))
     dbname = cfg['dbname']
     dbhost = cfg['dbhost']

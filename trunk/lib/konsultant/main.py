@@ -8,12 +8,17 @@ from kdecore import KLockFile
 from kdeui import KMainWindow, KSystemTray
 from kdeui import KPopupMenu, KStdAction
 
+from kommon.base.gui import MainWindow
+from kommon.base.actions import ManageClients
+from kommon.db import BaseDatabase, BaseObject
+from kommon.db.pgpool import PgPool
+
 from konsultant.base.config import BaseConfig
-from konsultant.base.gui import MainWindow, ConfigureDialog
-from konsultant.base.actions import EditAddresses, ManageClients
+from konsultant.base.gui import ConfigureDialog
+from konsultant.base.actions import EditAddresses
 from konsultant.base.actions import ManageTickets, ConfigureKonsultant
-from konsultant.db import BaseDatabase, BaseObject
-from konsultant.db.pgpool import PgPool
+#from konsultant.db import BaseDatabase, BaseObject
+#from konsultant.db.pgpool import PgPool
 from konsultant.db.gui import AddressSelector
 
 from konsultant.managers.client import ClientManagerWidget

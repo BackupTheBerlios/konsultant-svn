@@ -12,11 +12,12 @@ from kdeui import KListView, KStdGuiItem
 from kdeui import KPushButton, KStatusBar
 from kdeui import KColorButton
 
-from konsultant.base import NoExistError
-from konsultant.sqlgen.clause import Eq, In
+from kommon.base import NoExistError
+from kommon.sqlgen.clause import Eq, In
 
-from konsultant.base.gui import MainWindow, MimeSources
-from konsultant.base.gui import SimpleRecord, SimpleRecordDialog
+from kommon.base.gui import MainWindow, MimeSources
+from kommon.base.gui import SimpleRecord, SimpleRecordDialog
+
 from konsultant.db.xmlgen import AddressSelectDoc, AddressLink
 
 class SimpleWindow(MainWindow):

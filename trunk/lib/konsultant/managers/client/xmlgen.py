@@ -2,17 +2,18 @@
 from copy import deepcopy, copy
 from xml.dom.minidom import Element, Text
 
-from konsultant.base import NoExistError
-from konsultant.sqlgen.clause import Eq, In
+from kommon.base import NoExistError
+from kommon.sqlgen.clause import Eq, In
 
-from konsultant.base.xmlgen import Html, Body, Anchor
-from konsultant.base.xmlgen import HR, BR, Bold, TR, TD
-from konsultant.base.xmlgen import TableElement
-from konsultant.base.xmlgen import BaseElement, TextElement
-from konsultant.base.xmlgen import SimpleTitleElement, RecordElement
-from konsultant.db.xmlgen import BaseDocument
+from kommon.base.xmlgen import Html, Body, Anchor
+from kommon.base.xmlgen import HR, BR, Bold, TR, TD
+from kommon.base.xmlgen import TableElement
+from kommon.base.xmlgen import BaseElement, TextElement
+from kommon.base.xmlgen import SimpleTitleElement, RecordElement
+from kommon.db.xmlgen import RecordDoc
+from kommon.db.xmlgen import BaseDocument
+
 from konsultant.db.xmlgen import AddressLink
-from konsultant.db.xmlgen import RecordDoc
 from konsultant.db.xmlgen import AddressRecord
 from db import ClientManager
 

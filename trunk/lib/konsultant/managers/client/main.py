@@ -23,23 +23,24 @@ from kdeui import KJanusWidget, KListViewItem
 from kdeui import KListView, KStatusBar
 from kdeui import KAction, KGuiItem
 
-from konsultant.base import NoExistError, Error
-from konsultant.base.refdata import RefData
-from konsultant.sqlgen.clause import Eq, In
-from konsultant.base.actions import EditAddresses, ConfigureKonsultant
-from konsultant.base.actions import ManageTickets, AdministerDatabase
-from konsultant.base.actions import ManageTasks
-from konsultant.base.gui import MainWindow
-from konsultant.base.gui import ConfigureDialog
-from konsultant.pdb.record import EmptyRefRecord
+from kommon.base import NoExistError, Error
+from kommon.base.refdata import RefData
+from kommon.sqlgen.clause import Eq, In
+from kommon.base.gui import MainWindow
+from kommon.pdb.record import EmptyRefRecord
+from kommon.base.xmlgen import TextElement, Anchor, TableElement
+from kommon.db import BaseDatabase
+from kommon.db.gui import BaseManagerWidget, RecordSelector
+from kommon.db.gui import ViewBrowser, SimpleRecordDialog
+from kommon.db.admin import AdminWidget
+from kommon.base.actions import AdministerDatabase
 
-from konsultant.base.xmlgen import TextElement, Anchor, TableElement
-from konsultant.db import BaseDatabase
-from konsultant.db.gui import AddressSelectView, RecordSelector
-from konsultant.db.gui import SimpleRecordDialog, AddressSelector
-from konsultant.db.gui import BaseManagerWidget
-from konsultant.db.gui import ViewBrowser
-from konsultant.db.admin import AdminWidget
+from konsultant.base.actions import EditAddresses, ConfigureKonsultant
+from konsultant.base.actions import ManageTickets
+from konsultant.base.actions import ManageTasks
+from konsultant.base.gui import ConfigureDialog
+
+from konsultant.db.gui import AddressSelectView, AddressSelector
 from konsultant.db.xmlgen import AddressLink
 from konsultant.managers.ticket import TicketManagerWidget
 

@@ -3,9 +3,9 @@ from operator import and_
 from pyPgSQL.libpq import PgQuoteString as quote
 from pyPgSQL.libpq import OperationalError
 
-from konsultant.base import Error, NoExistError
-from konsultant.sqlgen.statement import Statement
-from konsultant.sqlgen.clause import Eq
+from kommon.base import Error, NoExistError
+from kommon.sqlgen.statement import Statement
+from kommon.sqlgen.clause import Eq
 
 from lowlevel import CommandCursor
 

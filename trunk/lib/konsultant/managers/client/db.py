@@ -1,6 +1,6 @@
-from konsultant.base.refdata import RefData
-from konsultant.pdb.record import RefRecord
-from konsultant.sqlgen.clause import Eq, In
+from kommon.base.refdata import RefData
+from kommon.pdb.record import RefRecord
+from kommon.sqlgen.clause import Eq, In
 
 class ClientManager(object):
     def __init__(self, app):

@@ -21,25 +21,6 @@ class MimeSources(QMimeSourceFactory):
     def __init__(self):
         QMimeSourceFactory.__init__(self)
         self.addFilePath('/usr/share/wallpapers')
-        
-class AboutData(KAboutData):
-    def __init__(self):
-        KAboutData.__init__(self,
-                            'Konsultant',
-                            'konsultant',
-                            '0.1',
-                            'Client Management for Small Business')
-        self.addAuthor('Joseph Rawson', 'author',
-                       'umeboshi@gregscomputerservice.com')
-        self.setCopyrightStatement('plublic domain')
-        
-                            
-class AboutDialog(KAboutDialog):
-    def __init__(self, parent, *args):
-        KAboutDialog.__init__(self, parent, *args)
-        self.setTitle('Konsultant Database')
-        self.setAuthor('Joseph Rawson')
-        self.show()
 
 class MainWindow(KMainWindow):
     def __init__(self, parent, name='MainWindow'):
@@ -205,4 +186,55 @@ class ConfigureDialog(KDialogBase):
         for t in self.grouplist:
             self.page.addTab(self.groups[t].parent(), t)
         self.setMainWidget(self.page)
+        self.show()
+
+#############################
+## from paella-kde need to remove
+
+class SimpleSplitWindow(KMainWindow):
+    def __init__(self, app, parent, view, name):
+        KMainWindow.__init__(self, parent, name)
+        self.app = app
+        self.conn = app.conn
+        self.mainView = QSplitter(self, 'mainView')
+        self.listView = KListView(self.mainView)
+        self.listView.setRootIsDecorated(True)
+        self.view = view(self.app, self.mainView)
+        self.setCentralWidget(self.mainView)
+        if hasattr(self, 'initlistView'):
+            self.initlistView()
+        self.connect(self.listView,
+                     SIGNAL('selectionChanged()'), self.selectionChanged)
+        self.show()
+
+
+        
+class ViewBrowser(KTextBrowser):
+    def __init__(self, app, parent, doc):
+        KTextBrowser.__init__(self, parent)
+        self.setMimeSourceFactory(MimeSources())
+        self.app = app
+        self.doc = doc(self.app)
+        self.setNotifyClick(True)
+        
+
+    def setMimeSourceFactory(self, factory=None):
+        if factory is None:
+            self.mimes = QMimeSourceFactory()
+            self.mimes.addFilePath('/usr/share/wallpapers')
+        else:
+            self.mimes = factory
+        KTextBrowser.setMimeSourceFactory(self, self.mimes)
+
+    def set_clause(self, clause):
+        self.doc.set_clause(clause)
+        self.setText(self.doc.toxml())
+
+class ViewWindow(KMainWindow):
+    def __init__(self, app, parent, view, name):
+        KMainWindow.__init__(self, parent, name)
+        self.app = app
+        self.conn = app.conn
+        self.view = view(self.app, self)
+        self.setCentralWidget(self.view)
         self.show()
