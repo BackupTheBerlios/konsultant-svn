@@ -1,4 +1,5 @@
-
+from konsultant.sqlgen.statement import Statement
+from konsultant.sqlgen.clause import Eq, In, NotIn
 
 #refcols is a  name, idcol paired dictionary
 #refdata[name] is a dictionary of id, record pairs
@@ -21,3 +22,134 @@ class RefData(object):
     def set_refdata(self, column, refdata):
         self.data[column] = refdata
         
+    def copy(self):
+        #data and cols remain the same
+        newobj = RefData(self.cols)
+        newobj.data = self.data
+        #object is a new dict that doesn't interfere with this dict
+        newobj.object = dict(zip([(k,v) for k,v in self.object.items()]))
+        return newobj
+    
+class DataObject(object):
+    def __init__(self):
+        object.__init__(self)
+        self.stmt = Statement()
+        self.id = None
+        self.idcol = None
+        self.fields = []
+        self.table = None
+        self.hasMany = {}
+        self.hasOne = {}
+        
+    def select(self, fields=None, table=None, clause=None):
+        if fields is None:
+            fields = self.fields            
+        if table is None:
+            table = self.table
+        if clause is None:
+            clause = Eq(self.idcol, self.id)
+        nfields = []
+        for field in fields:
+            if field in self.hasOne:
+                nfields.append(self.hasOne[field].idcol)
+            elif field in self.hasMany:
+                #nfields.append(self.hasMany[field].idcol)
+                pass
+            else:
+                nfields.append(field)
+        #for field in self.hasMany:
+            #obj = self.hasMany[field]
+            #rtable = self.hasMany_tables[field]
+            #clause &= In(obj.idcol, obj.select(fields=[obj.idcol], table=rtable, clause=clause))
+        for field in self.hasOne:
+            obj = self.hasOne[field]
+        return self.stmt.select(fields=nfields, table=table, clause=clause)
+
+    def getMany(self, manyfield, clause=None):
+        if clause is None:
+            clause = Eq(self.idcol, self.id)
+        obj = self.hasMany[manyfield]
+        rtable = self.hasMany_tables[manyfield]        
+        rid = obj.idcol
+        clause = In(obj.idcol, self.stmt.select(fields=[obj.idcol], table=rtable, clause=clause))
+        return obj.select(fields=obj.fields, table=obj.table, clause=clause)
+
+    def getAllfields(self, allids=None):
+        if allids is None:
+            allids = [self.idcol]
+        else:
+            if self.idcol not in allids:
+                allids.append(self.idcol)
+        for obj in self.hasMany:
+            for field in self.hasMany[obj].getAllfields(allids):
+                if field not in allids:
+                    allids.append(field)
+        for obj in self.hasOne:
+            for field in self.hasOne[obj].getAllfields(allids):
+                if field not in allids:
+                    allids.append(field)
+        return allids
+
+    def getData(self, idcol, clause=None):
+        ho = [f for f in self.hasOne if self.hasOne[f].idcol == idcol]
+        hm = [f for f in self.hasMany if self.hasMany[f].idcol == idcol]
+        print ho, hm, 'ho hum'
+        if idcol == self.idcol:
+            return self.select()
+        else:
+            if len(hm):
+                for f in hm:
+                    clause = In(idcol, self.select(fields=[idcol], clause='TRUE'))
+                    print clause
+        for m, o in self.hasMany.items():
+            clause = Eq(self.idcol, self.id)
+            rtable = self.hasMany_tables[m]
+            sel = self.stmt.select(fields=[o.idcol], table=rtable, clause=clause)
+            print In(o.idcol, sel)
+            
+        
+    
+class AddressDataObject(DataObject):
+    def __init__(self):
+        DataObject.__init__(self)
+        self.idcol = 'addressid'
+        self.fields = ['street1', 'street2', 'city', 'state', 'zip']
+        self.table = 'addresses'
+        
+class ContactDataObject(DataObject):
+    def __init__(self):
+        DataObject.__init__(self)
+        self.idcol = 'contactid'
+        self.fields = ['name', 'address', 'email', 'description']
+        self.table = 'contacts'
+        self.hasMany = dict(address=AddressDataObject())
+        self.hasMany_tables = dict(address='contactaddresses')
+        
+
+class LocationDataObject(DataObject):
+    def __init__(self):
+        DataObject.__init__(self)
+        self.idcol = 'locationid'
+        self.fields = ['name', 'address', 'isp',
+                       'connection', 'ip', 'static', 'serviced']
+        self.table = 'locations'
+        self.hasOne = dict(address=AddressDataObject())
+        
+    
+class ClientDataObject(DataObject):
+    def __init__(self):
+        DataObject.__init__(self)
+        self.idcol = 'clientid'
+        self.fields = ['client', 'contacts', 'locations']
+        self.table = 'clients'
+        self.hasMany = dict(contacts=ContactDataObject(),
+                            locations=LocationDataObject())
+        self.hasMany_tables = dict(contacts='clientinfo',
+                                   locations='clientinfo')
+        
+if __name__ == '__main__':
+    s = Statement()
+    c = ClientDataObject()
+    l = LocationDataObject()
+
+    a = AddressDataObject()

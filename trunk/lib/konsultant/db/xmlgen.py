@@ -87,54 +87,6 @@ class AddressSelectDoc(BaseDocument):
             a = row.addressid
             self.body.appendChild(AddressLink(self.db, a, 'select.address.%d' % a))
 
-class RecordElementOrig(BaseElement):
-    def __init__(self, fields, idcol, action, record):
-        BaseElement.__init__(self, 'p')
-        for field in fields:
-            f = Bold('%s:  ' % field)
-            self.appendChild(f)
-            url = '.'.join(map(str, [action, record[idcol], record[field]]))
-            self.anchor = Anchor(url, record[field])
-            self.appendChild(self.anchor)
-            self.appendChild(BaseElement('br'))
-        self.record = record
-
-class RecordElement(BaseElement):
-    def __init__(self, fields, idcol, action, record):
-        BaseElement.__init__(self, 'table')
-        self.record = record
-        refdata = None
-        if hasattr(record, '_refdata'):
-            refdata = record._refdata
-        if refdata is not None:
-            print refdata, refdata.cols, fields
-        for field in fields:
-            row = BaseElement('tr')
-            key = TD(bgcolor='DarkSeaGreen')
-            key.appendChild(Bold(field))
-            row.appendChild(key)
-            val = TD()
-            if refdata is not None and field in refdata.cols:
-                ridcol = refdata.cols[field]
-                refrec =  refdata.data[field][record[ridcol]]
-                node = refdata.object[field](refrec)
-                if action:
-                    url = '.'.join(map(str, [action, field, record[idcol]]))
-                    val.appendChild(Anchor(url, node))
-                else:
-                    val.appendChild(node)
-            elif action:
-                url = '.'.join(map(str, [action, field, record[idcol]]))
-                val.appendChild(Anchor(url, record[field]))
-            else:
-                node = Text()
-                node.data = record[field]
-                val.appendChild(node)
-            row.appendChild(val)
-            self.val = val
-            self.key = key
-            self.appendChild(row)
-            
 class RecordDoc(BaseDocument):
     def __init__(self, app, manager=None, records=None):
         BaseDocument.__init__(self, app)

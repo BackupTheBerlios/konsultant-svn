@@ -17,25 +17,10 @@ if __name__ == '__main__':
     KCmdLineArgs.init(sys.argv, aboutData)
     #app = KApplication()
     app = KonsultantMainApplication()
-    app.connect(app, SIGNAL('lastWindowClosed()'), app.quit)
+    #app.connect(app, SIGNAL('lastWindowClosed()'), app.quit)
     dcop = app.dcopClient()
     appid = dcop.registerAs('konsultant')
-    bo = DeadParrotObject(app.db, 'kon-default')
-    ba2 = DeadParrotObject(app.db, 'anther')
-    #bo.db = app.db
-    #app.db = BaseDatabase('Konsultant', app)
-    #win = ClientManager(app.db)
     win = ClientManagerWidget(None, app)
     win.show()
-    #win.lower()
-    
-    #win.hide()
-    #app.setMainWidget(win)
-    #print app.mainWidget()
-    #win2 = ClientManager(win, win.db)
-    #win2.hide()
-    cfg = app.config()
-    print cfg
-    from kdecore import KLockFile
-    f = KLockFile('foolock')
+    app.setMainWidget(win)
     app.exec_loop()

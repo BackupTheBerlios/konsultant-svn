@@ -11,7 +11,6 @@ class Record(PgResultSet):
             self._xlatkey[desc[column][0]] = column
         PgResultSet.__init__(self, value)
         
-
 class RefRecordOrig(PgResultSet):
     def __init__(self, record, refdata):
         PgResultSet._desc_ = record._desc_
@@ -26,6 +25,11 @@ def RefRecord(record, refdata):
     record.__dict__['_refdata'] = refdata
     return record
 
+class EmptyRefRecord(dict):
+    def __init__(self, fields, refdata):
+        dict.__init__(self, [(f, '') for f in fields])
+        self._refdata = refdata
+        
 class PsyCursor(object):
     def __init__(self, conn):
         object.__init__(self)

@@ -23,20 +23,22 @@ from kdeui import KListView, KStatusBar
 from kdeui import KAction, KGuiItem
 
 from konsultant.base import NoExistError, Error
+from konsultant.base.refdata import RefData
 from konsultant.sqlgen.clause import Eq, In
 from konsultant.base.actions import EditAddresses, ConfigureKonsultant
 from konsultant.base.actions import ManageTickets, AdministerDatabase
 from konsultant.base.gui import MainWindow
 from konsultant.base.gui import ConfigureDialog
+from konsultant.pdb.record import EmptyRefRecord
 
 from konsultant.base.xmlgen import TextElement, Anchor, TableElement
 from konsultant.db import BaseDatabase
 from konsultant.db.gui import AddressSelectView, RecordSelector
 from konsultant.db.gui import SimpleRecordDialog, AddressSelector
-from konsultant.db.gui import WithAddressIdRecDialog, BaseManagerWidget
+from konsultant.db.gui import BaseManagerWidget
 from konsultant.db.gui import ViewBrowser
 from konsultant.db.admin import AdminWidget
-
+from konsultant.db.xmlgen import AddressLink
 from konsultant.managers.ticket import TicketManagerWidget
 
 from xmlgen import ClientInfoDoc
@@ -44,6 +46,38 @@ from contact import ContactEditorWin
 from location import LocationEditorWin
 from db import ClientManager
 
+class AddressData(RefData):
+    def __init__(self):
+        RefData.__init__(self, dict(address='addressid'))
+        
+class WithAddressIdRecDialog(SimpleRecordDialog):
+    def __init__(self, app, parent, fields, name):
+        record = EmptyRefRecord(fields, AddressData())
+        SimpleRecordDialog.__init__(self, parent, fields, record=record, name=name)
+        self.app = app
+        self.connect(self.refbuttons['address'],
+                     SIGNAL('clicked()'), self.selAddress)
+        self.enableButtonOK(False)
+
+    def selAddress(self):
+        dlg = AddressSelector(self, self.app, modal=True)
+        dlg.setSource(self.addressidSelected)
+        self.dialogs['address'] = dlg
+
+    def addressidSelected(self, url):
+        addressid = int(str(url).split('.')[2])
+        self.enableButtonOK(True)
+        self.dialogs['address'].done(0)
+        #self.refbuttons['address'].close()
+        n = self.grid.fields.index('address') + 1
+        text = AddressLink(self.app.db, addressid).firstChild.data
+        #lbl = QLabel(text, self.page)
+        #lbl.show()
+        self.refbuttons['address'].setText(text)
+        self.grid.addMultiCellWidget(lbl, n, n, 1, 1)
+        self.addressid = addressid
+        
+        
 class ClientStyleSheet(QStyleSheet):
     def __init__(self, parent=None, name='ClientStyleSheet'):
         QStyleSheet.__init__(self, parent, name)
@@ -60,7 +94,7 @@ class ClientView(ViewBrowser):
         action, context, id = str(url).split('.')
         if context == 'contact':
             if action == 'new':
-                dlg = ContactDialog(self, self.db)
+                dlg = ContactDialog(self.app, self)
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertContact)
                 dlg.clientid = self.doc.current
                 self.dialogs['new-contact'] = dlg
@@ -68,7 +102,7 @@ class ClientView(ViewBrowser):
                 ContactEditorWin(self, self.app, self.doc.records['contacts'])
         elif context == 'location':
             if action == 'new':
-                dlg = LocationDialog(self, self.db)
+                dlg = LocationDialog(self.app, self)
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertLocation)
                 dlg.clientid = self.doc.current
                 self.dialogs['new-location'] = dlg
@@ -99,18 +133,22 @@ class ClientDialog(SimpleRecordDialog):
         fields = ['client']
         SimpleRecordDialog.__init__(self, parent, fields, name='ClientDialog')
         
-class ContactDialog(WithAddressIdRecDialog):
+class ContactDialogOrig(WithAddressIdRecDialog):
     def __init__(self, parent, db, name='ContactDialog'):
         fields = ['name', 'addressid', 'email', 'description']
         WithAddressIdRecDialog.__init__(self, parent, db, fields, name=name)
         
 class LocationDialog(WithAddressIdRecDialog):
-    def __init__(self, parent, db, name='LocationDialog'):
-        fields = ['name', 'addressid', 'isp', 'connection',
+    def __init__(self, app, parent, name='LocationDialog'):
+        fields = ['name', 'address', 'isp', 'connection',
                   'ip', 'static', 'serviced']
-        WithAddressIdRecDialog.__init__(self, parent, db, fields, name=name)
-
-
+        WithAddressIdRecDialog.__init__(self, app, parent, fields, name=name)
+        
+class ContactDialog(WithAddressIdRecDialog):
+    def __init__(self, app, parent, name='ContactDialog'):
+        fields = ['name', 'address', 'email', 'description']
+        WithAddressIdRecDialog.__init__(self, app, parent, fields, name=name)
+        
 class ClientManagerWidget(BaseManagerWidget):
     def __init__(self, parent, app, *args):
         BaseManagerWidget.__init__(self, parent, app, ClientView, 'ClientManager')

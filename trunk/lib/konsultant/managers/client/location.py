@@ -15,7 +15,7 @@ LOCFIELDS = ['name', 'address', 'isp', 'connection', 'ip', 'static', 'serviced']
 class EditLocationDialog(EditRecordDialog):
     def __init__(self, parent, record):
         fields = LOCFIELDS
-        EditRecordDialog.__init__(self, parent, fields, record, name='EditLocation')
+        EditRecordDialog.__init__(self, parent, fields, record=record, name='EditLocation')
         
 class LocationView(RecordView):
     def __init__(self, app, parent, records):

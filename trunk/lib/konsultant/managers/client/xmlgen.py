@@ -9,10 +9,10 @@ from konsultant.base.xmlgen import Html, Body, Anchor
 from konsultant.base.xmlgen import HR, BR, Bold, TR, TD
 from konsultant.base.xmlgen import TableElement
 from konsultant.base.xmlgen import BaseElement, TextElement
-from konsultant.base.xmlgen import SimpleTitleElement
+from konsultant.base.xmlgen import SimpleTitleElement, RecordElement
 from konsultant.db.xmlgen import BaseDocument
 from konsultant.db.xmlgen import AddressLink
-from konsultant.db.xmlgen import RecordElement, RecordDoc
+from konsultant.db.xmlgen import RecordDoc
 from konsultant.db.xmlgen import AddressRecord
 from db import ClientManager
 

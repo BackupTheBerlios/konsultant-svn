@@ -5,7 +5,7 @@ from qt import QMimeSourceFactory
 
 from kdecore import KConfigDialogManager
 from kdecore import KAboutData
-from kdeui import KMainWindow, KEdit
+from kdeui import KMainWindow, KEdit, KPushButton
 from kdeui import KMessageBox, KAboutDialog
 from kdeui import KConfigDialog, KListView
 from kdeui import KDialogBase, KLineEdit
@@ -60,37 +60,65 @@ class MainWindow(KMainWindow):
         self.menuBar().insertItem('&Help', self.helpMenu(''))
     
 class SimpleRecord(QGridLayout):
-    def __init__(self, parent, fields, text=None, name='SimpleRecord'):
-        if text is None:
-            text = '<b>insert a simple record</b>'
+    def __init__(self, parent, fields, text=None, record=None, name=None):
+        print 'record, name', record, name
+        if name is None:
+            print 'I need a name', record
+            raise Exception, 'name needed in SimpleRecord'
         QGridLayout.__init__(self, parent, len(fields) + 1, 2, 1, -1, name)
         self.fields = fields
         self.entries = {}
-        self._setupfields(parent)
+        #self._setupfields(parent)
         self.setSpacing(7)
         self.setMargin(10)
-        self.addMultiCellWidget(QLabel(text, parent), 0, 0, 0, 1)
-
-    def _setupfields(self, parent):
+        self.record = record
+        self._refbuttons = {}
+        self._setupfields(parent)
+        
+    def _setupfields(self, parent, text=None):
+        if text is None:
+            text = '<b>insert a simple record</b>'
+        for child in self.parent().children():
+            print child
+            #child.close()
+        refdata = None
+        if self.record is not None:
+            print 'record is not None', self.record
+            refdata = self.record._refdata
         for f in range(len(self.fields)):
-            entry = KLineEdit('', parent)
-            self.entries[self.fields[f]] = entry
-            self.addWidget(entry, f + 1, 1)
-            label = QLabel(entry, self.fields[f], parent, self.fields[f])
-            self.addWidget(label, f + 1, 0)
+            field = self.fields[f]
+            print 'field is', field
+            if refdata is not None and field in refdata.cols:
+                button = KPushButton('select/create', parent)
+                self._refbuttons[field] = button
+                self.addWidget(button, f + 1, 1)
+                label = QLabel(entry, field, parent, field)
+                self.addWidget(label, f + 1, 0)
+            else:
+                entry = KLineEdit('', parent)
+                if self.record is not None:
+                    entry.setText(str(self.record[field]))
+                self.entries[field] = entry
+                self.addWidget(entry, f + 1, 1)
+                label = QLabel(entry, field, parent, field)
+                self.addWidget(label, f + 1, 0)
+        self.addMultiCellWidget(QLabel(text, parent), 0, 0, 0, 1)
 
     def getRecordData(self):
         return dict([(k,v.text()) for k,v in self.entries.items()])
 
 class SimpleRecordDialog(KDialogBase):
-    def __init__(self, parent, fields, name='SimpleRecordDialog'):
+    def __init__(self, parent, fields, record=None, name='SimpleRecordDialog'):
         KDialogBase.__init__(self, parent, name)
         self.page = QFrame(self)
         self.setMainWidget(self.page)
         text = 'this is a <em>simple</em> record dialog'
-        self.grid = SimpleRecord(self.page, fields, text, name=name)
+        self.grid = SimpleRecord(self.page, fields, text,
+                                 record=record,name=name)
         self.showButtonApply(False)
         self.setButtonOKText('insert', 'insert')
+        self.dialogs = {}
+        self.refbuttons = self.grid._refbuttons
         self.show()
 
     def getRecordData(self):
@@ -99,14 +127,11 @@ class SimpleRecordDialog(KDialogBase):
 
 class EditRecordDialog(SimpleRecordDialog):
     def __init__(self, parent, fields, record, name):
-        SimpleRecordDialog.__init__(self, parent, fields, name=name)
+        SimpleRecordDialog.__init__(self, parent, fields, record=record, name=name)
         self.record = record
         if hasattr(record, '_refdata'):
             print 'record has refdata'
         self.setButtonOKText('update', 'update')
-        for field in fields:
-            val = str(record[field])
-            self.grid.entries[field].setText(val)
         
 class ConfigureDialog(KConfigDialog):
     def __init__(self, parent, cfg, name='ConfigureDialog'):
