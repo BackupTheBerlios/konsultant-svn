@@ -260,15 +260,14 @@ class AddressSelector(KDialogBase):
         self.mainView.setSource(handler)
         
 class RecordView(ViewBrowser):
-    def __init__(self, app, parent, ident, doc, manager, action='edit'):
+    def __init__(self, app, parent, records, doc, action='edit'):
         ViewBrowser.__init__(self, app, parent, doc)
         self.dialogs = {}
         self._action = action
-        self.manager = manager(self.app)
-        self.set_ident(ident)
+        self.set_records(records)
 
-    def set_ident(self, ident):
-        self.doc.set_ident(ident)
+    def set_records(self, records):
+        self.doc.set_records(records)
         self.setText(self.doc.toxml())
 
     def setSource(self, url):

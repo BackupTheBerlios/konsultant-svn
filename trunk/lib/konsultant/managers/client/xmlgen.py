@@ -8,36 +8,11 @@ from konsultant.base.xmlgen import Html, Body, Anchor
 from konsultant.base.xmlgen import HR, BR, Bold, TR, TD
 from konsultant.base.xmlgen import TableElement
 from konsultant.base.xmlgen import BaseElement, TextElement
+from konsultant.base.xmlgen import SimpleTitleElement
 from konsultant.db.xmlgen import BaseDocument
 from konsultant.db.xmlgen import AddressLink
 from konsultant.db.xmlgen import RecordElement, RecordDoc
 from db import ClientManager
-
-
-class SimpleTitleElement(BaseElement):
-    def __init__(self, title, **attributes):
-        BaseElement.__init__(self, 'table')
-        self._title = title
-        for k,v in attributes.items():
-            self.setAttribute(k, v)
-        self.row = TR()
-        td = TD()
-        self.appendChild(self.row)
-        self.row.appendChild(td)
-        self._font = BaseElement('font')
-        self._font.setAttribute('color', 'gold')
-        td.appendChild(self._font)
-        element = TextElement('h1', self._title)
-        self._font.appendChild(element)
-
-    def set_font(self, **attributes):
-        for k,v in attributes.items():
-            self._font.setAttribute(k, v)
-
-    def set_title(self, title):
-        self._title = title
-        print 'i don nothing'
-        
 
 ###########
 ##Contact Objects
@@ -57,13 +32,11 @@ class ContactDoc(RecordDoc):
     def __init__(self, app):
         RecordDoc.__init__(self, app, ClientManager)
         
-    def set_ident(self, clientid, action='edit'):
-        self.clientid = clientid
+    def set_records(self, records, action='edit'):
         self.clear_body()
         self.body.appendChild(ContactTitle(bgcolor='DarkSeaGreen4'))
         self.body.appendChild(HR())
-        rows, ignore = self.manager.getContacts(self.clientid, False)
-        for row in rows:
+        for row in records:
             element = ContactElement(row, action)
             self.body.appendChild(element)
             self.body.appendChild(HR())
@@ -88,13 +61,11 @@ class LocationDoc(RecordDoc):
     def __init__(self, app):
         RecordDoc.__init__(self, app, ClientManager)
         
-    def set_ident(self, clientid, action='edit'):
-        self.clientid = clientid
+    def set_records(self, records, action='edit'):
         self.clear_body()
         self.body.appendChild(LocationTitle(bgcolor='DarkSeaGreen4'))
         self.body.appendChild(HR())
-        rows, ignore = self.manager.getLocations(self.clientid, False)
-        for row in rows:
+        for row in records:
             element = LocationElement(row, action)
             self.body.appendChild(element)
             self.body.appendChild(HR())
@@ -183,10 +154,10 @@ class ClientInfoDoc(BaseDocument):
         self.mtable.appendChild(row)
         row.appendChild(TextElement('td', self.locations))
         #insert the contacts, locations and tickets
-        self.contacts.set_ident(clientid, action=None)
-        self.locations.set_ident(clientid, action=None)
+        self.contacts.set_records(cdata['contacts'], action=None)
+        self.locations.set_records(cdata['locations'], action=None)
         for node in self.contacts.records.values():
             node.setAttribute('bgcolor', 'DarkSeaGreen3')
         for node in self.locations.records.values():
             node.setAttribute('bgcolor', 'DarkSeaGreen3')
-
+        self.records = cdata

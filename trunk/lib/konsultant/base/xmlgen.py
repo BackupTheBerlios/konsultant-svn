@@ -121,3 +121,29 @@ class TD(BaseElement):
 class Paragraph(BaseElement):
     def __init__(self, **atts):
         BaseElement.__init__(self, 'p', **atts)
+
+class SimpleTitleElement(BaseElement):
+    def __init__(self, title, **attributes):
+        BaseElement.__init__(self, 'table')
+        self._title = title
+        for k,v in attributes.items():
+            self.setAttribute(k, v)
+        self.row = TR()
+        td = TD()
+        self.appendChild(self.row)
+        self.row.appendChild(td)
+        self._font = BaseElement('font')
+        self._font.setAttribute('color', 'gold')
+        td.appendChild(self._font)
+        element = TextElement('h1', self._title)
+        self._font.appendChild(element)
+
+    def set_font(self, **attributes):
+        for k,v in attributes.items():
+            self._font.setAttribute(k, v)
+
+    def set_title(self, title):
+        self._title = title
+        print 'i don nothing'
+        
+

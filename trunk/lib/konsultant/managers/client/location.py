@@ -11,9 +11,9 @@ from xmlgen import LocationDoc
 from db import ClientManager
 
 class LocationView(RecordView):
-    def __init__(self, app, parent, clientid):
-        RecordView.__init__(self, app, parent, clientid, LocationDoc,
-                            ClientManager, 'edit')
+    def __init__(self, app, parent, records):
+        RecordView.__init__(self, app, parent, records, LocationDoc,
+                            'edit')
         
     def setSource(self, url):
         print url
@@ -23,21 +23,13 @@ class LocationView(RecordView):
         current = self.doc.records[int(id)].record[context]
         dlg.grid.entries[context].setText(current)
         
-        print url
-        
-        
-class LocationEditorWidget(QSplitter):
-    def __init__(self, parent, app, clientid):
-        QSplitter.__init__(self, parent, 'ContactEditorWidget')
-        self.app = app
-        self.db = app.db
-        self.recView = LocationView(self.app, self, clientid)
+
         
 class LocationEditorWin(SimpleWindow):
-    def __init__(self, parent, app, clientid):
+    def __init__(self, parent, app, records):
         SimpleWindow.__init__(self, parent, app, 'ContactEditor')
         self.fields = ['name', 'isp', 'connection', 'ip', 'static', 'serviced']
-        self.mainView = LocationView(self.app, self, clientid)
+        self.mainView = LocationView(self.app, self, records)
         self.setCentralWidget(self.mainView)
         self.setCaption('LocationEditor')
         self.resize(300, 500)

@@ -65,7 +65,7 @@ class ClientView(ViewBrowser):
                 dlg.clientid = self.doc.current
                 self.dialogs['new-contact'] = dlg
             elif action == 'edit':
-                ContactEditorWin(self, self.app, self.doc.current)
+                ContactEditorWin(self, self.app, self.doc.records['contacts'])
         elif context == 'location':
             if action == 'new':
                 dlg = LocationDialog(self, self.db)
@@ -73,7 +73,7 @@ class ClientView(ViewBrowser):
                 dlg.clientid = self.doc.current
                 self.dialogs['new-location'] = dlg
             elif action == 'edit':
-                LocationEditorWin(self, self.app, self.doc.current)
+                LocationEditorWin(self, self.app, self.doc.records['locations'])
         else:
             KMessageBox.error(self, 'bad call %s' % url)
 

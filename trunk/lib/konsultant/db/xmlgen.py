@@ -88,7 +88,6 @@ class RecordElement(BaseElement):
         BaseElement.__init__(self, 'table')
         self.record = record
         for field in fields:
-            print 'field is', field
             row = BaseElement('tr')
             key = TD(bgcolor='DarkSeaGreen')
             key.appendChild(Bold(field))
@@ -105,7 +104,7 @@ class RecordElement(BaseElement):
             self.appendChild(row)
             
 class RecordDoc(BaseDocument):
-    def __init__(self, app, manager):
+    def __init__(self, app, manager=None, records=None):
         BaseDocument.__init__(self, app)
         self.manager = manager(self.app)
         self.records = {}
