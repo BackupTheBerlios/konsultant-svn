@@ -51,6 +51,19 @@ class ManageTickets(KAction):
         cut = KShortcut()
         KAction.__init__(self, item, cut, slot, parent, name)
 
+class ManageTasksItem(BaseItem):
+    def __init__(self):
+        BaseItem.__init__(self, 'Manage Tasks', 'attach',
+                          'Manage Tasks', 'manage or brouse Tasks')
+
+class ManageTasks(KAction):
+    def __init__(self, slot, parent):
+        item = ManageTasksItem()
+        name = 'ManageTasks'
+        cut = KShortcut()
+        KAction.__init__(self, item, cut, slot, parent, name)
+
+
 class ConfigItem(BaseItem):
     def __init__(self):
         BaseItem.__init__(self, 'Configure Konsultant', 'configure',

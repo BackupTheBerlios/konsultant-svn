@@ -2,6 +2,7 @@ from qt import QSplitter, QPixmap, QGridLayout
 from qt import QLabel, QFrame, QString
 from qt import SIGNAL, SLOT, Qt
 from qt import QMimeSourceFactory
+from qt import QCheckBox
 
 from kdecore import KConfigDialogManager
 from kdecore import KAboutData
@@ -11,6 +12,7 @@ from kdeui import KConfigDialog, KListView
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KTextBrowser, KPopupMenu
 from kdeui import KStdAction
+from kdeui import KTabWidget
 
 from konsultant.base.actions import EditAddresses, ManageClients
 from konsultant.base.config import DefaultSkeleton, KonsultantConfig
@@ -133,7 +135,7 @@ class EditRecordDialog(SimpleRecordDialog):
             print 'record has refdata'
         self.setButtonOKText('update', 'update')
         
-class ConfigureDialog(KConfigDialog):
+class ConfigureDialogorig(KConfigDialog):
     def __init__(self, parent, cfg, name='ConfigureDialog'):
         print 'repreper'
         #skel = DefaultSkeleton()
@@ -143,3 +145,64 @@ class ConfigureDialog(KConfigDialog):
         print skel
         KConfigDialog.__init__(self, parent, name, skel)
         #self.manager = KConfigDialogManager(self, skel, 'ConfigureDialogManager')
+
+class ConfigLayout(QGridLayout):
+    def __init__(self, parent):
+        QGridLayout.__init__(self, parent)
+
+class _SimpleConfigLayout(QGridLayout):
+    def __init__(self, parent, cfg, group, keys):
+        cfg.setGroup(group)
+        QGridLayout.__init__(self, parent, len(keys), 2)
+        self.entries = {}.fromkeys(keys)
+        row = 0
+        for k in keys:
+            self.addWidget(QLabel(k, parent), row, 0)
+            entry = KLineEdit(parent)
+            self.addWidget(entry, row, 1)
+            self.entries[k] = entry
+            entry.setText(cfg.readEntry(k))
+            row += 1
+
+class DbConfigLayout(_SimpleConfigLayout):
+    def __init__(self, parent, cfg):
+        keys = ['dbhost', 'dbname', 'dbpass', 'dbport', 'dbuser']
+        _SimpleConfigLayout.__init__(self, parent, cfg, 'database', keys)
+    
+class PgPoolConfigLayout(QGridLayout):
+    def __init__(self, parent, cfg):
+        cfg.setGroup('pgpool')
+        keys = ['command', 'connection_life_time', 'max_pool', 'num_init_children',
+                'port', 'usepgpool']
+        QGridLayout.__init__(self, parent, len(keys), 2)
+        self.entries = {}.fromkeys(keys)
+        row = 0
+        for k in keys[:-1]:
+            self.addWidget(QLabel(k, parent), row, 0)
+            entry = KLineEdit(parent)
+            self.addWidget(entry, row, 1)
+            self.entries[k] = entry
+            row += 1
+        self.addWidget(QLabel('usepgpool', parent), row, 0)
+        entry = QCheckBox('usepgpool', parent)
+        self.addWidget(entry, row, 1)
+        self.entries['usepgpool'] = entry
+
+class ConfigureDialog(KDialogBase):
+    def __init__(self, app, parent):
+        KDialogBase.__init__(self, parent, 'ConfigureDialog')
+        self.app = app
+        self.cfg = app.cfg
+        self.page = KTabWidget(self)
+        self.grouplist = ['database', 'pgpool']
+        self.groups = {}
+        frame = QFrame(self.page)
+        self.groups['database'] = DbConfigLayout(frame, self.cfg)
+        frame = QFrame(self.page)
+        self.groups['pgpool'] = PgPoolConfigLayout(frame, self.cfg)
+        
+        
+        for t in self.grouplist:
+            self.page.addTab(self.groups[t].parent(), t)
+        self.setMainWidget(self.page)
+        self.show()

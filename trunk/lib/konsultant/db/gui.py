@@ -10,6 +10,7 @@ from kdeui import KStdAction, KMessageBox
 from kdeui import KListViewItem
 from kdeui import KListView, KStdGuiItem
 from kdeui import KPushButton, KStatusBar
+from kdeui import KColorButton
 
 from konsultant.base import NoExistError
 from konsultant.sqlgen.clause import Eq, In
@@ -19,14 +20,14 @@ from konsultant.base.gui import SimpleRecord, SimpleRecordDialog
 from konsultant.db.xmlgen import AddressSelectDoc, AddressLink
 
 class SimpleWindow(MainWindow):
-    def __init__(self, parent, app, name):
+    def __init__(self, app, parent, name):
         MainWindow.__init__(self, parent, name)
         self.app = app
         self.db = app.db
         
 class BaseManagerWidget(SimpleWindow):
     def __init__(self, app, parent, view, name):
-        SimpleWindow.__init__(self, parent, app, name)
+        SimpleWindow.__init__(self, app, parent, name)
         self.mainView = QSplitter(self, 'main view')
         self.listView = KListView(self.mainView)
         #view is some sort of display widget that requires db
@@ -247,3 +248,17 @@ class RecordView(ViewBrowser):
         key = '%s-%s' % (self._action, id)
         self.dialogs[key] = dlg
         
+
+class TableEditor(SimpleWindow):
+    def __init__(self, app, parent, name="TableEditor"):
+        SimpleWindow.__init__(self, app, parent, name)
+        self.table = None
+        self.fields = None
+        self.idcol = None
+        self.split = QSplitter(self, 'mainsplit')
+        self.listView = KListView(self.split)
+        self.rowView = KListView(self.split)
+        self.setCentralWidget(self.split)
+        self.show()
+
+    

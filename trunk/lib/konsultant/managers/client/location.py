@@ -49,7 +49,7 @@ class LocationView(RecordView):
         
 class LocationEditorWin(SimpleWindow):
     def __init__(self, app, parent, records):
-        SimpleWindow.__init__(self, parent, app, 'ContactEditor')
+        SimpleWindow.__init__(self, app, parent, 'ContactEditor')
         self.fields = LOCFIELDS
         self.mainView = LocationView(self.app, self, records)
         self.setCentralWidget(self.mainView)

@@ -46,7 +46,7 @@ class ContactView(RecordView):
         
 
 class ContactEditorWin(SimpleWindow):
-    def __init__(self, parent, app, records):
+    def __init__(self, app, parent, records):
         SimpleWindow.__init__(self, app, parent, 'ContactEditor')
         self.fields = CONFIELDS
         self.mainView = ContactView(self.app, self, records)

@@ -18,7 +18,7 @@ from konsultant.sqlgen.clause import Eq, In, NotIn
 from xmlgen import TicketInfoDoc
 from xmlgen import TicketDocument
 
-from db import TicketManager
+from db import TaskManager
 
 TICKETSTATUS = ['new', 'open', 'closed']
 class VboxDialog(KDialogBase):
@@ -180,10 +180,10 @@ class TicketView(ViewBrowser):
                 print 'need to assign ticket'
                 TicketAssigner(self.app, self, id)
                 
-class TicketManagerWidgetNew(BaseManagerWidget):
+class TaskManagerWidget(BaseManagerWidget):
     def __init__(self, app, parent, *args):
         BaseManagerWidget.__init__(self, app, parent, TicketView, 'TicketManager')
-        self.setCaption('TicketManager')
+        self.setCaption('TaskManager')
         self.manager = TicketManager(self.app)
         self.dialogs = {}
         print 'ticket app', app, self.app

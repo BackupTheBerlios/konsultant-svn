@@ -28,6 +28,7 @@ from konsultant.base.refdata import RefData
 from konsultant.sqlgen.clause import Eq, In
 from konsultant.base.actions import EditAddresses, ConfigureKonsultant
 from konsultant.base.actions import ManageTickets, AdministerDatabase
+from konsultant.base.actions import ManageTasks
 from konsultant.base.gui import MainWindow
 from konsultant.base.gui import ConfigureDialog
 from konsultant.pdb.record import EmptyRefRecord
@@ -144,6 +145,7 @@ class ClientManagerWidget(BaseManagerWidget):
         self.editaddressAction = EditAddresses(self.slotEditAddresses, collection)
         self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
         self.manageTicketsAction = ManageTickets(self.slotManageTickets, collection)
+        self.manageTasksAction = ManageTasks(self.slotManageTasks, collection)
         self.admindbAction = AdministerDatabase(self.slotAdministerDatabase,
                                                 collection)
         BaseManagerWidget.initActions(self, collection=collection)
@@ -152,8 +154,10 @@ class ClientManagerWidget(BaseManagerWidget):
         mainMenu = KPopupMenu(self)
         self.newAction.plug(mainMenu)
         self.manageTicketsAction.plug(mainMenu)
+        self.manageTasksAction.plug(mainMenu)
         self.editaddressAction.plug(mainMenu)
         self.admindbAction.plug(mainMenu)
+        self.configureAction.plug(mainMenu)
         BaseManagerWidget.initMenus(self, mainmenu=mainMenu)
         
     def initlistView(self):
@@ -164,7 +168,9 @@ class ClientManagerWidget(BaseManagerWidget):
     def initToolbar(self):
         toolbar = self.toolBar()
         actions = [self.newAction, self.manageTicketsAction,
-                   self.editaddressAction, self.admindbAction, self.quitAction]
+                   self.manageTasksAction,
+                   self.editaddressAction, self.admindbAction,
+                   self.configureAction, self.quitAction]
         for action in actions:
             action.plug(toolbar)
         
@@ -177,7 +183,7 @@ class ClientManagerWidget(BaseManagerWidget):
             c.clientid = row.clientid
 
     def slotConfigure(self):
-        ConfigureDialog(self)
+        ConfigureDialog(self.app, self)
     
     def slotNew(self):
         dlg = ClientDialog(self.app, self)
@@ -215,3 +221,7 @@ class ClientManagerWidget(BaseManagerWidget):
 
     def slotManageTickets(self):
         TicketManagerWidget(self.app, self, self.db)
+
+    def slotManageTasks(self):
+        print 'Manage Tasks'
+        

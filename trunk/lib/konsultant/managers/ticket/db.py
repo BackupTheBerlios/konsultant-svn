@@ -122,13 +122,7 @@ class TicketManager(object):
             clause = In('clientid', sub)
             return self.db.select(fields=fields, table='clients', clause=clause)
         else:
-            afields = cfields + ['TRUE as assigned']
-            ufields = cfields + ['FALSE as assigned']
-            asel = self.db.stmt.select(fields=afields, table='clients',
-                                       clause=In('clientid', sub))
-            usel = self.db.stmt.select(fields=ufields, table='clients',
-                                       clause=NotIn('clientid', sub))
-            self.db.mcursor.execute('%s UNION %s' % (asel, usel))
-            return self.db.mcursor.fetchall()
+            clause = In('clientid', sub)
+            fields = cfields + ['%s as assigned' % clause]
+            return self.db.select(fields=fields, table='clients')
 
-    
