@@ -113,7 +113,7 @@ class KonsultantMainWindow(KMainWindow):
         AddressSelector(self, self.db, 'AddressBrowser', modal=False)
 
     def slotManageClients(self):
-        win = ClientManagerWidget(self, self.db)
+        win = ClientManagerWidget(self, self.app)
         win.show()
 
     def slotManageTickets(self):

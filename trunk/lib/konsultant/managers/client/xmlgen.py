@@ -43,9 +43,9 @@ class ContactTableElement(TableElement):
         TableElement.__init__(self, cols)
 
 class ClientInfoDoc(BaseDocument):
-    def __init__(self, db):
-        BaseDocument.__init__(self, db)
-        self.manager = ClientManager(self.db)
+    def __init__(self, app):
+        BaseDocument.__init__(self, app)
+        self.manager = ClientManager(self.app)
         self.body.setAttribute('text', '#000000')
         self.body.setAttribute('background', 'Time-For-Lunch-2.jpg')
 

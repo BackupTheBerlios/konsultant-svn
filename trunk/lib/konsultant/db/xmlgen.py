@@ -16,9 +16,10 @@ class BaseDbElement(BaseElement):
         self.db = db
         
 class BaseDocument(BaseDbElement):
-    def __init__(self, db):
-        BaseDbElement.__init__(self, db, 'html')
-        self.db = db
+    def __init__(self, app):
+        BaseDbElement.__init__(self, app, 'html')
+        self.app = app
+        self.db = app.db
         self.body = Body()
         self.appendChild(self.body)
 

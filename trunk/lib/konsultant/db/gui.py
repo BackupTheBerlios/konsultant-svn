@@ -20,14 +20,14 @@ from konsultant.base.gui import SimpleRecord, SimpleRecordDialog
 from konsultant.db.xmlgen import AddressSelectDoc, AddressLink
 
 class BaseManagerWidget(MainWindow):
-    def __init__(self, parent, app, db, view, name):
+    def __init__(self, parent, app, view, name):
         MainWindow.__init__(self, parent, name)
         self.app = app
-        self.db = db
+        self.db = app.db
         self.mainView = QSplitter(self, 'main view')
         self.listView = KListView(self.mainView)
         #view is some sort of display widget that requires db
-        self.view = view(self.db, self.mainView)
+        self.view = view(self.app, self.mainView)
         self.setCentralWidget(self.mainView)
         self.initlistView()
         self.initActions()
@@ -156,11 +156,12 @@ class RecordSelector(QSplitter):
 #db is BaseDatabase from konsultant.maindb
 #doc is Element from xml.dom.minidom
 class ViewBrowser(KTextBrowser):
-    def __init__(self, db, parent, doc):
+    def __init__(self, app, parent, doc):
         KTextBrowser.__init__(self, parent)
         self.setMimeSourceFactory(MimeSources())
-        self.db = db
-        self.doc = doc(self.db)
+        self.app = app
+        self.db = app.db
+        self.doc = doc(self.app)
         self.setNotifyClick(True)
         
 

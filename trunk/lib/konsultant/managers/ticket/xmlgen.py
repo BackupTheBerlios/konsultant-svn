@@ -32,7 +32,44 @@ class TitleTable(BaseElement):
         element = TextElement('b', title)
         font.appendChild(element)
         
+class SubjectTable(BaseElement):
+    def __init__(self, subject, action, author, posted):
+        BaseElement.__init__(self, 'table')
+        #self.app  = app
+        self.setAttribute('border', '0')
+        self.setAttribute('width', '100%')
+        self.setAttribute('cellpadding', '2')
+        self.setAttribute('cellspacing', '0')
+        self.setAttribute('bgcolor', 'cornsilk4')
+        row = BaseElement('tr')
+        self.appendChild(row)
+        td = self._subjectdata(subject, action)
+        row.appendChild(td)
+        
+        row = BaseElement('tr')
+        self.appendChild(row)
+        row.setAttribute('bgcolor', 'bisque4')
+        td = self._subjectdata(author, posted)
+        row.appendChild(td)
+        
 
+    def _subjectdata(self, subject, action):
+        td = BaseElement('td')
+
+        font = BaseElement('font')
+        font.setAttribute('color', 'gold')
+        element = TextElement('b', subject)
+        font.appendChild(element)
+        td.appendChild(font)
+
+        font = BaseElement('font')
+        font.setAttribute('color', 'yellow')
+        element = Text()
+        font.appendChild(element)
+        element.data = '(%s)' % action
+        td.appendChild(font)
+        return td
+    
 class TicketHeader(BaseElement):
     def __init__(self, ticketid, row):
         BaseElement.__init__(self, 'p')
@@ -66,21 +103,28 @@ class ActionItem(ListItem):
     def __init__(self, row):
         self.actionid = row.actionid
         url = 'show.action.%d' % self.actionid
-        element = Anchor(url, row.subject)
+        self.anchor = Anchor(url, row.subject)
+        #element = TitleTable(self.anchor)
+        element = SubjectTable(self.anchor, row.action, row.author, row.posted)
+        element.setAttribute('width', '100%')
+        element.setAttribute('border', '0')
         url = 'new.action.%d' % self.actionid
         ListItem.__init__(self, element)
         self.appendChild(Anchor(url, ' (respond)'))
 
     def show_data(self, data):
-        anchor = self.firstChild
+        anchor = self.anchor
+        print self.anchor.getAttribute('href'), 'href'
         child = self.lastChild
+        print anchor.toxml(), child.toxml()
         anchor.setAttribute('href', 'hide.action.%d' % self.actionid)
         self.data = data
         self.insertBefore(TextElement('p', data), child)
 
     def hide_data(self):
-        anchor = self.firstChild
-        anchor.setAttribute('href', 'show.action.%d' % self.actionid)
+        self.anchor.setAttribute('href', 'show.action.%d' % self.actionid)
+        print self.anchor.getAttribute('href'), 'href'
+        print ['%s-----' % c for c in self.childNodes]
         del self.childNodes[1]
         
         
@@ -145,12 +189,12 @@ class TicketInfoElement(BaseElement):
     
 
 class TicketDocument(BaseDocument):
-    def __init__(self, db):
-        BaseDocument.__init__(self, db)
+    def __init__(self, app):
+        BaseDocument.__init__(self, app)
         #self.body.setAttribute('bgcolor', 'MistyRose4')
         #self.body.setAttribute('link', 'plum')
         #self.body.setAttribute('hover', 'green')
-        self.manager = TicketManager(self.db)
+        self.manager = TicketManager(self.app)
 
     def setID(self, clause=None, ids=None):
         self.clear_body()
@@ -161,9 +205,9 @@ class TicketDocument(BaseDocument):
             self.body.appendChild(element)
 
 class TicketInfoDoc(BaseDocument):
-    def __init__(self, db):
-        BaseDocument.__init__(self, db)
-        self.manager = TicketManager(self.db)
+    def __init__(self, app):
+        BaseDocument.__init__(self, app)
+        self.manager = TicketManager(self. app)
 
     def set_clause(self, clause):
         self.clear_body()

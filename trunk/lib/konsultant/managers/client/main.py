@@ -41,12 +41,12 @@ from xmlgen import ClientInfoDoc
 from db import ClientManager
         
 class ClientView(ViewBrowser):
-    def __init__(self, db, parent):
-        doc = ClientInfoDoc(db)
-        ViewBrowser.__init__(self, db, parent, ClientInfoDoc)
+    def __init__(self, app, parent):
+        doc = ClientInfoDoc(app)
+        ViewBrowser.__init__(self, app, parent, ClientInfoDoc)
         self.dialogs = {}
-        self.manager = ClientManager(self.db)
-        self.resize(800, 300)
+        self.manager = ClientManager(self.app)
+        self.resize(800, 600)
         
     def setSource(self, url):
         action, context, id = str(url).split('.')
@@ -100,16 +100,17 @@ class LocationDialog(WithAddressIdRecDialog):
 
 
 class ClientManagerWidget(BaseManagerWidget):
-    def __init__(self, parent, app, db, *args):
-        BaseManagerWidget.__init__(self, parent, app, db, ClientView, 'ClientManager')
+    def __init__(self, parent, app, *args):
+        BaseManagerWidget.__init__(self, parent, app, ClientView, 'ClientManager')
         self.cfg = self.app.cfg
         self.cfg.setGroup('client-gui')
         size = self.cfg.readEntry('mainwinsize')
         w, h = [int(x.strip()) for x in str(size).split(',')]
-        self.resize(QSize(w, h))
+        #self.resize(QSize(w, h))
         self.dialogs  = {}
-        self.manager = ClientManager(self.db)
+        self.manager = ClientManager(self.app)
         self.initToolbar()
+        self.resize(800, 600)
         
     def initActions(self):
         collection = self.actionCollection()

@@ -3,7 +3,6 @@ from xml.dom.minidom import Element, Text
 class BaseElement(Element):
     def __init__(self, tagname):
         Element.__init__(self, tagname)
-        self._auto = False
 
 class TextElement(BaseElement):
     def __init__(self, name, data):

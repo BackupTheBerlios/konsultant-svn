@@ -25,7 +25,7 @@ if __name__ == '__main__':
     #bo.db = app.db
     #app.db = BaseDatabase('Konsultant', app)
     #win = ClientManager(app.db)
-    win = ClientManagerWidget(None, app, app.db)
+    win = ClientManagerWidget(None, app)
     win.show()
     #win.lower()
     

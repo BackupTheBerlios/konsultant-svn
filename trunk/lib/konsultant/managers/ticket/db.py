@@ -2,8 +2,9 @@ from konsultant.sqlgen.clause import Eq, In, NotIn
 
 
 class TicketManager(object):
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, app):
+        self.app = app
+        self.db = app.db
         self.atable = 'ticketactions'
         self.aptable = 'ticketactionparent'
         self.apfields = ['actionid', 'parent'] 

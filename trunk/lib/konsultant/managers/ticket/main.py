@@ -53,10 +53,10 @@ class ActionDialog(VboxDialog):
         self.show()
 
 class TicketActionView(ViewBrowser):
-    def __init__(self, db, parent, ticketid):
-        ViewBrowser.__init__(self, db, parent, TicketInfoDoc)
+    def __init__(self, app, parent, ticketid):
+        ViewBrowser.__init__(self, app, parent, TicketInfoDoc)
         self.dialogs = {}
-        self.manager = TicketManager(self.db)
+        self.manager = TicketManager(self.app)
 
     def setSource(self, url):
         action, context, id = str(url).split('.')
@@ -101,10 +101,10 @@ class TicketActionView(ViewBrowser):
         
         
 class TicketView(ViewBrowser):
-    def __init__(self, db, parent):
-        ViewBrowser.__init__(self, db, parent, TicketDocument)
+    def __init__(self, app, parent):
+        ViewBrowser.__init__(self, app, parent, TicketDocument)
         self.dialogs = {}
-        self.manager = TicketManager(self.db)
+        self.manager = TicketManager(self.app)
 
     def setID(self, ticketid=None, clause=None):
         self.doc.setID(clause=clause)
@@ -127,19 +127,19 @@ class TicketView(ViewBrowser):
             if action == 'show':
                 print 'showing ticket %s' % id
                 win = KMainWindow(self)
-                v = TicketActionView(self.db, win, int(id))
+                v = TicketActionView(self.app, win, int(id))
                 v.setID(int(id))
-                v.resize(400, 600)
+                v.resize(700, 900)
                 win.setCentralWidget(v)
-                win.resize(400, 600)
+                win.resize(700, 900)
                 win.show()
                 
 class TicketManagerWidgetNew(BaseManagerWidget):
-    def __init__(self, parent, app, db, *args):
-        self.db = db
-        self.manager = TicketManager(self.db)
-        BaseManagerWidget.__init__(self, parent, app, db, TicketView, 'TicketManager')
+    def __init__(self, parent, app, *args):
+        BaseManagerWidget.__init__(self, parent, app, TicketView, 'TicketManager')
+        self.manager = TicketManager(self.app)
         self.dialogs = {}
+        print 'ticket app', app, self.app
         
     def initActions(self):
         collection = self.actionCollection()

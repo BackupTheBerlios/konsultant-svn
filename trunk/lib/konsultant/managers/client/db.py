@@ -1,8 +1,9 @@
 from konsultant.sqlgen.clause import Eq, In
 
 class ClientManager(object):
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, app):
+        self.app = app
+        self.db = app.db
         self.addressfields = ['street1', 'street2', 'city', 'state', 'zip']
 
     def _setup_insdata(self, fields, clientid, addressid, data):
