@@ -79,7 +79,8 @@ class ClientManager(object):
 
     def _preparequeries(self, clientid, idcol, fields, table):
         clientclause = Eq('clientid', clientid)
-        clause = '%s IN (select %s from clientinfo where %s)' % (idcol, idcol, clientclause)
+        stmt = self.db.stmt.select(fields=[idcol], table='clientinfo', clause=clientclause)
+        clause = In(idcol, stmt)
         query = self.db.stmt.select(fields=['addressid'], table=table, clause=clause)
         return query, clause
     

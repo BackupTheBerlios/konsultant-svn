@@ -1,9 +1,8 @@
-from qt import SIGNAL, SLOT
+from qt import SIGNAL, SLOT, Qt
 from qt import QMimeSourceFactory, QSplitter
 from qt import QGridLayout
 from qt import QFrame, QPushButton
 from qt import QLabel, QString
-from qt import Qt
 
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KMainWindow, KTextBrowser
@@ -262,3 +261,11 @@ class AddressSelector(KDialogBase):
         self.mainView.setSource(handler)
         
 
+class AdminWidget(BaseManagerWidget):
+    def __init__(self, parent, app):
+        BaseManagerWidget
+        
+class AdminWidget(KMainWindow):
+    def __init__(self, parent, app):
+        KMainWindow.__init__(self, parent, 'AdminWidget')
+        

@@ -9,6 +9,7 @@ from qt import SIGNAL, SLOT, Qt
 
 from qt import QMimeSourceFactory, QGridLayout
 from qt import QFrame, QPushButton
+from qt import QStyleSheet, QStyleSheetItem
 
 from qtsql import QDataTable, QSqlCursor, QSqlFieldInfo
 from qtsql import QSqlPropertyMap
@@ -39,6 +40,11 @@ from konsultant.managers.ticket import TicketManagerWidget
 
 from xmlgen import ClientInfoDoc
 from db import ClientManager
+
+class ClientStyleSheet(QStyleSheet):
+    def __init__(self, parent=None, name='ClientStyleSheet'):
+        QStyleSheet.__init__(self, parent, name)
+        
         
 class ClientView(ViewBrowser):
     def __init__(self, app, parent):
