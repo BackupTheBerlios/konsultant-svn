@@ -23,6 +23,12 @@ class TicketHeader(BaseElement):
         self.new = Anchor('new.ticket.noid', 'new')
         p.appendChild(self.new)
         self.appendChild(p)
+
+class TicketFooter(BaseElement):
+    def __init__(self, ticketid):
+        BaseElement.__init__(self, 'h3')
+        self.respond = Anchor('new.action.%d' % ticketid, 'respond')
+        self.appendChild(self.respond)
         
 class TicketTableElement(TableElement):
     def __init__(self, db=None):
@@ -53,3 +59,7 @@ class TicketInfoDoc(BaseDocument):
         #append ticket data
         tdata = TicketData(row.data)
         self.body.appendChild(tdata)
+        #append ticket footer
+        self.tfooter = TicketFooter(ticketid)
+        self.body.appendChild(self.tfooter)
+        

@@ -23,7 +23,7 @@ class TicketDialog(KDialogBase):
         self.page = QFrame(self)
         self.setMainWidget(self.page)
         self.vbox = QVBoxLayout(self.page, 5, 7)
-        self.titleEdit = KLineEdit('new ticket', self.page)
+        self.titleEdit = KLineEdit('', self.page)
         self.dataEdit = KTextEdit(self.page)
         self.vbox.addWidget(self.titleEdit)
         self.vbox.addWidget(self.dataEdit)
@@ -38,11 +38,27 @@ class TicketView(ViewBrowser):
         self.manager = TicketManager(self.db)
 
     def setSource(self, url):
-        print url
-        
+        action, context, id = str(url).split('.')
+        print action, context, id
+        if context == 'action':
+            if action == 'new':
+                dlg = TicketDialog(self, 'ActionDialog')
+                dlg.connect(dlg, SIGNAL('okClicked()'), self.insertAction)
+                dlg.ticketid = self.doc.current
+                self.dialogs['new-action'] = dlg
+                
     def setID(self, ticketid):
         self.doc.setID(ticketid)
         self.setText(self.doc.toxml())
+
+    def insertAction(self):
+        dlg = self.dialogs['new-action']
+        subject = str(dlg.titleEdit.text())
+        action = str(dlg.dataEdit.text())
+        ticketid = dlg.ticketid
+        actionid = self.manager.append_action(ticketid, subject, action)
+        self.setID(ticketid)
+        
         
 
 class TicketManagerWidget(BaseManagerWidget):
@@ -106,6 +122,9 @@ class TicketManagerWidget(BaseManagerWidget):
         dlg = self.dialogs['new-ticket']
         title = str(dlg.titleEdit.text())
         data = str(dlg.dataEdit.text())
-        self.manager.create_ticket(title, data)
-        self.refreshlistView()
+        if data:
+            self.manager.create_ticket(title, data)
+            self.refreshlistView()
+        else:
+            KMessageBox.error(self, "just a title won't do.")
     

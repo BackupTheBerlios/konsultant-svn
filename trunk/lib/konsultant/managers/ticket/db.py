@@ -19,10 +19,9 @@ class TicketManager(object):
         return ticketid
         
 
-    def append_action(self, ticketid, action, parent=None):
-        fields = ['ticketid', 'action', 'posted']
-        insdata = self._setup_insdata(fields, data)
-        insdata['author'] = self.db.dbuser
+    def append_action(self, ticketid, subject, action, parent=None):
+        data = dict(ticketid=ticketid, subject=subject, action=action)
+        data['author'] = self.db.dbuser
         row = self.db.identifyData('actionid', 'ticketactions', data)
         actionid = row.actionid
         if parent is not None:
@@ -59,5 +58,9 @@ class TicketManager(object):
         fields = ['title', 'author', 'created']
         if data:
             fields.append('data')
-        return self.db.select_row(fields=fields, table='tickets', clause=Eq('ticketid', ticketid))
+        return self.db.select_row(fields=fields,
+                                  table='tickets', clause=Eq('ticketid', ticketid))
+
+    def get_actionids(self, ticketid):
+        pass
     

@@ -19,7 +19,7 @@ class EditAddressesItem(KGuiItem):
 class ManageClientsItem(KGuiItem):
     def __init__(self):
         text = QString('Manage Clients')
-        icon = QString('edit')
+        icon = QString('identity')
         ttip = QString('Manage Clients')
         wtf = QString('manage or browse Clients')
         KGuiItem.__init__(self, text, icon, ttip, wtf)
@@ -27,7 +27,7 @@ class ManageClientsItem(KGuiItem):
     
 class ManageTicketsItem(BaseItem):
     def __init__(self):
-        BaseItem.__init__(self, 'Manage Tickets', 'edit',
+        BaseItem.__init__(self, 'Manage Tickets', 'contents',
                           'Manage Tickets', 'manage or brouse Tickets')
 
 class ConfigItem(BaseItem):

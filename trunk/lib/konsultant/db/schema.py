@@ -7,7 +7,7 @@ from paella.sqlgen.statement import Statement
 ZipName = ColumnType('varchar', 5)
 StateName = ColumnType('varchar', 2)
 sequences = ['address_ident', 'contact_ident', 'ticket_ident',
-             'location_ident', 'client_ident']
+             'location_ident', 'client_ident', 'action_ident']
 
 def AutoId(name, seqname, pk=False):
     column = Num(name)
@@ -61,7 +61,6 @@ class TicketTable(Table):
     def __init__(self):
         idcol = AutoId('ticketid', 'ticket_ident', pk=True)
         title = Name('title')
-        title.constraint.unique = True
         title.constraint.null = False
         author = Name('author')
         created = Now('created')
@@ -73,7 +72,7 @@ class TicketActionTable(Table):
     def __init__(self):
         ticket = Num('ticketid')
         ticket.set_fk('tickets')
-        actionid = PkNum('actionid')
+        actionid = AutoId('actionid', 'action_ident', pk=True)
         subject = Bigname('subject')
         action = Text('action')
         author = Name('author')
