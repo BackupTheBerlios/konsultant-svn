@@ -19,7 +19,7 @@ from konsultant.base.gui import MainWindow, MimeSources
 from konsultant.base.gui import SimpleRecord, SimpleRecordDialog
 from konsultant.db.xmlgen import AddressSelectDoc, AddressLink
 
-class BaseManager(MainWindow):
+class BaseManagerWidget(MainWindow):
     def __init__(self, parent, db, view, name):
         MainWindow.__init__(self, parent, name)
         self.db = db

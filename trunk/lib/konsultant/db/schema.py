@@ -1,6 +1,7 @@
 from paella.sqlgen.classes import Table, Sequence, ColumnType, Column
 from paella.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
 from paella.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
+from paella.sqlgen.defaults import DateTime
 from paella.sqlgen.statement import Statement
 
 ZipName = ColumnType('varchar', 5)
@@ -66,6 +67,7 @@ class TicketActionTable(Table):
         ticket.set_fk('tickets')
         actionid = PkNum('actionid')
         action = Text('action')
+        time = DateTime('time')
         cols = [ticket, actionid, action]
         Table.__init__(self, 'ticketactions', cols)
         
@@ -106,23 +108,30 @@ class ClientTable(Table):
         client = Name('client')
         Table.__init__(self, 'clients', [idcol, client])
         
+class ClientTicketTable(Table):
+    def __init__(self):
+        clientid = PkNum('clientid')
+        clientid.set_fk('clients')
+        ticketid = PkNum('ticketid')
+        ticketid.set_fk('tickets')
+        status = Name('status')
+        Table.__init__(self, 'client_tickets', [clientid, ticketid, status])
+        
 class ClientInfoTable(Table):
     def __init__(self):
         clientid = Num('clientid')
         clientid.set_fk('clients')
         locationid = Num('locationid')
         locationid.set_fk('locations', 'locationid')
-        ticketid = Num('ticketid')
-        ticketid.set_fk('tickets')
         contactid = Num('contactid')
         contactid.set_fk('contacts', 'contactid')
-        cols = [clientid, locationid, ticketid, contactid]
+        cols = [clientid, locationid, contactid]
         Table.__init__(self, 'clientinfo', cols)
         
         
 MAINTABLES = [AddressTable, ContactTable, TicketTable,
               TicketStatusTable, TicketActionTable, TicketActionParentTable,
-              LocationTable, ClientTable, ClientInfoTable
+              LocationTable, ClientTable, ClientTicketTable, ClientInfoTable
               ]
 
 def create_schema(cursor):

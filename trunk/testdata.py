@@ -31,20 +31,20 @@ locations = [
 clients = ['butcher', 'baker', 'candlestick maker']
 
 clientinfo = [
-    [1, 1, None, None],
-    [1, None, None, 1],
-    [1, None, None, 2],
-    [2, 2, None, None],
-    [2, None, None, 3],
-    [2, None, None, 4],
-    [3, 3, None, None],
-    [3, None, None, 5]
+    [1, 1, None],
+    [1, None, 1],
+    [1, None, 2],
+    [2, 2, None],
+    [2, None, 3],
+    [2, None, 4],
+    [3, 3, None],
+    [3, None, 5]
     ]
 
 address_cols = ['street1', 'street2', 'city', 'state', 'zip']
 contact_cols = ['name', 'addressid', 'email', 'description']
 location_cols = ['addressid', 'isp', 'connection', 'ip', 'static', 'serviced']
-clientinfo_cols = ['clientid', 'locationid', 'ticketid', 'contactid']
+clientinfo_cols = ['clientid', 'locationid', 'contactid']
 
 def gen_inserts(table, cols, rows):
     statements = []

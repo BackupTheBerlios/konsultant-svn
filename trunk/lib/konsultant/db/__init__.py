@@ -19,18 +19,12 @@ class BaseDriver(QSqlDriver):
 
 
 class BaseDatabase(QSqlDatabase):
-    def __init__(self, cfg, name, parent=None, objname=None):
-        self.cfg = cfg
-        self.cfg.setGroup('database')
+    def __init__(self, dsn, name, parent=None, objname=None):
         QSqlDatabase.__init__(self, 'QPSQL7', name, parent, objname)
-        dbname = str(self.cfg.readEntry('dbname'))
-        dbhost = str(self.cfg.readEntry('dbhost'))
-        dbuser = str(self.cfg.readEntry('dbuser'))
-        print dbhost, dbname, dbuser
-        self.conn = BasicConnection(dbuser, dbhost, dbname)
-        self.setDatabaseName(dbname)
-        self.setHostName(dbhost)
-        self.setUserName(dbuser)
+        self.conn = BasicConnection(**dsn)
+        self.setDatabaseName(dsn['dbname'])
+        self.setHostName(dsn['host'])
+        self.setUserName(dsn['user'])
         self.stmt = Statement()
         self.mcursor = StatementCursor(self.conn)
         

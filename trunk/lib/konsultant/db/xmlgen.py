@@ -7,6 +7,7 @@ from paella.sqlgen.clause import Eq, In
 from konsultant.base.xmlgen import Html, Body, Anchor
 from konsultant.base.xmlgen import TableElement
 from konsultant.base.xmlgen import BaseElement
+from konsultant.db.client import ClientManager
 
 #db is BaseDatabase from konsultant.db
 class BaseDbElement(BaseElement):
@@ -42,15 +43,19 @@ class BaseParagraph(BaseDbElement):
     
     
 class AddressLink(BaseParagraph):
-    def makeParagraph(self, addressid):
-        fields = ['street1', 'street2', 'city', 'state', 'zip']
-        table = 'addresses'
-        clause = Eq('addressid', addressid)
-        row = self.db.mcursor.select_row(fields=fields, table=table, clause=clause)
-        lastline = '%s, %s  %s' % (row.city, row.state, row.zip)
-        lines = [row.street1]
-        if row.street2:
-            lines.append(row.street2)
+    def makeParagraph(self, address):
+        #this is ugly and will be removed soon
+        if type(address) is not dict and not hasattr(address, 'items'):
+            fields = ['street1', 'street2', 'city', 'state', 'zip']
+            table = 'addresses'
+            clause = Eq('addressid', address)
+            row = self.db.mcursor.select_row(fields=fields, table=table, clause=clause)
+        else:
+            row = address
+        lastline = '%s, %s  %s' % (row['city'], row['state'], row['zip'])
+        lines = [row['street1']]
+        if row['street2']:
+            lines.append(row['street2'])
         lines.append(lastline)
         return '\n'.join(lines)
 
@@ -68,7 +73,6 @@ class ClientHeaderElement(BaseElement):
     def __init__(self, client):
         BaseElement.__init__(self, 'h3')
         self.client = client
-        #anchor = Anchor('foo.bar.-1', client)
         node = Text()
         node.data = '%s:' % client
         self.appendChild(node)
@@ -121,7 +125,7 @@ class TicketInfoDoc(BaseDocument):
         rows = self.db.select(fields=['title'], table='tickets')
         
         
-class ClientInfoDoc(BaseDocument):
+class ClientInfoDocOrig(BaseDocument):
     def __init__(self, db):
         BaseDocument.__init__(self, db)
         self.body.setAttribute('text', '#000000')
@@ -163,10 +167,8 @@ class ClientInfoDoc(BaseDocument):
         #insert the contacts, locations and tickets
         locs = [r.locationid for r in inforows if r.locationid]
         contacts = [r.contactid for r in inforows if r.contactid]
-        tickets = [r.ticketid for r in inforows if r.ticketid]
         self.appendLocations(locs)
         self.appendContacts(contacts)
-        self.appendTickets(tickets)
         
     def _appendRows(self, ids, fields, table, idcol, element):
         if len(ids):
@@ -186,6 +188,68 @@ class ClientInfoDoc(BaseDocument):
         table = 'contacts'
         element = self.contacts
         self._appendRows(contacts, fields, table, 'contactid', element)
+
+    def appendTickets(self, tickets):
+        fields = ['title', 'status']
+        tables = ['tickets', 'ticketstatus']
+        table = ' natural join '.join(tables)
+        element = self.tickets
+        self._appendRows(tickets, fields, tables, 'ticketid', element)
+        
+class ClientInfoDoc(BaseDocument):
+    def __init__(self, db):
+        BaseDocument.__init__(self, db)
+        self.manager = ClientManager(self.db)
+        self.body.setAttribute('text', '#000000')
+        #self.body.setAttribute('background', 'vegetative_fog.jpg')
+        self.body.setAttribute('background', 'Time-For-Lunch-2.jpg')
+
+    def setID(self, clientid):
+        cdata = self.manager.getClientInfo(clientid)
+        self.current = clientid
+        self.clear_body()
+        #make header
+        self.header = ClientHeaderElement(cdata['client'])
+        self.body.appendChild(self.header)
+        #append contacts header
+        conheader = ClientSectionHeader(self.current, 'contact', 'Contacts:')
+        self.body.appendChild(conheader)
+        self.contacts = ContactTableElement()
+        self.body.appendChild(self.contacts)
+        #append locations header
+        locheader = ClientSectionHeader(self.current, 'location', 'Locations:')
+        self.body.appendChild(locheader)
+        self.locations = LocationTableElement()
+        self.body.appendChild(self.locations)
+        #append tickets header
+        #tickheader = ClientSectionHeader(self.current, 'ticket', 'Tickets:')
+        #self.body.appendChild(tickheader)
+        #self.tickets = TicketTableElement()
+        #self.body.appendChild(self.tickets)
+        
+        #insert the contacts, locations and tickets
+        self.appendLocations(cdata)
+        self.appendContacts(cdata)
+
+    def _appendRows(self, rows, element, addresses):
+        for row in rows:
+            print row
+            row.addressid = AddressLink(self.db, addresses[row.addressid])
+            element.appendRowElement(element, row)
+            
+    def _appendRowsOrig(self, ids, fields, table, idcol, element):
+        if len(ids):
+            clause = In(idcol, ids)
+            for row in self.db.mcursor.select(fields=fields, table=table, clause=clause):
+                row.addressid = AddressLink(self.db, row.addressid)
+                element.appendRowElement(element, row)
+            
+    def appendLocations(self, data):
+        print data['addresses']
+        self._appendRows(data['locations'], self.locations, data['addresses'])
+
+    def appendContacts(self, data):
+        self._appendRows(data['contacts'], self.contacts, data['addresses'])
 
     def appendTickets(self, tickets):
         fields = ['title', 'status']

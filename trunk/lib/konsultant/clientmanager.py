@@ -31,7 +31,7 @@ from konsultant.base.xmlgen import TextElement, Anchor, TableElement
 from konsultant.db import BaseDatabase
 from konsultant.db.gui import AddressSelectView, RecordSelector
 from konsultant.db.gui import SimpleRecordDialog, AddressSelector
-from konsultant.db.gui import WithAddressIdRecDialog, BaseManager
+from konsultant.db.gui import WithAddressIdRecDialog, BaseManagerWidget
 from konsultant.db.gui import ViewBrowser
 
 from konsultant.db.xmlgen import ClientInfoDoc
@@ -80,13 +80,13 @@ class ClientView(ViewBrowser):
             if action == 'new':
                 dlg = ContactDialog(self, self.db)
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertContact)
-                dlg.clientid = self.info.current
+                dlg.clientid = self.doc.current
                 self.dialogs['new-contact'] = dlg
         elif context == 'location':
             if action == 'new':
                 dlg = LocationDialog(self, self.db)
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertLocation)
-                dlg.clientid = self.info.current
+                dlg.clientid = self.doc.current
                 self.dialogs['new-location'] = dlg
         else:
             KMessageBox.error(self, 'bad call %s' % url)
@@ -104,7 +104,7 @@ class ClientView(ViewBrowser):
 
     def set_client(self, clientid):
         clause = Eq('clientid', clientid)
-        self.doc.set_client(clientid)
+        self.doc.setID(clientid)
         self.setText(self.doc.toxml())
         
     def insertContact(self):
@@ -151,9 +151,9 @@ class LocationDialog(WithAddressIdRecDialog):
         WithAddressIdRecDialog.__init__(self, parent, db, fields, name=name)
 
 
-class ClientManager(BaseManager):
+class ClientManagerWidget(BaseManagerWidget):
     def __init__(self, parent, db, *args):
-        BaseManager.__init__(self, parent, db, ClientView, 'ClientManager')
+        BaseManagerWidget.__init__(self, parent, db, ClientView, 'ClientManager')
 
     def initActions(self):
         collection = self.actionCollection()
@@ -202,8 +202,7 @@ class ClientManager(BaseManager):
 
         
     def setClientView(self, clientid):
-        row = self.db.select_row(fields=['clientid'], table='clients', clause=Eq('clientid', clientid))
-        self.view.set_client(row.clientid)
+        self.view.set_client(clientid)
 
 
 

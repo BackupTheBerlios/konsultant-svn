@@ -26,7 +26,10 @@ class BaseSkel(ConfigParser):
         items = [
             ['usepgpool', 'false'],
             ['port', '5434'],
-            ['command', '/usr/bin/pgpool']
+            ['command', '/usr/sbin/pgpool'],
+            ['num_init_children', '32'],
+            ['max_pool', '4'],
+            ['connection_life_time', '0']
             ]
         self.add_section(s)
         self._additems(s, items)
@@ -83,5 +86,8 @@ class BaseConfig(KSimpleConfig):
 class DefaultSkeleton(KConfigSkeleton):
     def __init__(self, cfg):
         print cfg
-        KConfigSkeleton.__init__(self, cfg)
-        
+        for group in cfg.groupList():
+            #self.setCurrentGroup(group)
+            for k,v in cfg.entryMap(group).items():
+                print k, '-->', v
+        KConfigSkeleton.__init__(self, 'konsultantrc')
