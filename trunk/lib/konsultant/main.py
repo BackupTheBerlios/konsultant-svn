@@ -1,5 +1,6 @@
 import os
 from qt import SLOT, SIGNAL, Qt
+
 from kdecore import KApplication, KIconLoader
 from kdecore import KStandardDirs
 from kdecore import KLockFile

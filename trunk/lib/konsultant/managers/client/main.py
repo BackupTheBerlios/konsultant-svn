@@ -4,6 +4,7 @@ from xml.dom.minidom import Element, Text
 from qt import QListViewItem, QSplitter, QString
 from qt import QStringList, QListView, QLabel
 from qt import QVariant, QPixmap
+from qt import QSize
 from qt import SIGNAL, SLOT, Qt
 
 from qt import QMimeSourceFactory, QGridLayout
@@ -42,6 +43,7 @@ class ClientView(ViewBrowser):
         ViewBrowser.__init__(self, db, parent, ClientInfoDoc)
         self.dialogs = {}
         self.manager = ClientManager(self.db)
+        self.resize(800, 300)
         
     def setSource(self, url):
         action, context, id = str(url).split('.')
@@ -92,7 +94,12 @@ class LocationDialog(WithAddressIdRecDialog):
 class ClientManagerWidget(BaseManagerWidget):
     def __init__(self, parent, db, *args):
         BaseManagerWidget.__init__(self, parent, db, ClientView, 'ClientManager')
-
+        self.cfg = parent.app.cfg
+        self.cfg.setGroup('client-gui')
+        size = self.cfg.readEntry('mainwinsize')
+        w, h = [int(x.strip()) for x in str(size).split(',')]
+        self.resize(QSize(w, h))
+        
     def initActions(self):
         collection = self.actionCollection()
         self.newAction = KStdAction.openNew(self.slotNew, collection)

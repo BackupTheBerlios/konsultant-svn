@@ -33,6 +33,16 @@ class BaseSkel(ConfigParser):
             ]
         self.add_section(s)
         self._additems(s, items)
+
+        s = 'client-gui'
+        items = [
+            ['mainwinsize', '500, 400'],
+            ['contactdlgsize', '200, 300'],
+            ['locationdlgsize', '200, 400']
+            ]
+        self.add_section(s)
+        self._additems(s, items)
+
         
     def _additems(self, section, items):
         for k,v in items:

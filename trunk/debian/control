@@ -1,0 +1,17 @@
+Source: konsultant
+Section: unknown
+Priority: optional
+Maintainer: Joseph Rawson <umeboshi@gregscomputerservice.com>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: konsultant
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: konsultant-doc
+Architecture: all
+Description: Documentation for konsultant
+ <insert long description, indented with spaces>
