@@ -1,3 +1,10 @@
+konsultant (0.1-2) common; urgency=low
+
+  * fixed depends
+
+
+ -- Joseph Rawson <umeboshi@gregscomputerservice.com>  Mon, 27 Sep 2004 22:07:47 -0500
+
 konsultant (0.1-1) common; urgency=low
 
   * Initial Release.
