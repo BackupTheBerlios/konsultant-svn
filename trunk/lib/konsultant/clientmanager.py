@@ -36,23 +36,6 @@ from konsultant.db.gui import ViewBrowser
 
 from konsultant.db.xmlgen import ClientInfoDoc
 from konsultant.db.client import ClientManager
-
-class ClientHeaderElement(Element):
-    def __init__(self, client):
-        Element.__init__(self, 'h3')
-        self.client = client
-        anchor = Anchor('foo.bar.-1', client)
-        self.appendChild(anchor)
-        
-class LocationTableElement(TableElement):
-    def __init__(self, db=None):
-        cols = ['address', 'isp', 'connection', 'ip', 'static', 'serviced']
-        TableElement.__init__(self, cols)
-        
-class ContactTableElement(TableElement):
-    def __init__(self, db=None):
-        cols = ['name', 'address', 'email', 'description']
-        TableElement.__init__(self, cols)
         
 class ClientView(ViewBrowser):
     def __init__(self, db, parent):
@@ -78,17 +61,6 @@ class ClientView(ViewBrowser):
         else:
             KMessageBox.error(self, 'bad call %s' % url)
 
-    def _check_address(self, data):
-        addressfields = ['street1', 'street2', 'city', 'state', 'zip']
-        a_data = dict([(f, data[f]) for f in addressfields])
-        table = 'addresses'
-        row = self.db.identifyData('addressid', table, a_data)
-        return row.addressid
-
-    def _update_clientinfo(self, cldata):
-        table = 'clientinfo'
-        row = self.db.identifyData('*', table, cldata)
-
     def set_client(self, clientid):
         clause = Eq('clientid', clientid)
         self.doc.setID(clientid)
@@ -113,7 +85,7 @@ class ContactDialog(WithAddressIdRecDialog):
         
 class LocationDialog(WithAddressIdRecDialog):
     def __init__(self, parent, db, name='LocationDialog'):
-        fields = ['addressid', 'isp', 'connection',
+        fields = ['name', 'addressid', 'isp', 'connection',
                   'ip', 'static', 'serviced']
         WithAddressIdRecDialog.__init__(self, parent, db, fields, name=name)
 

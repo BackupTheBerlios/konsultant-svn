@@ -18,6 +18,12 @@ def AutoId(name, seqname, pk=False):
     column.set_auto_increment(seqname)
     return column
 
+def Now(name):
+    column = DateTime(name)
+    column.constraint.default_raw = True
+    column.constraint.default = 'now()'
+    return column
+
 class ConfigTable(Table):
     def __init__(self):
         uname = PkName('username')
@@ -57,8 +63,10 @@ class TicketTable(Table):
         title = Name('title')
         title.constraint.unique = True
         title.constraint.null = False
+        author = Name('author')
+        created = Now('created')
         data = Text('data')
-        cols = [idcol, title, data]
+        cols = [idcol, title, author, created, data]
         Table.__init__(self, 'tickets', cols)
         
 class TicketActionTable(Table):
@@ -67,8 +75,9 @@ class TicketActionTable(Table):
         ticket.set_fk('tickets')
         actionid = PkNum('actionid')
         action = Text('action')
-        time = DateTime('time')
-        cols = [ticket, actionid, action]
+        author = Name('author')
+        posted = Now('posted')
+        cols = [ticket, actionid, action, author, posted]
         Table.__init__(self, 'ticketactions', cols)
         
 class TicketActionParentTable(Table):
@@ -89,6 +98,8 @@ class TicketStatusTable(Table):
 class LocationTable(Table):
     def __init__(self):
         idcol = AutoId('locationid', 'location_ident')
+        name = PkName('name')
+        name.constraint.default = 'main office'
         addressid = PkNum('addressid')
         addressid.set_fk('addresses', 'addressid')
         isp = PkName('isp')
@@ -98,7 +109,7 @@ class LocationTable(Table):
         static.constraint.pk = True
         serviced = Bool('serviced')
         serviced.constraint.pk = True
-        cols = [idcol, addressid, isp, conn, ip, static, serviced]
+        cols = [idcol, name, addressid, isp, conn, ip, static, serviced]
         Table.__init__(self, 'locations', cols)
         
 class ClientTable(Table):

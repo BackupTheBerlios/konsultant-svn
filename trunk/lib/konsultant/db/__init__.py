@@ -24,7 +24,8 @@ class BaseDatabase(QSqlDatabase):
         self.conn = BasicConnection(**dsn)
         self.setDatabaseName(dsn['dbname'])
         self.setHostName(dsn['host'])
-        self.setUserName(dsn['user'])
+        self.dbuser = dsn['user']
+        self.setUserName(self.dbuser)
         self.stmt = Statement()
         self.mcursor = StatementCursor(self.conn)
         
@@ -96,17 +97,18 @@ class BaseDatabase(QSqlDatabase):
     def stdclause(self, data):
         return reduce(and_, [Eq(k, v) for k,v in data.items()])
 
-    def insertData(self, idcol, table, data):
+    def insertData(self, idcol, table, data, commit=True):
         clause = self.stdclause(data)
         try:
             self.mcursor.select_row(fields=[idcol], table=table, clause=clause)
         except NoExistError:
             self.mcursor.insert(table=table, data=data)
-            self.conn.commit()
+            if commit:
+                self.conn.commit()
             
-    def identifyData(self, idcol, table, data):
+    def identifyData(self, idcol, table, data, commit=True):
         clause = self.stdclause(data)
-        self.insertData(idcol, table, data)
+        self.insertData(idcol, table, data, commit=commit)
         return self.mcursor.select_row(fields=['*'], table=table, clause=clause)
         
 class BaseObject(DCOPExObj):

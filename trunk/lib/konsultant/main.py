@@ -5,6 +5,7 @@ from kdecore import KStandardDirs
 from kdecore import KLockFile
 
 from kdeui import KMainWindow, KSystemTray
+from kdeui import KPopupMenu
 
 from konsultant.base.config import BaseConfig
 from konsultant.base.gui import MainWindow, ConfigureDialog
@@ -14,7 +15,7 @@ from konsultant.db import BaseDatabase, BaseObject
 from konsultant.db.pgpool import PgPool
 from konsultant.db.gui import AddressSelector
 from konsultant.clientmanager import ClientManagerWidget
-from konsultant.ticketmanager import TicketManager
+from konsultant.ticketmanager import TicketManagerWidget
 
 class KonsultantMainApplication(KApplication):
     def __init__(self, *args):
@@ -38,6 +39,8 @@ class KonsultantMainApplication(KApplication):
             self.pgpool = PgPool(self.cfg, self.tmpdir, self.datadir)
             if not os.path.isfile(self.pgpool.pidfile):
                 self.pgpool.run()
+            else:
+                self.pgpool = None
             dsn['host'] = 'localhost'
             dsn['port'] = self.cfg.readEntry('port')
         else:
@@ -50,7 +53,8 @@ class KonsultantMainApplication(KApplication):
         
     def quit(self):
         if self.pgpool is not None:
-            self.pgpool.stop()
+            if os.path.isfile(self.pgpool.pidfile):
+                self.pgpool.stop()
         KApplication.quit(self)
         
 
@@ -66,6 +70,7 @@ class KonsultantMainWindow(KMainWindow):
         self.systray.show()
         self.initActions()
         self.initMenus()
+        self.initToolbar()
         self.app = app
         self.db = app.db
         self.cfg = app.cfg
@@ -78,11 +83,23 @@ class KonsultantMainWindow(KMainWindow):
         self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
         
     def initMenus(self):
-        mainMenu = self.systray.contextMenu()
-        self.editaddressAction.plug(mainMenu)
-        self.manageclientsAction.plug(mainMenu)
-        self.manageticketsAction.plug(mainMenu)
-        self.configureAction.plug(mainMenu)
+        trayMenu = self.systray.contextMenu()
+        mainMenu = KPopupMenu(self)
+        self.menuBar().insertItem('&Main', mainMenu)
+        self.menuBar().insertItem('&Help', self.helpMenu(''))
+        for menu in [trayMenu, mainMenu]:
+            self.editaddressAction.plug(menu)
+            self.manageclientsAction.plug(menu)
+            self.manageticketsAction.plug(menu)
+            self.configureAction.plug(menu)
+
+    def initToolbar(self):
+        toolbar = self.toolBar()
+        actions = [self.manageclientsAction, self.manageticketsAction,
+                   self.editaddressAction, self.configureAction]
+        for action in actions:
+            action.plug(toolbar)
+        
         
     def slotEditAddresses(self):
         AddressSelector(self, self.db, 'AddressBrowser', modal=False)
@@ -92,7 +109,7 @@ class KonsultantMainWindow(KMainWindow):
         win.show()
 
     def slotManageTickets(self):
-        win = TicketManager(self, self.db)
+        win = TicketManagerWidget(self, self.db)
         win.show()
 
     def slotConfigure(self):

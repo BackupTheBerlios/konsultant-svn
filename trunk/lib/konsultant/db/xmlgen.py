@@ -103,7 +103,7 @@ class TicketHeader(BaseElement):
         
 class LocationTableElement(TableElement):
     def __init__(self, db=None):
-        cols = ['address', 'isp', 'connection', 'ip', 'static', 'serviced']
+        cols = ['name', 'address', 'isp', 'connection', 'ip', 'static', 'serviced']
         TableElement.__init__(self, cols)
         
 class ContactTableElement(TableElement):

@@ -39,7 +39,7 @@ class ClientManager(object):
         return contactid
 
     def insertLocation(self, clientid, addressid, data):
-        fields = ['isp', 'connection', 'ip', 'static', 'serviced']
+        fields = ['name', 'isp', 'connection', 'ip', 'static', 'serviced']
         insdata = self._setup_insdata(fields, clientid, addressid, data)
         row = self.db.identifyData('locationid', 'locations', insdata)
         locationid = row.locationid
@@ -61,7 +61,7 @@ class ClientManager(object):
         return dict([(row.addressid, row) for row in rows])
     
     def getLocations(self, clientid, addresses=True):
-        fields = ['addressid', 'isp', 'connection', 'ip', 'static', 'serviced']
+        fields = ['name', 'addressid', 'isp', 'connection', 'ip', 'static', 'serviced']
         sclause = Eq('clientid', clientid)
         clause = 'locationid IN (select locationid from clientinfo where %s)' % sclause
         if addresses:

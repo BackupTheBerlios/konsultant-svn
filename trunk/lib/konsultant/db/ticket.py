@@ -10,13 +10,18 @@ class TicketManager(object):
 
     def create_ticket(self, title, data):
         fields = ['title', 'data']
-        insdata = self._setup_insdata(fields, data)
+        insdata = dict(title=title, data=data, author=self.db.dbuser)
         row = self.db.identifyData('ticketid', 'tickets', insdata)
-        return row.ticketid
+        ticketid = row.ticketid
+        status = dict(ticketid=ticketid, status='new')
+        self.db.insert(table='ticketstatus', data=status)
+        
+        
 
     def append_action(self, ticketid, action, parent=None):
-        fields = ['ticketid', 'action', 'time']
+        fields = ['ticketid', 'action', 'posted']
         insdata = self._setup_insdata(fields, data)
+        insdata['author'] = self.db.dbuser
         row = self.db.identifyData('actionid', 'ticketactions', data)
         actionid = row.actionid
         if parent is not None:
@@ -40,5 +45,12 @@ class TicketManager(object):
         return new
     
 
-    def get_tickets(self, clause):
+    def get_tickets(self, clause=None):
+        fields = ['ticketid', 'title', 'author', 'created']
+        if clause is None:
+            tquery = self.db.stmt.select(fields=['ticketid'], table='ticketstatus',
+                                         clause=In('status', ['new', 'open']), order='created')
+            clause = 'ticketid IN (%s)' % tquery
+        rows = self.db.select(fields=fields, table='tickets', clause=clause)
         return rows
+            

@@ -42,7 +42,6 @@ class SimpleRecord(QGridLayout):
         self._setupfields(parent)
         self.setSpacing(7)
         self.setMargin(10)
-        print text
         self.addMultiCellWidget(QLabel(text, parent), 0, 0, 0, 1)
 
     def _setupfields(self, parent):
