@@ -18,6 +18,8 @@ class PgPoolConfig(object):
         data['logdir'] = "'%s'" % tmpdir
         data['socket_dir'] = "'%s'" % tmpdir
         self.data = data
+        self.pidfile = os.path.join(tmpdir, 'pgpool.pid')
+        
 
     def write(self):
         lines = ['%s = %s' % (k,v) for k,v in self.data.items()]
@@ -33,7 +35,8 @@ class PgPool(object):
         cf = file(self.conf, 'w')
         cf.write(self.cfg.write())
         cf.close()
-
+        self.pidfile = self.cfg.pidfile
+        
     def run(self):
         cmd = '%s -f %s' % (self.cmd, self.conf)
         print cmd

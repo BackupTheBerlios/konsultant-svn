@@ -27,8 +27,8 @@ if __name__ == '__main__':
     #win.lower()
     
     #win.hide()
-    app.setMainWidget(win)
-    print app.mainWidget()
+    #app.setMainWidget(win)
+    #print app.mainWidget()
     #win2 = ClientManager(win, win.db)
     #win2.hide()
     cfg = app.config()

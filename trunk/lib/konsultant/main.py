@@ -1,4 +1,5 @@
 import os
+from qt import SLOT, SIGNAL, Qt
 from kdecore import KApplication, KIconLoader
 from kdecore import KStandardDirs
 from kdecore import KLockFile
@@ -24,21 +25,19 @@ class KonsultantMainApplication(KApplication):
         self.tmpdir = str(dirs.findResourceDir('tmp', '/'))
         self.datadir = str(dirs.findResourceDir('data', '/'))
         self.socketdir = str(dirs.findResourceDir('socket', '/'))
-        lockname = os.path.join(self.tmpdir, 'konsultant-mainlock')
-        lockfile = KLockFile(lockname)
         dsn = {}
         self.cfg.setGroup('database')
         dsn['user'] = self.cfg.readEntry('dbuser')
         dsn['dbname'] = self.cfg.readEntry('dbname')
         dsn['passwd'] = self.cfg.readEntry('dbpass')
         self.cfg.setGroup('pgpool')
+        self.pgpool = None
         usepgpool = self.cfg.readEntry('usepgpool')
         if usepgpool != 'false':
-            if not lockfile.isLocked():
-                print 'use pgpool'
-                pgpool = PgPool(self.cfg, self.tmpdir, self.datadir)
-                pgpool.run()
-                lockfile.lock()
+            print 'using pgpool'
+            self.pgpool = PgPool(self.cfg, self.tmpdir, self.datadir)
+            if not os.path.isfile(self.pgpool.pidfile):
+                self.pgpool.run()
             dsn['host'] = 'localhost'
             dsn['port'] = self.cfg.readEntry('port')
         else:
@@ -46,7 +45,14 @@ class KonsultantMainApplication(KApplication):
             dsn['host'] = self.cfg.readEntry('dbhost')
             dsn['port'] = self.cfg.readEntry('dbport')
         self.db = BaseDatabase(dsn, 'Konsultant', self)
-                
+        self.connect(self, SIGNAL('aboutToQuit()'), self.quit)
+        
+        
+    def quit(self):
+        if self.pgpool is not None:
+            self.pgpool.stop()
+        KApplication.quit(self)
+        
 
                 
         

@@ -37,20 +37,6 @@ from konsultant.db.gui import ViewBrowser
 from konsultant.db.xmlgen import ClientInfoDoc
 from konsultant.db.client import ClientManager
 
-class ClientCursor(QSqlCursor):
-    def __init__(self, db):
-        QSqlCursor.__init__(self, 'clients', True, db)
-        self.append(QSqlFieldInfo('clientid'))
-        
-class ClientsTable(QDataTable):
-    def __init__(self, db, cursor, autoPopulate=False, parent=None):
-        QDataTable.__init__(self, cursor)
-        self.propMap = QSqlPropertyMap()
-        self.installPropertyMap(self.propMap)
-        self.setSort(QStringList('client'))
-        self.addColumn('client', 'Client')
-        self.refresh()
-
 class ClientHeaderElement(Element):
     def __init__(self, client):
         Element.__init__(self, 'h3')

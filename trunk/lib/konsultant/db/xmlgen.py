@@ -125,83 +125,11 @@ class TicketInfoDoc(BaseDocument):
         rows = self.db.select(fields=['title'], table='tickets')
         
         
-class ClientInfoDocOrig(BaseDocument):
-    def __init__(self, db):
-        BaseDocument.__init__(self, db)
-        self.body.setAttribute('text', '#000000')
-        #self.body.setAttribute('background', 'vegetative_fog.jpg')
-        self.body.setAttribute('background', 'Time-For-Lunch-2.jpg')
-
-    def set_client(self, clientid):
-        clause = Eq('clientid', clientid)
-        self.current = clientid
-        self.set_clause(clause)
-        
-    def set_clause(self, clause):
-        self.clear_body()
-        inforows = self.db.select(table='clientinfo', clause=clause)
-
-        #make header
-        row = self.db.select_row(table='clients', clause=clause)
-        self.header = ClientHeaderElement(row.client)
-        self.body.appendChild(self.header)
-
-        #append contacts header
-        conheader = ClientSectionHeader(self.current, 'contact', 'Contacts:')
-        self.body.appendChild(conheader)
-        self.contacts = ContactTableElement()
-        self.body.appendChild(self.contacts)
-
-        #append locations header
-        locheader = ClientSectionHeader(self.current, 'location', 'Locations:')
-        self.body.appendChild(locheader)
-        self.locations = LocationTableElement()
-        self.body.appendChild(self.locations)
-
-        #append tickets header
-        tickheader = ClientSectionHeader(self.current, 'ticket', 'Tickets:')
-        self.body.appendChild(tickheader)
-        self.tickets = TicketTableElement()
-        self.body.appendChild(self.tickets)
-        
-        #insert the contacts, locations and tickets
-        locs = [r.locationid for r in inforows if r.locationid]
-        contacts = [r.contactid for r in inforows if r.contactid]
-        self.appendLocations(locs)
-        self.appendContacts(contacts)
-        
-    def _appendRows(self, ids, fields, table, idcol, element):
-        if len(ids):
-            clause = In(idcol, ids)
-            for row in self.db.mcursor.select(fields=fields, table=table, clause=clause):
-                row.addressid = AddressLink(self.db, row.addressid)
-                element.appendRowElement(element, row)
-            
-    def appendLocations(self, locations):
-        fields = ['addressid', 'isp', 'connection', 'ip', 'static', 'serviced']
-        table = 'locations'
-        element = self.locations
-        self._appendRows(locations, fields, table, 'locationid', element)
-
-    def appendContacts(self, contacts):
-        fields = ['name', 'addressid', 'email', 'description']
-        table = 'contacts'
-        element = self.contacts
-        self._appendRows(contacts, fields, table, 'contactid', element)
-
-    def appendTickets(self, tickets):
-        fields = ['title', 'status']
-        tables = ['tickets', 'ticketstatus']
-        table = ' natural join '.join(tables)
-        element = self.tickets
-        self._appendRows(tickets, fields, tables, 'ticketid', element)
-        
 class ClientInfoDoc(BaseDocument):
     def __init__(self, db):
         BaseDocument.__init__(self, db)
         self.manager = ClientManager(self.db)
         self.body.setAttribute('text', '#000000')
-        #self.body.setAttribute('background', 'vegetative_fog.jpg')
         self.body.setAttribute('background', 'Time-For-Lunch-2.jpg')
 
     def setID(self, clientid):
@@ -221,19 +149,12 @@ class ClientInfoDoc(BaseDocument):
         self.body.appendChild(locheader)
         self.locations = LocationTableElement()
         self.body.appendChild(self.locations)
-        #append tickets header
-        #tickheader = ClientSectionHeader(self.current, 'ticket', 'Tickets:')
-        #self.body.appendChild(tickheader)
-        #self.tickets = TicketTableElement()
-        #self.body.appendChild(self.tickets)
-        
         #insert the contacts, locations and tickets
         self.appendLocations(cdata)
         self.appendContacts(cdata)
 
     def _appendRows(self, rows, element, addresses):
         for row in rows:
-            print row
             row.addressid = AddressLink(self.db, addresses[row.addressid])
             element.appendRowElement(element, row)
             
@@ -245,15 +166,8 @@ class ClientInfoDoc(BaseDocument):
                 element.appendRowElement(element, row)
             
     def appendLocations(self, data):
-        print data['addresses']
         self._appendRows(data['locations'], self.locations, data['addresses'])
 
     def appendContacts(self, data):
         self._appendRows(data['contacts'], self.contacts, data['addresses'])
 
-    def appendTickets(self, tickets):
-        fields = ['title', 'status']
-        tables = ['tickets', 'ticketstatus']
-        table = ' natural join '.join(tables)
-        element = self.tickets
-        self._appendRows(tickets, fields, tables, 'ticketid', element)
