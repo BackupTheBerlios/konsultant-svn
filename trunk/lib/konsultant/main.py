@@ -14,8 +14,9 @@ from konsultant.base.actions import ManageTickets, ConfigureKonsultant
 from konsultant.db import BaseDatabase, BaseObject
 from konsultant.db.pgpool import PgPool
 from konsultant.db.gui import AddressSelector
-from konsultant.clientmanager import ClientManagerWidget
-from konsultant.ticketmanager import TicketManagerWidget
+
+from konsultant.managers.client import ClientManagerWidget
+from konsultant.managers.ticket import TicketManagerWidget
 
 class KonsultantMainApplication(KApplication):
     def __init__(self, *args):
