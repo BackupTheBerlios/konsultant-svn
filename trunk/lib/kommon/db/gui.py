@@ -175,6 +175,13 @@ class ViewBrowser(KTextBrowser):
     def set_clause(self, clause):
         self.doc.set_clause(clause)
         self.setText(self.doc.toxml())
+
+    def _split_url(self, url):
+        action, context, id_ = str(url).split('.')
+        return action, context, id_
+
+    def _url_error(self, url):
+            KMessageBox.information(self, 'called %s' % url)
         
 class AddressSelectView(ViewBrowser):
     def __init__(self, app, parent):

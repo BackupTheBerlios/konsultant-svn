@@ -7,14 +7,17 @@ class BaseElement(Element):
         
     def setAttributes(self, **atts):
         for k,v in atts.items():
-            self.setAttribute(k, str(v))
-        
-class TextElement(BaseElement):
-    def __init__(self, name, data, **atts):
-        BaseElement.__init__(self, name, **atts)
+            if k == '_node':
+                self.appendChild(v)
+            elif k == '_text':
+                self._appendText(v)
+            else:
+                self.setAttribute(k, str(v))
+
+    def _appendText(self, text):
         elementd = Text()
-        if type(data) == str:
-            lines = data.split('\n')
+        if type(text) == str:
+            lines = text.split('\n')
             if len(lines) > 1:
                 for line in lines:
                     e = Text()
@@ -22,14 +25,19 @@ class TextElement(BaseElement):
                     self.appendChild(e)
                     self.appendChild(BaseElement('br'))
             else:
-                elementd.data = data
+                elementd.data = text
                 self.appendChild(elementd)
-        elif hasattr(data, 'hasChildNodes'):
-            self.appendChild(data)
+        elif hasattr(text, 'hasChildNodes'):
+            self.appendChild(text)
         else:
             #print 'type data', type(data)
-            elementd.data = str(data)
+            elementd.data = str(text)
             self.appendChild(elementd)
+        
+class TextElement(BaseElement):
+    def __init__(self, name, data, **atts):
+        BaseElement.__init__(self, name, **atts)
+        self._appendText(data)
 
 class Anchor(TextElement):
     def __init__(self, href, data, **atts):
@@ -122,9 +130,13 @@ class Paragraph(BaseElement):
     def __init__(self, **atts):
         BaseElement.__init__(self, 'p', **atts)
 
+class Font(BaseElement):
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'font', **atts)
+        
 class SimpleTitleElement(BaseElement):
     def __init__(self, title, **attributes):
-        BaseElement.__init__(self, 'table')
+        BaseElement.__init__(self, 'table', cellspacing='0')
         self._title = title
         for k,v in attributes.items():
             self.setAttribute(k, v)
@@ -132,8 +144,7 @@ class SimpleTitleElement(BaseElement):
         td = TD()
         self.appendChild(self.row)
         self.row.appendChild(td)
-        self._font = BaseElement('font')
-        self._font.setAttribute('color', 'gold')
+        self._font = Font(color='gold')
         td.appendChild(self._font)
         element = TextElement('h1', self._title)
         self._font.appendChild(element)
@@ -146,6 +157,18 @@ class SimpleTitleElement(BaseElement):
         self._title = title
         print 'i don nothing'
         
+    def create_rightside_table(self):
+        self._rstable = BaseElement('table', border='0')
+        self.row.appendChild(TD(align='right', _node=self._rstable))
+        
+    def append_rightside_anchor(self, anchor):
+        row = TR()
+        self._rstable.appendChild(row)
+        td = TD(align='right', rowspan='1')
+        row.appendChild(td)
+        font = Font(color='gold')
+        td.appendChild(font)
+        font.appendChild(anchor)
 
 class RecordElement(BaseElement):
     def __init__(self, fields, idcol, action, record, **atts):

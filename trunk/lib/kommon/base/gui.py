@@ -3,6 +3,7 @@ from qt import QLabel, QFrame, QString
 from qt import SIGNAL, SLOT, Qt
 from qt import QMimeSourceFactory
 from qt import QCheckBox
+from qt import QVBoxLayout
 
 from kdecore import KConfigDialogManager
 from kdecore import KAboutData
@@ -12,10 +13,11 @@ from kdeui import KConfigDialog, KListView
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KTextBrowser, KPopupMenu
 from kdeui import KStdAction
-from kdeui import KTabWidget
+from kdeui import KTabWidget, KActionSelector
+from kdeui import KComboBox
 
-from konsultant.base.actions import EditAddresses, ManageClients
-from konsultant.base.config import DefaultSkeleton, KonsultantConfig
+#from konsultant.base.actions import EditAddresses, ManageClients
+#from konsultant.base.config import DefaultSkeleton, KonsultantConfig
 
 class MimeSources(QMimeSourceFactory):
     def __init__(self):
@@ -188,6 +190,35 @@ class ConfigureDialog(KDialogBase):
         self.setMainWidget(self.page)
         self.show()
 
+class VboxDialog(KDialogBase):
+    def __init__(self, parent, name='VboxDialog'):
+        KDialogBase.__init__(self, parent, name)
+        self.page = QFrame(self)
+        self.setMainWidget(self.page)
+        self.vbox = QVBoxLayout(self.page, 5, 7)
+
+class BaseAssigner(VboxDialog):
+    def __init__(self, app, parent, name='BaseAssigner', udbuttons=False):
+        VboxDialog.__init__(self, parent, name=name)
+        self.listBox = KActionSelector(self.page)
+        self.listBox.setShowUpDownButtons(udbuttons)
+        self.vbox.addWidget(self.listBox)
+        self.app = app
+        self.initView()
+        self.setModal(False)
+        self.show()
+
+    def initView(self):
+        print 'you need to override initView'
+        
+
+class MyCombo(KComboBox):
+    def fill(self, alist):
+        self.clear()
+        for item in alist:
+            self.insertItem(item)
+            
+
 #############################
 ## from paella-kde need to remove
 
@@ -206,29 +237,6 @@ class SimpleSplitWindow(KMainWindow):
         self.connect(self.listView,
                      SIGNAL('selectionChanged()'), self.selectionChanged)
         self.show()
-
-
-        
-class ViewBrowser(KTextBrowser):
-    def __init__(self, app, parent, doc):
-        KTextBrowser.__init__(self, parent)
-        self.setMimeSourceFactory(MimeSources())
-        self.app = app
-        self.doc = doc(self.app)
-        self.setNotifyClick(True)
-        
-
-    def setMimeSourceFactory(self, factory=None):
-        if factory is None:
-            self.mimes = QMimeSourceFactory()
-            self.mimes.addFilePath('/usr/share/wallpapers')
-        else:
-            self.mimes = factory
-        KTextBrowser.setMimeSourceFactory(self, self.mimes)
-
-    def set_clause(self, clause):
-        self.doc.set_clause(clause)
-        self.setText(self.doc.toxml())
 
 class ViewWindow(KMainWindow):
     def __init__(self, app, parent, view, name):

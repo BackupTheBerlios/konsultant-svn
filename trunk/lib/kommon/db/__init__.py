@@ -19,10 +19,16 @@ class BaseDriver(QSqlDriver):
 class BaseDatabase(QSqlDatabase):
     def __init__(self, dsn, name, parent=None, objname=None):
         QSqlDatabase.__init__(self, 'QPSQL7', name, parent, objname)
-        self.conn = BasicConnection(**dsn)
-        self.setDatabaseName(dsn['dbname'])
-        self.setHostName(dsn['host'])
-        self.dbuser = dsn['user']
+        if hasattr(dsn, 'items'): #if dsn is dictionary
+            self.conn = BasicConnection(**dsn)
+            self.setDatabaseName(dsn['dbname'])
+            self.setHostName(dsn['host'])
+            self.dbuser = dsn['user']
+        else: #else a conn was passed as dsn
+            self.conn = dsn
+            self.setDatabaseName(self.conn.conn.db)
+            self.setHostName(self.conn.conn.host)
+            self.dbuser = self.conn.conn.user
         self.setUserName(self.dbuser)
         self.stmt = Statement()
         self.mcursor = StatementCursor(self.conn)
