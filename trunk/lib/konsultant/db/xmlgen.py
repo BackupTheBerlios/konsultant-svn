@@ -67,3 +67,4 @@ class AddressSelectDoc(BaseDocument):
         for row in rows:
             a = row.addressid
             self.body.appendChild(AddressLink(self.db, a, 'select.address.%d' % a))
+

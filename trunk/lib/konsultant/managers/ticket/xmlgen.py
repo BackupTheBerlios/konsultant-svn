@@ -8,6 +8,7 @@ from konsultant.base.xmlgen import Html, Body, Anchor
 from konsultant.base.xmlgen import TextElement
 from konsultant.base.xmlgen import TableElement
 from konsultant.base.xmlgen import BaseElement
+from konsultant.base.xmlgen import UnorderedList, ListItem
 from konsultant.db.xmlgen import BaseDocument
 from konsultant.db.xmlgen import BaseParagraph
 
@@ -39,21 +40,27 @@ class TicketData(TextElement):
     def __init__(self, data):
         TextElement.__init__(self, 'p', data)
 
-
-class ListItem(TextElement):
-    def __init__(self, data):
-        TextElement.__init__(self, 'li', data)
-
-class UnorderedList(BaseElement):
-    def __init__(self):
-        BaseElement.__init__(self, 'ul')
-
 class ActionItem(ListItem):
     def __init__(self, row):
-        url = 'new.action.%d' % row.actionid
+        self.actionid = row.actionid
+        url = 'show.action.%d' % self.actionid
         element = Anchor(url, row.subject)
+        url = 'new.action.%d' % self.actionid
         ListItem.__init__(self, element)
+        self.appendChild(Anchor(url, ' (respond)'))
 
+    def show_data(self, data):
+        anchor = self.firstChild
+        child = self.lastChild
+        anchor.setAttribute('href', 'hide.action.%d' % self.actionid)
+        self.data = data
+        self.insertBefore(TextElement('p', data), child)
+
+    def hide_data(self):
+        anchor = self.firstChild
+        anchor.setAttribute('href', 'show.action.%d' % self.actionid)
+        del self.childNodes[1]
+        
         
 class ActionThreads(UnorderedList):
     def __init__(self, parent, actions, trows, crows):
@@ -72,10 +79,8 @@ class ActionThreads(UnorderedList):
         self.make_threads(parent, crows)
         
     def make_threads(self, parent, rows):
-        print rows
         while len(rows):
             row = rows[0]
-            print 'row is', row.actionid, row.parent
             element = UnorderedList()
             #element = ListItem('actionid %d' % row.actionid)
             if not row.parent:
@@ -86,13 +91,18 @@ class ActionThreads(UnorderedList):
                 rows.append(row)
             else:
                 self.actions[row.parent].appendChild(element)
-                print row.actionid, 'appended to ', row.parent
                 element.appendChild(ActionItem(self._actiondata[row.actionid]))
             self.actions[row.actionid] = element
             del rows[0]
-            
-            
-    
+
+    def show_data(self, actionid, data):
+        element = self.actions[actionid].firstChild
+        element.show_data(data)
+
+    def hide_data(self, actionid):
+        element = self.actions[actionid].firstChild
+        element.hide_data()
+        
 class TicketInfoDoc(BaseDocument):
     def __init__(self, db):
         BaseDocument.__init__(self, db)
@@ -118,4 +128,12 @@ class TicketInfoDoc(BaseDocument):
         actions, rows, trows, crows = self.manager.get_actions(ticketid, True)
         athreads = ActionThreads(self.body, actions, trows, crows)
         self.body.appendChild(athreads)
+        self.threads = athreads
+
+    def showActionData(self, actionid):
+        data = self.manager.get_actiondata(self.current, actionid)
+        self.threads.show_data(actionid, data)
+
+    def hideActionData(self, actionid):
+        self.threads.hide_data(actionid)
         

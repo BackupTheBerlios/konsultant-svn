@@ -16,16 +16,34 @@ from xmlgen import TicketInfoDoc
 from db import TicketManager
 
 TICKETSTATUS = ['new', 'open', 'closed']
-
-class TicketDialog(KDialogBase):
-    def __init__(self, parent, name='TicketDialog'):
+class VboxDialog(KDialogBase):
+    def __init__(self, parent, name='VboxDialog'):
         KDialogBase.__init__(self, parent, name)
         self.page = QFrame(self)
         self.setMainWidget(self.page)
         self.vbox = QVBoxLayout(self.page, 5, 7)
+        
+
+
+class TicketDialog(VboxDialog):
+    def __init__(self, parent, name='TicketDialog'):
+        VboxDialog.__init__(self, parent, name)
         self.titleEdit = KLineEdit('', self.page)
         self.dataEdit = KTextEdit(self.page)
         self.vbox.addWidget(self.titleEdit)
+        self.vbox.addWidget(self.dataEdit)
+        self.showButtonApply(False)
+        self.setButtonOKText('insert', 'insert')
+        self.show()
+        
+class ActionDialog(VboxDialog):
+    def __init__(self, parent, name='ActionDialog'):
+        VboxDialog.__init__(self, parent, name)
+        self.subjEdit = KLineEdit('', self.page)
+        self.actionEdit = KLineEdit('comment', self.page)
+        self.dataEdit = KTextEdit(self.page)
+        self.vbox.addWidget(self.subjEdit)
+        self.vbox.addWidget(self.actionEdit)
         self.vbox.addWidget(self.dataEdit)
         self.showButtonApply(False)
         self.setButtonOKText('insert', 'insert')
@@ -42,15 +60,21 @@ class TicketView(ViewBrowser):
         print action, context, id
         if context == 'action':
             if action == 'new':
-                dlg = TicketDialog(self, 'ActionDialog')
+                dlg = ActionDialog(self, 'ActionDialog')
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertAction)
                 dlg.ticketid = self.doc.current
                 if id == 'none':
                     dlg.actionid = None
                 else:
                     dlg.actionid = int(id)
-                print 'dlg.actionid', dlg.actionid
                 self.dialogs['new-action'] = dlg
+            elif action == 'show':
+                element = self.doc.threads.actions[int(id)]
+                self.doc.showActionData(int(id))
+                self.setText(self.doc.toxml())
+            elif action == 'hide':
+                self.doc.hideActionData(int(id))
+                self.setText(self.doc.toxml())
                 
     def setID(self, ticketid):
         self.doc.setID(ticketid)
@@ -58,11 +82,12 @@ class TicketView(ViewBrowser):
 
     def insertAction(self):
         dlg = self.dialogs['new-action']
-        subject = str(dlg.titleEdit.text())
-        action = str(dlg.dataEdit.text())
+        subject = str(dlg.subjEdit.text())
+        action = str(dlg.actionEdit.text())
+        data = str(dlg.dataEdit.text())
         ticketid = dlg.ticketid
         actionid = self.manager.append_action(ticketid, subject, action,
-                                              parent=dlg.actionid)
+                                              data, parent=dlg.actionid)
         self.setID(ticketid)
         
         
@@ -86,7 +111,6 @@ class TicketManagerWidget(BaseManagerWidget):
         self.listView.clear()
         fields = ['title', 'author', 'created']
         rows = self.manager.get_tickets()
-        print len(rows)
         for row in rows:
             drow = [str(row[field]) for field in fields]
             item = KListViewItem(self.listView, *drow)
@@ -112,8 +136,6 @@ class TicketManagerWidget(BaseManagerWidget):
     def selectionChanged(self):
         current = self.listView.currentItem()
         if hasattr(current, 'ticketid'):
-            print current
-            print current.ticketid
             self.view.setID(current.ticketid)
         else:
             self.view.setText('hello there')

@@ -74,10 +74,11 @@ class TicketActionTable(Table):
         ticket.set_fk('tickets')
         actionid = AutoId('actionid', 'action_ident', pk=True)
         subject = Bigname('subject')
-        action = Text('action')
+        action = Name('action')
         author = Name('author')
         posted = Now('posted')
-        cols = [ticket, actionid, subject, action, author, posted]
+        data = Text('data')
+        cols = [ticket, actionid, subject, action, author, posted, data]
         Table.__init__(self, 'ticketactions', cols)
         
 class TicketActionParentTable(Table):

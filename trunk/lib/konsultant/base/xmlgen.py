@@ -5,18 +5,6 @@ class BaseElement(Element):
         Element.__init__(self, tagname)
         self._auto = False
 
-    def __repr__(self):
-        if not self._auto:
-            return Element.__repr__(self)
-        else:
-            return self.toxml()
-
-    def __str__(self):
-        if not self._auto:
-            return Element.__str__(self)
-        else:
-            return self.toxml()
-
 class TextElement(BaseElement):
     def __init__(self, name, data):
         BaseElement.__init__(self, name)
@@ -78,6 +66,7 @@ class TableElement(TableBaseElement):
     def __init__(self, cols, align='right', border='1'):
         TableBaseElement.__init__(self, 'table')
         self.setAttribute('border', border)
+        self.setAttribute('class', 'tableheader')
         labels = BaseElement('tr')
         self.appendRowElement(labels, cols, align)
         self.appendChild(labels)
@@ -95,3 +84,12 @@ class Body(BaseElement):
     def __init__(self):
         BaseElement.__init__(self, 'body')
         
+
+class ListItem(TextElement):
+    def __init__(self, data):
+        TextElement.__init__(self, 'li', data)
+
+class UnorderedList(BaseElement):
+    def __init__(self):
+        BaseElement.__init__(self, 'ul')
+
