@@ -34,8 +34,8 @@ from konsultant.db.gui import SimpleRecordDialog, AddressSelector
 from konsultant.db.gui import WithAddressIdRecDialog, BaseManagerWidget
 from konsultant.db.gui import ViewBrowser
 
-from konsultant.db.xmlgen import ClientInfoDoc
-from konsultant.db.client import ClientManager
+from xmlgen import ClientInfoDoc
+from db import ClientManager
         
 class ClientView(ViewBrowser):
     def __init__(self, db, parent):

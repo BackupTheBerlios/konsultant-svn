@@ -11,8 +11,9 @@ from kdeui import KTextEdit
 from konsultant.base.gui import MainWindow
 from konsultant.db import BaseDatabase
 from konsultant.db.gui import BaseManagerWidget, ViewBrowser
-from konsultant.db.xmlgen import TicketInfoDoc
-from konsultant.db.ticket import TicketManager
+
+from xmlgen import TicketInfoDoc
+from db import TicketManager
 
 TICKETSTATUS = ['new', 'open', 'closed']
 
@@ -39,7 +40,10 @@ class TicketView(ViewBrowser):
     def setSource(self, url):
         print url
         
-
+    def setID(self, ticketid):
+        self.doc.setID(ticketid)
+        self.setText(self.doc.toxml())
+        
 
 class TicketManagerWidget(BaseManagerWidget):
     def __init__(self, parent, db, *args):
@@ -63,8 +67,8 @@ class TicketManagerWidget(BaseManagerWidget):
         print len(rows)
         for row in rows:
             drow = [str(row[field]) for field in fields]
-            KListViewItem(self.listView, *drow)
-        
+            item = KListViewItem(self.listView, *drow)
+            item.ticketid = row.ticketid
                 
 
     def initActions(self):
@@ -85,8 +89,14 @@ class TicketManagerWidget(BaseManagerWidget):
             
     def selectionChanged(self):
         current = self.listView.currentItem()
-        print current
-
+        if hasattr(current, 'ticketid'):
+            print current
+            print current.ticketid
+            self.view.setID(current.ticketid)
+        else:
+            self.view.setText('hello there')
+            
+        
     def slotNew(self):
         dlg = TicketDialog(self)
         self.connect(dlg, SIGNAL('okClicked()'), self.create_ticket)

@@ -15,7 +15,8 @@ class TicketManager(object):
         ticketid = row.ticketid
         status = dict(ticketid=ticketid, status='new')
         self.db.insert(table='ticketstatus', data=status)
-        
+        self.db.conn.commit()
+        return ticketid
         
 
     def append_action(self, ticketid, action, parent=None):
@@ -53,4 +54,10 @@ class TicketManager(object):
             clause = 'ticketid IN (%s)' % tquery
         rows = self.db.select(fields=fields, table='tickets', clause=clause)
         return rows
-            
+
+    def get_ticket(self, ticketid, data=False):
+        fields = ['title', 'author', 'created']
+        if data:
+            fields.append('data')
+        return self.db.select_row(fields=fields, table='tickets', clause=Eq('ticketid', ticketid))
+    

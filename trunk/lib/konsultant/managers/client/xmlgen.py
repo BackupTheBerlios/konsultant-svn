@@ -7,6 +7,8 @@ from paella.sqlgen.clause import Eq, In
 from konsultant.base.xmlgen import Html, Body, Anchor
 from konsultant.base.xmlgen import TableElement
 from konsultant.base.xmlgen import BaseElement
+from konsultant.db.xmlgen import BaseDocument
+from konsultant.db.xmlgen import AddressLink
 
 from db import ClientManager
 

@@ -20,9 +20,24 @@ class BaseElement(Element):
 class TextElement(BaseElement):
     def __init__(self, name, data):
         BaseElement.__init__(self, name)
-        element = Text()
-        element.data = data
-        self.appendChild(element)
+        elementd = Text()
+        if type(data) == str:
+            lines = data.split('\n')
+            if len(lines) > 1:
+                for line in lines:
+                    e = Text()
+                    e.data = line
+                    self.appendChild(e)
+                    self.appendChild(BaseElement('br'))
+            else:
+                elementd.data = data
+                self.appendChild(elementd)
+        elif hasattr(data, 'hasChildNodes'):
+            self.appendChild(data)
+        else:
+            #print 'type data', type(data)
+            elementd.data = str(data)
+            self.appendChild(elementd)
 
 class Anchor(TextElement):
     def __init__(self, href, data):
