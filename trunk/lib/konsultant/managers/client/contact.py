@@ -9,15 +9,13 @@ from konsultant.db.gui import SimpleWindow, RecordView
 from xmlgen import ContactDoc
 from db import ClientManager
 
+CONFIELDS = ['name', 'address', 'email', 'description']
 class EditContactDialog(EditRecordDialog):
     def __init__(self, parent, record):
-        fields = ['name', 'email', 'description']
+        fields = CONFIELDS
         EditRecordDialog.__init__(self, parent, fields, record, name='EditContact')
-        self.connect(self, SIGNAL('okClicked()'), self.updateContact)
 
-    def updateContact(self):
-        print 'updateContact'
-        
+
 class ContactView(RecordView):
     def __init__(self, app, parent, records):
         RecordView.__init__(self, app, parent, records, ContactDoc,
@@ -27,12 +25,24 @@ class ContactView(RecordView):
     def setSource(self, url):
         action, context, id = str(url).split('.')
         dlg = EditContactDialog(self, self.doc.records[int(id)].record)
+        dlg.connect(dlg, SIGNAL('okClicked()'), self.updateRecord)
+        self.dialogs['edit-contact'] = dlg
+
+    def updateRecord(self):
+        dlg = self.dialogs['edit-contact']
+        data = dlg.getRecordData()
+        contactid = dlg.record.contactid
+        print 'updateRecord', contactid
+        self.manager.updateContact(contactid, data)
+        self.parent().close()
+        
+
         
 
 class ContactEditorWin(SimpleWindow):
     def __init__(self, parent, app, records):
         SimpleWindow.__init__(self, parent, app, 'ContactEditor')
-        self.fields = ['name', 'email', 'description']
+        self.fields = CONFIELDS
         self.mainView = ContactView(self.app, self, records)
         self.setCentralWidget(self.mainView)
         self.setCaption('ContactEditor')

@@ -101,6 +101,9 @@ class EditRecordDialog(SimpleRecordDialog):
     def __init__(self, parent, fields, record, name):
         SimpleRecordDialog.__init__(self, parent, fields, name=name)
         self.record = record
+        if hasattr(record, '_refdata'):
+            print 'record has refdata'
+        self.setButtonOKText('update', 'update')
         for field in fields:
             val = str(record[field])
             self.grid.entries[field].setText(val)

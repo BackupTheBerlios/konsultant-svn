@@ -1,3 +1,5 @@
+from konsultant.base.refdata import RefData
+from konsultant.pdb.record import RefRecord
 from konsultant.sqlgen.clause import Eq, In
 
 class ClientManager(object):
@@ -33,6 +35,12 @@ class ClientManager(object):
         row = self._update_clientinfo(clientid, cldata)
         return contactid
 
+    def updateContact(self, contactid, data):
+        table = 'contacts'
+        clause = Eq('contactid', contactid)
+        self.db.update(table=table, data=data, clause=clause)
+        self.db.conn.commit()
+        
     def insertLocation(self, clientid, addressid, data):
         fields = ['name', 'isp', 'connection', 'ip', 'static', 'serviced']
         insdata = self._setup_insdata(fields, clientid, addressid, data)
@@ -42,6 +50,12 @@ class ClientManager(object):
         row = self._update_clientinfo(clientid, cldata)
         return locationid
 
+    def updateLocation(self, locationid, data):
+        table = 'locations'
+        clause = Eq('locationid', locationid)
+        self.db.update(table=table, data=data, clause=clause)
+        self.db.conn.commit()
+        
     def getClientInfoIds(self, clientid):
         clause = Eq('clientid', clientid)
         client = self.db.select_row(fields=['client'], table='clients', clause=clause).client
@@ -93,10 +107,14 @@ class ClientManager(object):
         cquery, cclause = self._preparequeries(clientid, 'contactid', cfields, 'contacts')
         aclause = ' or '.join(['addressid IN (%s)' % q for q in [cquery, lquery]])
         addresses = self.getAddresses(aclause)
+        adata = RefData(dict(address='addressid'))
+        adata.set_refdata('address', addresses)
         contacts, ignore = self.getContacts(clientid, False)
+        contacts = [RefRecord(c, adata) for c in contacts]
         locations, ignore = self.getLocations(clientid, False)
+        locations = [RefRecord(l, adata) for l in locations]
         return dict(client=client, contacts=contacts,
-                    locations=locations, addresses=addresses)
+                    locations=locations, addresses=adata)
 
     def insertClient(self, client):
         clientid = self.db.select_row(fields=["nextval('client_ident')"]).nextval

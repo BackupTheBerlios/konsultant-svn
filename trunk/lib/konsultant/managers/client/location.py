@@ -10,10 +10,11 @@ from konsultant.db.gui import SimpleWindow, RecordView
 from xmlgen import LocationDoc
 from db import ClientManager
 
+LOCFIELDS = ['name', 'address', 'isp', 'connection', 'ip', 'static', 'serviced']
 
 class EditLocationDialog(EditRecordDialog):
     def __init__(self, parent, record):
-        fields = ['name', 'isp', 'connection', 'ip', 'static', 'serviced']
+        fields = LOCFIELDS
         EditRecordDialog.__init__(self, parent, fields, record, name='EditLocation')
         
 class LocationView(RecordView):
@@ -24,13 +25,22 @@ class LocationView(RecordView):
     def setSource(self, url):
         action, context, id = str(url).split('.')
         dlg = EditLocationDialog(self, self.doc.records[int(id)].record)
+        dlg.connect(dlg, SIGNAL('okClicked()'), self.updateRecord)
+        self.dialogs['edit-location'] = dlg
+
+    def updateRecord(self):
+        dlg = self.dialogs['edit-location']
+        data = dlg.getRecordData()
+        locationid = dlg.record.locationid
+        print 'updateRecord', locationid
+        self.manager.updateLocation(locationid, data)
         
 
         
 class LocationEditorWin(SimpleWindow):
     def __init__(self, parent, app, records):
         SimpleWindow.__init__(self, parent, app, 'ContactEditor')
-        self.fields = ['name', 'isp', 'connection', 'ip', 'static', 'serviced']
+        self.fields = LOCFIELDS
         self.mainView = LocationView(self.app, self, records)
         self.setCentralWidget(self.mainView)
         self.setCaption('LocationEditor')

@@ -1,4 +1,5 @@
 #from operator import and_
+from copy import deepcopy, copy
 from xml.dom.minidom import Element, Text
 
 from konsultant.base import NoExistError
@@ -12,8 +13,15 @@ from konsultant.base.xmlgen import SimpleTitleElement
 from konsultant.db.xmlgen import BaseDocument
 from konsultant.db.xmlgen import AddressLink
 from konsultant.db.xmlgen import RecordElement, RecordDoc
+from konsultant.db.xmlgen import AddressRecord
 from db import ClientManager
 
+class SepTable(BaseElement):
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'table', width='100%')
+        self.appendChild(TR())
+        self.firstChild.appendChild(BaseElement('td', **atts))
+    
 ###########
 ##Contact Objects
 ###########
@@ -25,7 +33,7 @@ class ContactTitle(SimpleTitleElement):
 
 class ContactElement(RecordElement):
     def __init__(self, row, action):
-        fields = ['name', 'email', 'description']
+        fields = ['name', 'address', 'email', 'description']
         RecordElement.__init__(self, fields, 'contactid', action, row)
         
 class ContactDoc(RecordDoc):
@@ -35,11 +43,11 @@ class ContactDoc(RecordDoc):
     def set_records(self, records, action='edit'):
         self.clear_body()
         self.body.appendChild(ContactTitle(bgcolor='DarkSeaGreen4'))
-        self.body.appendChild(HR())
+        self.body.appendChild(SepTable(bgcolor='DarkSeaGreen4'))
         for row in records:
             element = ContactElement(row, action)
             self.body.appendChild(element)
-            self.body.appendChild(HR())
+            self.body.appendChild(SepTable(bgcolor='DarkSeaGreen4'))
             self.records[row.contactid] = element
             
 ##########
@@ -54,7 +62,7 @@ class LocationTitle(SimpleTitleElement):
 
 class LocationElement(RecordElement):
     def __init__(self, row, action):
-        fields = ['name', 'isp', 'connection', 'ip', 'static', 'serviced']
+        fields = ['name', 'address', 'isp', 'connection', 'ip', 'static', 'serviced']
         RecordElement.__init__(self, fields, 'locationid', action, row)
         
 class LocationDoc(RecordDoc):
@@ -64,11 +72,11 @@ class LocationDoc(RecordDoc):
     def set_records(self, records, action='edit'):
         self.clear_body()
         self.body.appendChild(LocationTitle(bgcolor='DarkSeaGreen4'))
-        self.body.appendChild(HR())
+        self.body.appendChild(SepTable(bgcolor='DarkSeaGreen4'))
         for row in records:
             element = LocationElement(row, action)
             self.body.appendChild(element)
-            self.body.appendChild(HR())
+            self.body.appendChild(SepTable(bgcolor='DarkSeaGreen4'))
             self.records[row.locationid] = element
 
 #########
@@ -131,6 +139,7 @@ class ClientInfoDoc(BaseDocument):
 
     def setID(self, clientid):
         cdata = self.manager.getClientInfo(clientid)
+        cdata['addresses'].set_refobject('address', AddressRecord)
         self.current = clientid
         self.clear_body()
         #make header

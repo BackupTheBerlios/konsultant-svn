@@ -30,8 +30,8 @@ class BaseDocument(BaseDbElement):
             del self.body.childNodes[0]
         
 class BaseParagraph(BaseDbElement):
-    def __init__(self, db, key, href=None, **atts):
-        BaseDbElement.__init__(self, db, 'p', **atts)
+    def __init__(self, app, key, href=None, **atts):
+        BaseDbElement.__init__(self, app, 'p', **atts)
         data = self.makeParagraph(key)
         if href is not None:
             node = Anchor(href, data)
@@ -62,6 +62,22 @@ class AddressLink(BaseParagraph):
         lines.append(lastline)
         return '\n'.join(lines)
 
+class AddressRecord(BaseElement):
+    def __init__(self, record, **atts):
+        BaseElement.__init__(self, 'p', **atts)
+        node = Text()
+        node.data = self.makeParagraph(record)
+        self.appendChild(node)
+        
+    def makeParagraph(self, row):
+        lastline = '%s, %s  %s' % (row['city'], row['state'], row['zip'])
+        lines = [row['street1']]
+        if row['street2']:
+            lines.append(row['street2'])
+        lines.append(lastline)
+        return '\n'.join(lines)
+
+        
 class AddressSelectDoc(BaseDocument):
     def set_clause(self, clause):
         self.clear_body()
@@ -87,13 +103,27 @@ class RecordElement(BaseElement):
     def __init__(self, fields, idcol, action, record):
         BaseElement.__init__(self, 'table')
         self.record = record
+        refdata = None
+        if hasattr(record, '_refdata'):
+            refdata = record._refdata
+        if refdata is not None:
+            print refdata, refdata.cols, fields
         for field in fields:
             row = BaseElement('tr')
             key = TD(bgcolor='DarkSeaGreen')
             key.appendChild(Bold(field))
             row.appendChild(key)
             val = TD()
-            if action:
+            if refdata is not None and field in refdata.cols:
+                ridcol = refdata.cols[field]
+                refrec =  refdata.data[field][record[ridcol]]
+                node = refdata.object[field](refrec)
+                if action:
+                    url = '.'.join(map(str, [action, field, record[idcol]]))
+                    val.appendChild(Anchor(url, node))
+                else:
+                    val.appendChild(node)
+            elif action:
                 url = '.'.join(map(str, [action, field, record[idcol]]))
                 val.appendChild(Anchor(url, record[field]))
             else:
@@ -101,6 +131,8 @@ class RecordElement(BaseElement):
                 node.data = record[field]
                 val.appendChild(node)
             row.appendChild(val)
+            self.val = val
+            self.key = key
             self.appendChild(row)
             
 class RecordDoc(BaseDocument):
