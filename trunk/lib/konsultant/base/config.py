@@ -11,11 +11,30 @@ from kdecore import KConfigSkeleton
 class BaseSkel(ConfigParser):
     def __init__(self):
         ConfigParser.__init__(self)
-        self.add_section('database')
-        self.set('database', 'dbhost', 'localhost')
-        self.set('database', 'dbname', 'konsultant')
-        self.set('database', 'dbuser', os.environ['USER'])
+        s = 'database'
+        items = [
+            ['dbhost', 'localhost'],
+            ['dbname', 'konsultant'],
+            ['dbuser', os.environ['USER']],
+            ['dbpass', ''],
+            ['dbport', '5432']
+            ]
+        self.add_section(s)
+        self._additems(s, items)
+
+        s = 'pgpool'
+        items = [
+            ['usepgpool', 'false'],
+            ['port', '5434'],
+            ['command', '/usr/bin/pgpool']
+            ]
+        self.add_section(s)
+        self._additems(s, items)
         
+    def _additems(self, section, items):
+        for k,v in items:
+            self.set(section, k, v)
+            
     def getdata(self):
         return self._sections
     
@@ -52,6 +71,14 @@ class DbConfigBackEnd(KConfigBackEnd):
 class BaseConfig(KSimpleConfig):
     def __init__(self):
         KSimpleConfig.__init__(self, 'konsultantrc')
+        skel = BaseSkel()
+        data = skel.getdata()
+        for section in skel.sections():
+            self.setGroup(section)
+            for opt in skel.options(section):
+                if not self.hasKey(opt):
+                    self.writeEntry(opt, data[section][opt])
+        self.sync()
 
 class DefaultSkeleton(KConfigSkeleton):
     def __init__(self, cfg):
