@@ -174,8 +174,10 @@ class ObjectMaker(object):
         coltype = ColumnType(type='int')
         maincol = Column(self.idcol.name, coltype)
         maincol.set_fk(self.maintable.name)
+        maincol.constraint.pk = True
         rcol = Column(name, coltype)
         rcol.set_fk(reftable)
+        rcol.constraint.pk = True
         self._hasManyTables[type] = Table(tablename, [maincol, rcol])
 
     def append_manyObject(self, objekt, tablename=None):

@@ -9,7 +9,7 @@ from konsultant.sqlgen.admin import grant_public, grant_group
 ZipName = ColumnType('varchar', 5)
 StateName = ColumnType('varchar', 2)
 sequences = ['address_ident', 'contact_ident', 'ticket_ident',
-             'location_ident', 'client_ident', 'action_ident']
+             'location_ident', 'client_ident', 'action_ident', 'task_ident']
 
 def AutoId(name, seqname, pk=False):
     column = Num(name)
@@ -151,10 +151,37 @@ class ClientDataTable(Table):
         value = Text('value')
         cols = [clientid, name, value]
         Table.__init__(self, 'clientdata', cols)
+
+class TaskTable(Table):
+    def __init__(self):
+        taskid = PkNum('taskid')
+        taskid.set_auto_increment('task_ident')
+        name = Name('name')
+        desc = Text('description')
+        cols = [taskid, name, desc]
+        Table.__init__(self, 'tasks', cols)
+
+class ClientTaskTable(Table):
+    def __init__(self):
+        taskid = PkNum('taskid')
+        taskid.set_fk('tasks')
+        clientid = PkNum('clientid')
+        clientid.set_fk('clients')
+        Table.__init__(self, 'clienttask', [taskid, clientid])
+
+class LocationTaskTable(Table):
+    def __init__(self):
+        taskid = PkNum('taskid')
+        taskid.set_fk('tasks')
+        locationid = PkNum('locationid')
+        locationid.set_fk('locations', 'locationid')
+        Table.__init__(self, 'locationtask', [taskid, locationid])
+        
         
 MAINTABLES = [AddressTable, ContactTable, TicketTable,
               TicketStatusTable, TicketActionTable, TicketActionParentTable,
-              LocationTable, ClientTable, ClientTicketTable, ClientInfoTable
+              LocationTable, ClientTable, ClientTicketTable, ClientInfoTable,
+              ClientDataTable, TaskTable, ClientTaskTable, LocationTaskTable
               ]
 
 def create_schema(cursor, group):
@@ -165,9 +192,9 @@ def create_schema(cursor, group):
         cursor.create_table(t())
 
     tables = [t().name for t in MAINTABLES]
-    full = [ClientInfoTable, ClientTicketTable]
+    full = [ClientInfoTable, ClientTicketTable, ClientTaskTable, LocationTaskTable]
     insup = [AddressTable, ContactTable, TicketStatusTable,
-             LocationTable, ClientTable]
+             LocationTable, ClientTable, TaskTable]
     ins = [TicketTable, TicketActionTable, TicketActionParentTable]
 
     execute = cursor.execute
