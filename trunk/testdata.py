@@ -79,7 +79,7 @@ if __name__ == '__main__':
     sl = gen_all()
     cursor = StatementCursor(conn)
     if not len(cursor.tables()):
-        create_schema(cursor)
+        create_schema(cursor, 'konsultant')
         map(cursor.execute, sl)
         conn.commit()
     

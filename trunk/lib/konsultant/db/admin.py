@@ -18,8 +18,8 @@ from konsultant.base.actions import AddDbUser, AddDbGroup
 from konsultant.base.actions import AddDbSchema
 from konsultant.sqlgen.clause import Eq, In
 from konsultant.sqlgen.admin import create_user, create_schema
-
-
+from konsultant.db import schema as kschema
+from konsultant.pdb.midlevel import StatementCursor
 #from konsultant.base.gui import MainWindow, MimeSources
 from konsultant.base.gui import SimpleRecordDialog
 #from konsultant.db.xmlgen import AddressSelectDoc, AddressLink
@@ -183,18 +183,26 @@ class AdminWidget(KMainWindow):
         dlg = self.dialogs['new-user']
         usename = str(dlg.grid.entries['username'].text())
         self.manager.create_user(usename)
+        self.db.conn.commit()
         self.refreshlistView()
         
     def addDbGroupok(self):
         dlg = self.dialogs['new-group']
         group = str(dlg.grid.entries['groupname'].text())
         self.manager.create_group(group)
+        self.db.conn.commit()
         self.refreshlistView()
         
     def addDbSchemaok(self):
         dlg = self.dialogs['new-schema']
         schema = str(dlg.grid.entries['schema'].text())
         self.manager.create_schema(schema)
+        cursor = StatementCursor(self.db.conn)
+        cursor.execute('set SESSION search_path to %s' % schema)
+        self.db.conn.commit()
+        cursor.execute('show search_path')
+        print cursor.fetchall()
+        kschema.create_schema(cursor)
         self.refreshlistView()
         
         

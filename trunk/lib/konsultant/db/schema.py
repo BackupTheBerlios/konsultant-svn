@@ -3,6 +3,8 @@ from konsultant.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
 from konsultant.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
 from konsultant.sqlgen.defaults import DateTime
 from konsultant.sqlgen.statement import Statement
+from konsultant.sqlgen.admin import grant_public, grant_group
+
 
 ZipName = ColumnType('varchar', 5)
 StateName = ColumnType('varchar', 2)
@@ -147,12 +149,28 @@ MAINTABLES = [AddressTable, ContactTable, TicketTable,
               LocationTable, ClientTable, ClientTicketTable, ClientInfoTable
               ]
 
-def create_schema(cursor):
-    for s in sequences:
+def create_schema(cursor, group):
+    newseqs = [s for s in sequences if  s not in cursor.sequences()]
+    for s in newseqs:
         cursor.create_sequence(Sequence(s))
     for t in MAINTABLES:
         cursor.create_table(t())
 
+    tables = [t().name for t in MAINTABLES]
+    full = [ClientInfoTable, ClientTicketTable]
+    insup = [AddressTable, ContactTable, TicketStatusTable,
+             LocationTable, ClientTable]
+    ins = [TicketTable, TicketActionTable, TicketActionParentTable]
+
+    execute = cursor.execute
+    execute(grant_public(tables))
+    execute(grant_group('ALL', sequences, group))
+    execute(grant_group('ALL', [t().name for t in full], group))
+    execute(grant_group('INSERT', [t().name for t in ins + insup], group))
+    execute(grant_group('UPDATE', [t().name for t in insup], group))
+    
+    
+    
 if __name__ == '__main__':
     import os
     from konsultant.base.config import Config
