@@ -4,13 +4,11 @@ from qtsql import QSqlDatabase, QSqlDriver
 from dcopexport import DCOPExObj
 
 
-from paella.base import NoExistError
-from paella.sqlgen.clause import Eq, In
-from paella.sqlgen.statement import Statement
-from paella.db.lowlevel import BasicConnection
-from paella.db.midlevel import StatementCursor
-
-from konsultant.base import Config
+from konsultant.base import NoExistError
+from konsultant.sqlgen.clause import Eq, In
+from konsultant.sqlgen.statement import Statement
+from konsultant.pdb.lowlevel import BasicConnection
+from konsultant.pdb.midlevel import StatementCursor
 
 class BaseDriver(QSqlDriver):
     def __init__(self, parent=None, name=None):

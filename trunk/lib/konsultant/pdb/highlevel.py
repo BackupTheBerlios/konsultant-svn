@@ -1,14 +1,14 @@
 from pyPgSQL.libpq import PgQuoteString as quote
 from pyPgSQL.libpq import OperationalError
 
-from paella.base import Error, debug, NoExistError
-from paella.base.util import ujoin
-from paella.sqlgen.statement import Statement
-from paella.sqlgen.classes import Table, Sequence
-from paella.sqlgen.defaults import ActionIdentifier, LogTable, ActionTrigger
+from konsultant.base import Error, NoExistError
+from konsultant.sqlgen.statement import Statement
+from konsultant.sqlgen.classes import Table, Sequence
+from konsultant.sqlgen.defaults import ActionIdentifier, LogTable, ActionTrigger
 
 from lowlevel import CommandCursor
 from midlevel import StatementCursor
+from midlevel import ujoin
 
 plpgsql_log_action = """create or replace function action_stamp() returns trigger as '
         declare
@@ -35,16 +35,3 @@ class MainCursor(StatementCursor):
             StatementCursor.create_table(self, logtable)
             self.create_trigger(ActionTrigger(table.name))
 
-    
-            
-    
-
-        
-    
-
-if __name__ == '__main__':
-    from paella.profile.base import PaellaConnection
-    conn = PaellaConnection()
-    c = MainCursor(conn)
-    
-    

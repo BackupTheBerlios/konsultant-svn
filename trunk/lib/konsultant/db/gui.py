@@ -12,8 +12,8 @@ from kdeui import KListViewItem
 from kdeui import KListView, KStdGuiItem
 from kdeui import KPushButton, KStatusBar
 
-from paella.base import NoExistError
-from paella.sqlgen.clause import Eq, In
+from konsultant.base import NoExistError
+from konsultant.sqlgen.clause import Eq, In
 
 from konsultant.base.gui import MainWindow, MimeSources
 from konsultant.base.gui import SimpleRecord, SimpleRecordDialog

@@ -1,8 +1,8 @@
 #from operator import and_
 from xml.dom.minidom import Element, Text
 
-from paella.base import NoExistError
-from paella.sqlgen.clause import Eq, In
+from konsultant.base import NoExistError
+from konsultant.sqlgen.clause import Eq, In
 
 from konsultant.base.xmlgen import Html, Body, Anchor
 from konsultant.base.xmlgen import TableElement

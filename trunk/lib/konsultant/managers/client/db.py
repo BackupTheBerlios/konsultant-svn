@@ -1,4 +1,4 @@
-from paella.sqlgen.clause import Eq, In
+from konsultant.sqlgen.clause import Eq, In
 
 class ClientManager(object):
     def __init__(self, db):
@@ -79,9 +79,8 @@ class ClientManager(object):
     def _preparequeries(self, clientid, idcol, fields, table):
         clientclause = Eq('clientid', clientid)
         clause = '%s IN (select %s from clientinfo where %s)' % (idcol, idcol, clientclause)
-        addressid_query = self.db.stmt.select(fields=['addressid'],
-                                              table=table, clause=clause)
-        return addressid_query, clause
+        query = self.db.stmt.select(fields=['addressid'], table=table, clause=clause)
+        return query, clause
     
     def getClientInfo(self, clientid):
         clause = Eq('clientid', clientid)

@@ -20,9 +20,8 @@ from kdeui import KJanusWidget, KListViewItem
 from kdeui import KListView, KStatusBar
 from kdeui import KAction, KGuiItem
 
-from paella.base import NoExistError, Error
-from paella.sqlgen.clause import Eq, In
-
+from konsultant.base import NoExistError, Error
+from konsultant.sqlgen.clause import Eq, In
 from konsultant.base.actions import EditAddresses, ConfigureKonsultant
 from konsultant.base.gui import MainWindow
 from konsultant.base.gui import ConfigureDialog

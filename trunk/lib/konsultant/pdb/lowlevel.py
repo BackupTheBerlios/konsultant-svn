@@ -1,24 +1,17 @@
-
 from pyPgSQL import PgSQL
 from pyPgSQL.PgSQL import Connection, Cursor, PgLargeObject
 from pyPgSQL.libpq import IntegrityError, OperationalError
 
-from sqlite.main import Connection as Connection_lite
-from sqlite.main import Cursor as Cursor_lite
-
-from paella.base import Error, debug
-from paella.base.util import Pkdictrows
-from paella.sqlgen.select import complex_select as select
-from paella.sqlgen.write import insert, delete, update
+from konsultant.base import Error
+from konsultant.sqlgen.select import complex_select as select
+from konsultant.sqlgen.write import insert, delete, update
 
 
 tquery_lite = "SELECT name from sqlite_master where type='table'"
 tquery_pg = "SELECT tablename from pg_tables"# where tablename not like 'pg_%'"
-
-class LocalConnection(Connection_lite):
-    def __init__(self, dbname='test.db', autocommit=1):
-        Connection_lite.__init__(self, dbname, autocommit=autocommit)
-        
+class Pkdictrows(dict):
+    def __init__(self, rows, keyfield):
+        dict.__init__(self, [(x[keyfield], x) for x in rows])
 
 class BasicConnection(Connection):
     def __init__(self, user=None, host=None, dbname=None, passwd=None,
@@ -125,7 +118,6 @@ class FakeCursor(_Simple):
     def commit(self):
         self.__real_cursor__.commit()
     def execute(self, query, *args):
-        #debug(query)
         try:
             self.__real_cursor__.execute(query, *args)
         except IntegrityError, error:

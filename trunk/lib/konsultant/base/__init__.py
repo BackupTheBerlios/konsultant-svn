@@ -1,9 +1,21 @@
-from paella.base.config import list_rcfiles
-from paella.base.config import Configuration
 
-class Config(Configuration):
-    def __init__(self):
-        files = list_rcfiles('konsultantrc')
-        Configuration.__init__(self, files=files)
-        
-    
+class Error(Exception):
+    pass
+
+class ExistsError(Error):
+    pass
+
+class NoExistError(Error):
+    pass
+class NoFileError(NoExistError):
+    pass
+
+class UnbornError(NoExistError):
+    pass
+
+class KeyError(ExistsError):
+    pass
+
+class TableError(ExistsError):
+    pass
+

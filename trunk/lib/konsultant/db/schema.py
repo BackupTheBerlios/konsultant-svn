@@ -1,8 +1,8 @@
-from paella.sqlgen.classes import Table, Sequence, ColumnType, Column
-from paella.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
-from paella.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
-from paella.sqlgen.defaults import DateTime
-from paella.sqlgen.statement import Statement
+from konsultant.sqlgen.classes import Table, Sequence, ColumnType, Column
+from konsultant.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
+from konsultant.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
+from konsultant.sqlgen.defaults import DateTime
+from konsultant.sqlgen.statement import Statement
 
 ZipName = ColumnType('varchar', 5)
 StateName = ColumnType('varchar', 2)
@@ -153,9 +153,9 @@ def create_schema(cursor):
 
 if __name__ == '__main__':
     import os
-    from paella.base.config import Configuration
-    from paella.db.lowlevel import BasicConnection
-    from paella.db.midlevel import StatementCursor
+    from konsultant.base.config import Config
+    from konsultant.db.lowlevel import BasicConnection
+    from konsultant.db.midlevel import StatementCursor
     from konsultant.base.config import BaseConfig
     from konsultant.db import BaseDatabase
     cfg = Configuration('database', os.path.expanduser('~/.kde/share/config/konsultantrc'))

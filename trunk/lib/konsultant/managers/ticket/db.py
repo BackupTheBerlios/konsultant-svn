@@ -1,4 +1,4 @@
-from paella.sqlgen.clause import Eq, In, NotIn
+from konsultant.sqlgen.clause import Eq, In, NotIn
 
 
 class TicketManager(object):
@@ -53,11 +53,10 @@ class TicketManager(object):
         fields = ['ticketid', 'title', 'author', 'created']
         if clause is None:
             tquery = self.db.stmt.select(fields=['ticketid'], table='ticketstatus',
-                                         clause=In('status', ['new', 'open']), order='created')
+                                         clause=In('status', ['new', 'open']))
             clause = 'ticketid IN (%s)' % tquery
         rows = self.db.select(fields=fields, table='tickets', clause=clause,
                               order='created')
-        print rows
         return rows
 
     def get_ticket(self, ticketid, data=False):
