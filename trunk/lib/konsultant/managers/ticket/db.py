@@ -53,6 +53,7 @@ class TicketManager(object):
 
     def get_tickets(self, clause=None):
         fields = ['ticketid', 'title', 'author', 'created']
+        print clause, type(clause)
         if clause is None:
             tquery = self.db.stmt.select(fields=['ticketid'], table='ticketstatus',
                                          clause=In('status', ['new', 'open']))

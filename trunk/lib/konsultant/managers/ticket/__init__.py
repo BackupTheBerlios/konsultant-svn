@@ -1,1 +1,1 @@
-from main import TicketManagerWidget
+from main import TicketManagerWidgetNew as TicketManagerWidget

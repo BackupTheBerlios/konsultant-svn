@@ -14,15 +14,37 @@ from konsultant.db.xmlgen import BaseParagraph
 
 from db import TicketManager
 
+class TitleTable(BaseElement):
+    def __init__(self, title):
+        BaseElement.__init__(self, 'table')
+        self.setAttribute('border', '1')
+        #self.setAttribute('width', '100%')
+        self.setAttribute('cellpadding', '2')
+        self.setAttribute('cellspacing', '0')
+        self.setAttribute('bgcolor', 'cornsilk4')
+        row = BaseElement('tr')
+        td = BaseElement('td')
+        self.appendChild(row)
+        row.appendChild(td)
+        font = BaseElement('font')
+        font.setAttribute('color', 'gold')
+        td.appendChild(font)
+        element = TextElement('b', title)
+        font.appendChild(element)
+        
+
 class TicketHeader(BaseElement):
-    def __init__(self):
-        BaseElement.__init__(self, 'h2')
-        node = Text()
-        node.data = 'All Tickets'
-        self.appendChild(node)
+    def __init__(self, ticketid, row):
+        BaseElement.__init__(self, 'p')
+        self.author = TextElement('h5', 'Author: %s' % row.author)
+        self.created = TextElement('h5', 'Created: %s' % row.created)
+        #node = TextElement('h2', row.title)
+        #self.appendChild(node)
+        self.appendChild(self.created)
+        self.appendChild(self.author)
         p = BaseElement('p')
-        self.new = Anchor('new.ticket.noid', 'new')
-        p.appendChild(self.new)
+        refresh = Anchor('refresh.page.%d' % ticketid, 'refresh')
+        p.appendChild(refresh)
         self.appendChild(p)
 
 class TicketFooter(BaseElement):
@@ -103,6 +125,41 @@ class ActionThreads(UnorderedList):
         element = self.actions[actionid].firstChild
         element.hide_data()
         
+class TicketInfoElement(BaseElement):
+    def __init__(self, ticketid, title, author, created):
+        BaseElement.__init__(self, 'div')
+        self.setAttribute('id', 'ticket-%d' % ticketid)
+        self.setAttribute('class', 'ticketinfo')
+        self.title = TitleTable(title)
+        #self.title = TextElement('h4', title)
+        self.author = TextElement('h5', 'Author: %s' % author)
+        self.created = TextElement('h5', 'Created: %s' % created)
+        self.appendChild(self.title)
+        self.appendChild(self.author)
+        self.appendChild(self.created)
+        self.anchor = Anchor('show.ticket.%d' % ticketid, 'show')
+        self.appendChild(self.anchor)
+        
+        
+        
+    
+
+class TicketDocument(BaseDocument):
+    def __init__(self, db):
+        BaseDocument.__init__(self, db)
+        #self.body.setAttribute('bgcolor', 'MistyRose4')
+        #self.body.setAttribute('link', 'plum')
+        #self.body.setAttribute('hover', 'green')
+        self.manager = TicketManager(self.db)
+
+    def setID(self, clause=None, ids=None):
+        self.clear_body()
+        rows = self.manager.get_tickets(clause)
+        for row in rows:
+            element = TicketInfoElement(row.ticketid, row.title,
+                                        row.author, row.created)
+            self.body.appendChild(element)
+
 class TicketInfoDoc(BaseDocument):
     def __init__(self, db):
         BaseDocument.__init__(self, db)
@@ -117,11 +174,16 @@ class TicketInfoDoc(BaseDocument):
         self.current = ticketid
         self.clear_body()
         #make header
-        self.header = TicketHeader()
+        self.body.appendChild(TitleTable(row.title))
+        self.header = TicketHeader(ticketid, row)
         self.body.appendChild(self.header)
+        hr = BaseElement('hr')
+        self.body.appendChild(hr)
         #append ticket data
         tdata = TicketData(row.data)
         self.body.appendChild(tdata)
+        hr = BaseElement('hr')
+        self.body.appendChild(hr)
         #append ticket footer
         self.tfooter = TicketFooter(ticketid)
         self.body.appendChild(self.tfooter)

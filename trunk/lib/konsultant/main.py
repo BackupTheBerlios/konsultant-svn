@@ -6,7 +6,7 @@ from kdecore import KStandardDirs
 from kdecore import KLockFile
 
 from kdeui import KMainWindow, KSystemTray
-from kdeui import KPopupMenu
+from kdeui import KPopupMenu, KStdAction
 
 from konsultant.base.config import BaseConfig
 from konsultant.base.gui import MainWindow, ConfigureDialog
@@ -84,6 +84,7 @@ class KonsultantMainWindow(KMainWindow):
         self.manageclientsAction = ManageClients(self.slotManageClients, collection)
         self.manageticketsAction = ManageTickets(self.slotManageTickets, collection)
         self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
+        self.quitAction = KStdAction.quit(self.app.quit, collection)
         
     def initMenus(self):
         mainMenu = KPopupMenu(self)
@@ -98,14 +99,15 @@ class KonsultantMainWindow(KMainWindow):
             self.manageclientsAction.plug(menu)
             self.manageticketsAction.plug(menu)
             self.configureAction.plug(menu)
-
+            self.quitAction.plug(menu)
+            
     def initToolbar(self):
         toolbar = self.toolBar()
         actions = [self.manageclientsAction, self.manageticketsAction,
-                   self.editaddressAction, self.configureAction]
+                   self.editaddressAction, self.configureAction,
+                   self.quitAction]
         for action in actions:
             action.plug(toolbar)
-        
         
     def slotEditAddresses(self):
         AddressSelector(self, self.db, 'AddressBrowser', modal=False)

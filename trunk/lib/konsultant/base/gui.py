@@ -3,22 +3,34 @@ from qt import QLabel, QFrame, QString
 from qt import SIGNAL, SLOT, Qt
 from qt import QMimeSourceFactory
 
+from kdecore import KConfigDialogManager
+from kdecore import KAboutData
 from kdeui import KMainWindow, KEdit
 from kdeui import KMessageBox, KAboutDialog
 from kdeui import KConfigDialog, KListView
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KTextBrowser
-from kdecore import KConfigDialogManager
 
 from konsultant.base.actions import EditAddresses, ManageClients
-from konsultant.base.config import DefaultSkeleton
+from konsultant.base.config import DefaultSkeleton, KonsultantConfig
 
 class MimeSources(QMimeSourceFactory):
     def __init__(self):
         QMimeSourceFactory.__init__(self)
         self.addFilePath('/usr/share/wallpapers')
         
-
+class AboutData(KAboutData):
+    def __init__(self):
+        KAboutData.__init__(self,
+                            'Konsultant',
+                            'konsultant',
+                            '0.1',
+                            'Client Management for Small Business')
+        self.addAuthor('Joseph Rawson', 'author',
+                       'umeboshi@gregscomputerservice.com')
+        self.setCopyrightStatement('plublic domain')
+        
+                            
 class AboutDialog(KAboutDialog):
     def __init__(self, parent, *args):
         KAboutDialog.__init__(self, parent, *args)
@@ -66,8 +78,10 @@ class SimpleRecordDialog(KDialogBase):
 class ConfigureDialog(KConfigDialog):
     def __init__(self, parent, cfg, name='ConfigureDialog'):
         print 'repreper'
-        skel = DefaultSkeleton(cfg)
-        skel.readConfig()
+        #skel = DefaultSkeleton()
+        skel = KonsultantConfig()
+        print 'hwllo'
+        #skel.readConfig()
         print skel
         KConfigDialog.__init__(self, parent, name, skel)
         #self.manager = KConfigDialogManager(self, skel, 'ConfigureDialogManager')

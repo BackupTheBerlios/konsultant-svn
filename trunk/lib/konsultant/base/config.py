@@ -52,20 +52,18 @@ class BaseSkel(ConfigParser):
         return self._sections
     
 
-class DefaultSkeleton(KConfigSkeleton):
-    def __init__(self, name='DefaultSkeleton'):
+class KonsultantConfig(KConfigSkeleton):
+    def __init__(self, name='konsultant'):
         KConfigSkeleton.__init__(self, name)
+        self.readConfig()
         print 'hello there'
+        config = self.config()
+        print config, [str(x) for x in config.groupList()]
         cfg = BaseSkel()
         data = cfg.getdata()
-        for section in cfg.sections():
-            self.setCurrentGroup(section)
-            print self.currentGroup()
-            for opt in cfg.options(section):
-                self.addItemString(opt, data[section][opt], cfg.get(section, opt))
-                print opt
-        self.setDefaults()
-        
+        print 'sections added'
+        #self.setDefaults()
+        print 'DefaultSkeleton written'
                 
 
 class DbConfigBackEnd(KConfigBackEnd):
@@ -100,4 +98,6 @@ class DefaultSkeleton(KConfigSkeleton):
             #self.setCurrentGroup(group)
             for k,v in cfg.entryMap(group).items():
                 print k, '-->', v
+        print 'preinit'
         KConfigSkeleton.__init__(self, 'konsultantrc')
+        print 'postinit'
