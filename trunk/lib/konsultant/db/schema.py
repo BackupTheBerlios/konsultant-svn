@@ -143,6 +143,14 @@ class ClientInfoTable(Table):
         cols = [clientid, locationid, contactid]
         Table.__init__(self, 'clientinfo', cols)
         
+class ClientDataTable(Table):
+    def __init__(self):
+        clientid = PkNum('clientid')
+        clientid.set_fk('clients')
+        name = PkName('name')
+        value = Text('value')
+        cols = [clientid, name, value]
+        Table.__init__(self, 'clientdata', cols)
         
 MAINTABLES = [AddressTable, ContactTable, TicketTable,
               TicketStatusTable, TicketActionTable, TicketActionParentTable,

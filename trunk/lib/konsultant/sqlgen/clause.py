@@ -115,10 +115,4 @@ def one_many(onefield, onevalue, manyfield, manyvalues, cmp='and'):
 
 
 if __name__ == '__main__':
-    co = CondOp('foo', 'bar')
-    
-    a = CondOp('foo', 'bar')
-    b = CondOp('id', 23)
-    c = In('a', ['a', 'b', 'c', 'd', 'e'])
     items = [('foo', 'bar'), ('fu', 'bar'), ('fi', 'bar')]
-    s = SimpleClause(items)

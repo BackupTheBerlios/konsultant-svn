@@ -9,7 +9,8 @@ from kdeui import KMainWindow, KEdit
 from kdeui import KMessageBox, KAboutDialog
 from kdeui import KConfigDialog, KListView
 from kdeui import KDialogBase, KLineEdit
-from kdeui import KTextBrowser
+from kdeui import KTextBrowser, KPopupMenu
+from kdeui import KStdAction
 
 from konsultant.base.actions import EditAddresses, ManageClients
 from konsultant.base.config import DefaultSkeleton, KonsultantConfig
@@ -40,10 +41,24 @@ class AboutDialog(KAboutDialog):
 
 class MainWindow(KMainWindow):
     def __init__(self, parent, name='MainWindow'):
-        #KMainWindow.__init__(self, parent, name, Qt.WType_Dialog)
         KMainWindow.__init__(self, parent, name)
-        
-        
+        self.initActions()
+        self.initMenus()
+        if hasattr(self, 'initToolbar'):
+            self.initToolbar()
+
+    def initActions(self, collection=None):
+        if collection is None:
+            collection = self.actionCollection()
+        self.quitAction = KStdAction.quit(self.close, collection)
+
+    def initMenus(self, mainmenu=None):
+        if mainmenu is None:
+            mainmenu = KPopupMenu(self)
+        self.quitAction.plug(mainmenu)
+        self.menuBar().insertItem('&Main', mainmenu)
+        self.menuBar().insertItem('&Help', self.helpMenu(''))
+    
 class SimpleRecord(QGridLayout):
     def __init__(self, parent, fields, text=None, name='SimpleRecord'):
         if text is None:

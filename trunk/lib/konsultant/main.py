@@ -20,7 +20,7 @@ from konsultant.managers.client import ClientManagerWidget
 from konsultant.managers.ticket import TicketManagerWidget
 
 class KonsultantMainApplication(KApplication):
-    def __init__(self, *args):
+    def __init__(self):
         KApplication.__init__(self)
         cfg = BaseConfig()
         self.cfg = cfg

@@ -124,17 +124,13 @@ class ActionItem(ListItem):
 
     def show_data(self, data):
         anchor = self.anchor
-        print self.anchor.getAttribute('href'), 'href'
         child = self.lastChild
-        print anchor.toxml(), child.toxml()
         anchor.setAttribute('href', 'hide.action.%d' % self.actionid)
         self.data = data
         self.insertBefore(TextElement('p', data), child)
 
     def hide_data(self):
         self.anchor.setAttribute('href', 'show.action.%d' % self.actionid)
-        print self.anchor.getAttribute('href'), 'href'
-        print ['%s-----' % c for c in self.childNodes]
         del self.childNodes[1]
         
         
@@ -163,7 +159,6 @@ class ActionThreads(UnorderedList):
                 parent.appendChild(element)
                 #element.appendChild(ListItem('actionid--%d' % row.actionid))
             elif not self.actions.has_key(row.parent):
-                print row.parent, 'is not there'
                 rows.append(row)
             else:
                 self.actions[row.parent].appendChild(element)
@@ -203,16 +198,11 @@ class TicketInfoElement(BaseElement):
         td.setAttribute('align', 'right')
         row.appendChild(td)
         node.appendChild(row)
-        print self.toxml()
-        
     
 
 class TicketDocument(BaseDocument):
     def __init__(self, app):
         BaseDocument.__init__(self, app)
-        #self.body.setAttribute('bgcolor', 'MistyRose4')
-        #self.body.setAttribute('link', 'plum')
-        #self.body.setAttribute('hover', 'green')
         self.manager = TicketManager(self.app)
 
     def setID(self, clause=None, ids=None):

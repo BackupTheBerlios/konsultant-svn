@@ -186,7 +186,6 @@ class TicketManagerWidgetNew(BaseManagerWidget):
         self.setCaption('TicketManager')
         self.manager = TicketManager(self.app)
         self.dialogs = {}
-        self.initToolbar()
         print 'ticket app', app, self.app
         self.resize(400, 600)
         

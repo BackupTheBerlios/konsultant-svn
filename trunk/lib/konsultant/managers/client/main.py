@@ -40,12 +40,13 @@ from konsultant.db.admin import AdminWidget
 from konsultant.managers.ticket import TicketManagerWidget
 
 from xmlgen import ClientInfoDoc
+from contact import ContactEditorWin
+from location import LocationEditorWin
 from db import ClientManager
 
 class ClientStyleSheet(QStyleSheet):
     def __init__(self, parent=None, name='ClientStyleSheet'):
         QStyleSheet.__init__(self, parent, name)
-        
         
 class ClientView(ViewBrowser):
     def __init__(self, app, parent):
@@ -53,7 +54,7 @@ class ClientView(ViewBrowser):
         ViewBrowser.__init__(self, app, parent, ClientInfoDoc)
         self.dialogs = {}
         self.manager = ClientManager(self.app)
-        self.resize(800, 600)
+        self.resize(600, 800)
         
     def setSource(self, url):
         action, context, id = str(url).split('.')
@@ -63,12 +64,16 @@ class ClientView(ViewBrowser):
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertContact)
                 dlg.clientid = self.doc.current
                 self.dialogs['new-contact'] = dlg
+            elif action == 'edit':
+                ContactEditorWin(self, self.app, self.doc.current)
         elif context == 'location':
             if action == 'new':
                 dlg = LocationDialog(self, self.db)
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertLocation)
                 dlg.clientid = self.doc.current
                 self.dialogs['new-location'] = dlg
+            elif action == 'edit':
+                LocationEditorWin(self, self.app, self.doc.current)
         else:
             KMessageBox.error(self, 'bad call %s' % url)
 
@@ -117,30 +122,26 @@ class ClientManagerWidget(BaseManagerWidget):
         #self.resize(QSize(w, h))
         self.dialogs  = {}
         self.manager = ClientManager(self.app)
-        self.initToolbar()
-        self.resize(800, 600)
-
+        self.resize(w, h)
+        self.initlistView()
+        
     def initActions(self):
         collection = self.actionCollection()
         self.newAction = KStdAction.openNew(self.slotNew, collection)
-        self.quitAction = KStdAction.quit(self.app.quit, collection)
         self.editaddressAction = EditAddresses(self.slotEditAddresses, collection)
         self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
         self.manageTicketsAction = ManageTickets(self.slotManageTickets, collection)
         self.admindbAction = AdministerDatabase(self.slotAdministerDatabase,
                                                 collection)
+        BaseManagerWidget.initActions(self, collection=collection)
         
-
     def initMenus(self):
         mainMenu = KPopupMenu(self)
         self.newAction.plug(mainMenu)
         self.manageTicketsAction.plug(mainMenu)
         self.editaddressAction.plug(mainMenu)
         self.admindbAction.plug(mainMenu)
-        self.quitAction.plug(mainMenu)
-        self.configureAction.plug(mainMenu)
-        self.menuBar().insertItem('&Main', mainMenu)
-        self.menuBar().insertItem('&Help', self.helpMenu(''))
+        BaseManagerWidget.initMenus(self, mainmenu=mainMenu)
         
     def initlistView(self):
         self.listView.addColumn('client')

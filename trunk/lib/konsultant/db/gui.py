@@ -18,27 +18,26 @@ from konsultant.base.gui import MainWindow, MimeSources
 from konsultant.base.gui import SimpleRecord, SimpleRecordDialog
 from konsultant.db.xmlgen import AddressSelectDoc, AddressLink
 
-class BaseManagerWidget(MainWindow):
-    def __init__(self, parent, app, view, name):
+class SimpleWindow(MainWindow):
+    def __init__(self, parent, app, name):
         MainWindow.__init__(self, parent, name)
         self.app = app
         self.db = app.db
+        
+class BaseManagerWidget(SimpleWindow):
+    def __init__(self, parent, app, view, name):
+        SimpleWindow.__init__(self, parent, app, name)
         self.mainView = QSplitter(self, 'main view')
         self.listView = KListView(self.mainView)
         #view is some sort of display widget that requires db
         self.view = view(self.app, self.mainView)
         self.setCentralWidget(self.mainView)
         self.initlistView()
-        self.initActions()
-        self.initMenus()
         self.connect(self.listView,
                      SIGNAL('selectionChanged()'), self.selectionChanged)
         self.statusbar = KStatusBar(self, 'statusbar')
         self.statusbar.insertItem(QString('status'), 0, False)
         self.show()
-        
-    def initMenus(self):
-        mainmenu = QPopupMenu(self)
         
 class EditableRecord(QGridLayout):
     def __init__(self, parent, fields, text=None, name='EditableRecord'):
@@ -260,12 +259,24 @@ class AddressSelector(KDialogBase):
     def setSource(self, handler):
         self.mainView.setSource(handler)
         
+class RecordView(ViewBrowser):
+    def __init__(self, app, parent, ident, doc, manager, action='edit'):
+        ViewBrowser.__init__(self, app, parent, doc)
+        self.dialogs = {}
+        self._action = action
+        self.manager = manager(self.app)
+        self.set_ident(ident)
 
-class AdminWidget(BaseManagerWidget):
-    def __init__(self, parent, app):
-        BaseManagerWidget
-        
-class AdminWidget(KMainWindow):
-    def __init__(self, parent, app):
-        KMainWindow.__init__(self, parent, 'AdminWidget')
+    def set_ident(self, ident):
+        self.doc.set_ident(ident)
+        self.setText(self.doc.toxml())
+
+    def setSource(self, url):
+        print url, 'ur;l'
+        action, context, id = str(url).split('.')
+        fields = [context]
+        dlg = SimpleRecordDialog(self, fields, name='hello')
+        current = self.doc.records[int(id)].record[context]
+        key = '%s-%s' % (self._action, id)
+        self.dialogs[key] = dlg
         

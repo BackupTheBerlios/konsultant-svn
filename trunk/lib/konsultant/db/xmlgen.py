@@ -5,19 +5,21 @@ from konsultant.base import NoExistError
 from konsultant.sqlgen.clause import Eq, In
 
 from konsultant.base.xmlgen import Html, Body, Anchor
+from konsultant.base.xmlgen import BR, HR, Bold
+from konsultant.base.xmlgen import TR, TD
 from konsultant.base.xmlgen import TableElement
-from konsultant.base.xmlgen import BaseElement
+from konsultant.base.xmlgen import BaseElement, TextElement
 
 
 #db is BaseDatabase from konsultant.db
 class BaseDbElement(BaseElement):
-    def __init__(self, db, tagname):
-        BaseElement.__init__(self, tagname)
+    def __init__(self, db, tagname, **atts):
+        BaseElement.__init__(self, tagname, **atts)
         self.db = db
         
 class BaseDocument(BaseDbElement):
-    def __init__(self, app):
-        BaseDbElement.__init__(self, app, 'html')
+    def __init__(self, app, **atts):
+        BaseDbElement.__init__(self, app, 'html', **atts)
         self.app = app
         self.db = app.db
         self.body = Body()
@@ -28,8 +30,8 @@ class BaseDocument(BaseDbElement):
             del self.body.childNodes[0]
         
 class BaseParagraph(BaseDbElement):
-    def __init__(self, db, key, href=None):
-        BaseDbElement.__init__(self, db, 'p')
+    def __init__(self, db, key, href=None, **atts):
+        BaseDbElement.__init__(self, db, 'p', **atts)
         data = self.makeParagraph(key)
         if href is not None:
             node = Anchor(href, data)
@@ -69,3 +71,41 @@ class AddressSelectDoc(BaseDocument):
             a = row.addressid
             self.body.appendChild(AddressLink(self.db, a, 'select.address.%d' % a))
 
+class RecordElementOrig(BaseElement):
+    def __init__(self, fields, idcol, action, record):
+        BaseElement.__init__(self, 'p')
+        for field in fields:
+            f = Bold('%s:  ' % field)
+            self.appendChild(f)
+            url = '.'.join(map(str, [action, record[idcol], record[field]]))
+            self.anchor = Anchor(url, record[field])
+            self.appendChild(self.anchor)
+            self.appendChild(BaseElement('br'))
+        self.record = record
+
+class RecordElement(BaseElement):
+    def __init__(self, fields, idcol, action, record):
+        BaseElement.__init__(self, 'table')
+        self.record = record
+        for field in fields:
+            print 'field is', field
+            row = BaseElement('tr')
+            key = TD(bgcolor='DarkSeaGreen')
+            key.appendChild(Bold(field))
+            row.appendChild(key)
+            val = TD()
+            if action:
+                url = '.'.join(map(str, [action, field, record[idcol]]))
+                val.appendChild(Anchor(url, record[field]))
+            else:
+                node = Text()
+                node.data = record[field]
+                val.appendChild(node)
+            row.appendChild(val)
+            self.appendChild(row)
+            
+class RecordDoc(BaseDocument):
+    def __init__(self, app, manager):
+        BaseDocument.__init__(self, app)
+        self.manager = manager(self.app)
+        self.records = {}

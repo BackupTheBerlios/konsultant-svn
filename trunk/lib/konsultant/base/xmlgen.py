@@ -1,12 +1,17 @@
 from xml.dom.minidom import Element, Text
 
 class BaseElement(Element):
-    def __init__(self, tagname):
+    def __init__(self, tagname, **atts):
         Element.__init__(self, tagname)
-
+        self.setAttributes(**atts)
+        
+    def setAttributes(self, **atts):
+        for k,v in atts.items():
+            self.setAttribute(k, str(v))
+        
 class TextElement(BaseElement):
-    def __init__(self, name, data):
-        BaseElement.__init__(self, name)
+    def __init__(self, name, data, **atts):
+        BaseElement.__init__(self, name, **atts)
         elementd = Text()
         if type(data) == str:
             lines = data.split('\n')
@@ -27,14 +32,13 @@ class TextElement(BaseElement):
             self.appendChild(elementd)
 
 class Anchor(TextElement):
-    def __init__(self, href, data):
-        TextElement.__init__(self, 'a', data)
+    def __init__(self, href, data, **atts):
+        TextElement.__init__(self, 'a', data, **atts)
         self.setAttribute('href', href)
 
 class TableBaseElement(BaseElement):
     def appendRowDataElement(self, parent, data, align='right'):
-        element  = BaseElement('td')
-        element.setAttribute('align', align)
+        element  = BaseElement('td', align='right')
         elementd = Text()
         if type(data) == str:
             lines = data.split('\n')
@@ -62,33 +66,58 @@ class TableBaseElement(BaseElement):
         parent.appendChild(element)
         
 class TableElement(TableBaseElement):
-    def __init__(self, cols, align='right', border='1'):
-        TableBaseElement.__init__(self, 'table')
-        self.setAttribute('border', border)
+    def __init__(self, cols, align='right', border='1', **atts):
+        TableBaseElement.__init__(self, 'table', align=align, border=border, **atts)
         self.setAttribute('class', 'tableheader')
         labels = BaseElement('tr')
-        self.appendRowElement(labels, cols, align)
+        for c in cols:
+            col = TextElement('b', c)
+            self.appendRowDataElement(labels, col, align)
         self.appendChild(labels)
+        self.cols = cols
 
 class TableRowElement(TableBaseElement):
-    def __init__(self, row, align='right'):
-        TableBaseElement.__init__(self, 'tr')
-        self.appendRowElement(self, row, align)
+    def __init__(self, row, align='right', **atts):
+        TableBaseElement.__init__(self, 'tr', **atts)
+        self.appendRowElement(self, row, align=align)
 
 class Html(BaseElement):
-    def __init__(self):
-        BaseElement.__init__(self, 'html')
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'html', **atts)
 
 class Body(BaseElement):
-    def __init__(self):
-        BaseElement.__init__(self, 'body')
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'body', **atts)
         
 
 class ListItem(TextElement):
-    def __init__(self, data):
-        TextElement.__init__(self, 'li', data)
+    def __init__(self, data, **atts):
+        TextElement.__init__(self, 'li', data, **atts)
 
 class UnorderedList(BaseElement):
-    def __init__(self):
-        BaseElement.__init__(self, 'ul')
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'ul', **atts)
 
+class BR(BaseElement):
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'br', **atts)
+
+class HR(BaseElement):
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'hr', **atts)
+
+class Bold(TextElement):
+    def __init__(self, text, **atts):
+        TextElement.__init__(self, 'b', text, **atts)
+
+class TR(BaseElement):
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'tr', **atts)
+
+class TD(BaseElement):
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'td', **atts)
+
+class Paragraph(BaseElement):
+    def __init__(self, **atts):
+        BaseElement.__init__(self, 'p', **atts)

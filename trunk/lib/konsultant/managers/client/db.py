@@ -56,7 +56,7 @@ class ClientManager(object):
         return dict([(row.addressid, row) for row in rows])
     
     def getLocations(self, clientid, addresses=True):
-        fields = ['name', 'addressid', 'isp', 'connection', 'ip', 'static', 'serviced']
+        fields = ['locationid', 'name', 'addressid', 'isp', 'connection', 'ip', 'static', 'serviced']
         sclause = Eq('clientid', clientid)
         clause = 'locationid IN (select locationid from clientinfo where %s)' % sclause
         if addresses:
@@ -67,7 +67,7 @@ class ClientManager(object):
         return locations, addresses
 
     def getContacts(self, clientid, addresses=True):
-        fields = ['name', 'addressid', 'email', 'description']
+        fields = ['contactid', 'name', 'addressid', 'email', 'description']
         sclause = Eq('clientid', clientid)
         clause = 'contactid IN (select contactid from clientinfo where %s)' % sclause
         if addresses:
