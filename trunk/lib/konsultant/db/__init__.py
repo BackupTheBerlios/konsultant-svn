@@ -1,6 +1,8 @@
 from operator import and_
 
 from qtsql import QSqlDatabase, QSqlDriver
+from dcopexport import DCOPExObj
+
 
 from paella.base import NoExistError
 from paella.sqlgen.clause import Eq, In
@@ -24,6 +26,7 @@ class BaseDatabase(QSqlDatabase):
         dbname = str(self.cfg.readEntry('dbname'))
         dbhost = str(self.cfg.readEntry('dbhost'))
         dbuser = str(self.cfg.readEntry('dbuser'))
+        print dbhost, dbname, dbuser
         self.conn = BasicConnection(dbuser, dbhost, dbname)
         self.setDatabaseName(dbname)
         self.setHostName(dbhost)
@@ -111,3 +114,14 @@ class BaseDatabase(QSqlDatabase):
         self.insertData(idcol, table, data)
         return self.mcursor.select_row(fields=['*'], table=table, clause=clause)
         
+class BaseObject(DCOPExObj):
+    def __init__(self, id='BaseObject'):
+        DCOPExObj.__init__(self, id)
+        self.addMethod('QString helloworld()', self.helloworld)
+        self.addMethod('BaseDatabase getdb()', self.getdb)
+        
+    def helloworld(self):
+        return 'Hello World'
+
+    def getdb(self):
+        return self.db

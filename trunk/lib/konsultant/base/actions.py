@@ -3,6 +3,11 @@ from kdecore import KShortcut
 from kdeui import KGuiItem, KAction
 
 
+class BaseItem(KGuiItem):
+    def __init__(self, text, icon, ttip, whatsit):
+        KGuiItem.__init__(self, QString(text), QString(icon), QString(ttip),
+                          QString(whatsit))
+        
 class EditAddressesItem(KGuiItem):
     def __init__(self):
         text = QString('Edit addresses')
@@ -18,7 +23,17 @@ class ManageClientsItem(KGuiItem):
         ttip = QString('Manage Clients')
         wtf = QString('manage or browse Clients')
         KGuiItem.__init__(self, text, icon, ttip, wtf)
+
     
+class ManageTicketsItem(BaseItem):
+    def __init__(self):
+        BaseItem.__init__(self, 'Manage Tickets', 'edit',
+                          'Manage Tickets', 'manage or brouse Tickets')
+
+class ConfigItem(BaseItem):
+    def __init__(self):
+        BaseItem.__init__(self, 'Configure Konsultant', 'configure',
+                          'Configure Konsultant', 'Configure Konsultant')
         
 class EditAddresses(KAction):
     def __init__(self, slot, parent):
@@ -34,4 +49,17 @@ class ManageClients(KAction):
         cut = KShortcut()
         KAction.__init__(self, item, cut, slot, parent, name)
 
+class ManageTickets(KAction):
+    def __init__(self, slot, parent):
+        item = ManageTicketsItem()
+        name = 'ManageTickets'
+        cut = KShortcut()
+        KAction.__init__(self, item, cut, slot, parent, name)
 
+class ConfigureKonsultant(KAction):
+    def __init__(self, slot, parent):
+        item = ConfigItem()
+        name = 'ConfigureKonsultant'
+        cut = KShortcut()
+        KAction.__init__(self, item, cut, slot, parent, name)
+        

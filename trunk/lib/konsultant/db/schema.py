@@ -1,12 +1,21 @@
 from paella.sqlgen.classes import Table, Sequence, ColumnType, Column
 from paella.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
-from paella.sqlgen.defaults import PkBigname, Bigname, Name, Num
+from paella.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
 from paella.sqlgen.statement import Statement
 
 ZipName = ColumnType('varchar', 5)
 StateName = ColumnType('varchar', 2)
 sequences = ['address_ident', 'contact_ident', 'ticket_ident',
              'location_ident', 'client_ident']
+
+def AutoId(name, seqname, pk=False):
+    column = Num(name)
+    c = column.constraint
+    c.unique = True
+    c.null = False
+    c.pk = pk
+    column.set_auto_increment(seqname)
+    return column
 
 class ConfigTable(Table):
     def __init__(self):
@@ -19,32 +28,34 @@ class ConfigTable(Table):
         
 class AddressTable(Table):
     def __init__(self):
-        idcol = PkNum('addressid')
-        idcol.set_auto_increment('address_ident')
-        s1 = Bigname('street1')
-        s2 = Bigname('street2')
-        city = Name('city')
+        idcol = AutoId('addressid', 'address_ident')
+        s1 = PkBigname('street1')
+        s2 = PkBigname('street2')
+        s2.constraint.default = ('')
+        city = PkName('city')
         state = Column('state', StateName)
+        state.constraint.pk = True
         zip_ = Column('zip', ZipName)
+        zip_.constraint.pk = True
         cols = [idcol, s1, s2, city, state, zip_]
         Table.__init__(self, 'addresses', cols)
 
 class ContactTable(Table):
     def __init__(self):
-        idcol = PkNum('contactid')
-        idcol.set_auto_increment('contact_ident')
-        name = Name('name')
+        idcol = AutoId('contactid', 'contact_ident')
+        name = PkName('name')
         address = Num('addressid')
-        address.set_fk('addresses')
-        email = Bigname('email')
+        address.set_fk('addresses', 'addressid')
+        email = PkBigname('email')
         desc = Text('description')
         Table.__init__(self, 'contacts', [idcol, name, address, email, desc])
 
 class TicketTable(Table):
     def __init__(self):
-        idcol = PkNum('ticketid')
-        idcol.set_auto_increment('ticket_ident')
+        idcol = AutoId('ticketid', 'ticket_ident', pk=True)
         title = Name('title')
+        title.constraint.unique = True
+        title.constraint.null = False
         data = Text('data')
         cols = [idcol, title, data]
         Table.__init__(self, 'tickets', cols)
@@ -75,15 +86,16 @@ class TicketStatusTable(Table):
 
 class LocationTable(Table):
     def __init__(self):
-        idcol = PkNum('locationid')
-        idcol.set_auto_increment('location_ident')
-        addressid = Num('addressid')
-        addressid.set_fk('addresses')
-        isp = Name('isp')
-        conn = Name('connection')
-        ip = Name('ip')
+        idcol = AutoId('locationid', 'location_ident')
+        addressid = PkNum('addressid')
+        addressid.set_fk('addresses', 'addressid')
+        isp = PkName('isp')
+        conn = PkName('connection')
+        ip = PkName('ip')
         static = Bool('static')
+        static.constraint.pk = True
         serviced = Bool('serviced')
+        serviced.constraint.pk = True
         cols = [idcol, addressid, isp, conn, ip, static, serviced]
         Table.__init__(self, 'locations', cols)
         
@@ -99,11 +111,11 @@ class ClientInfoTable(Table):
         clientid = Num('clientid')
         clientid.set_fk('clients')
         locationid = Num('locationid')
-        locationid.set_fk('locations')
+        locationid.set_fk('locations', 'locationid')
         ticketid = Num('ticketid')
         ticketid.set_fk('tickets')
         contactid = Num('contactid')
-        contactid.set_fk('contacts')
+        contactid.set_fk('contacts', 'contactid')
         cols = [clientid, locationid, ticketid, contactid]
         Table.__init__(self, 'clientinfo', cols)
         
@@ -120,16 +132,19 @@ def create_schema(cursor):
         cursor.create_table(t())
 
 if __name__ == '__main__':
+    import os
     from paella.base.config import Configuration
     from paella.db.lowlevel import BasicConnection
     from paella.db.midlevel import StatementCursor
-    import os
-    rcfile = os.path.expanduser('~/.konsultantrc')
-    cfg = Configuration(files=[rcfile])
-    host = cfg.get('database', 'dbhost')
-    user = cfg.get('database', 'dbusername')
-    dbname = cfg.get('database', 'dbname')
-    conn = BasicConnection(user, host, dbname, None)
+    from konsultant.base.config import BaseConfig
+    from konsultant.db import BaseDatabase
+    cfg = Configuration('database', os.path.expanduser('~/.kde/share/config/konsultantrc'))
+    dbname = cfg['dbname']
+    dbhost = cfg['dbhost']
+    dbuser = cfg['dbuser']
+    conn = BasicConnection(dbuser, dbhost, dbname)
+    #fg = BaseConfig()
+    #b = BaseDatabase( cfg , 'schema maker')
     c = StatementCursor(conn)
     if not len(c.tables()):
         create_schema(c)

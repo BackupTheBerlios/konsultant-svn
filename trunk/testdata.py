@@ -3,10 +3,10 @@ from paella.sqlgen.statement import Statement
 stmt = Statement()
 
 addresses = [
-    ['1313 Mockingbird Ln.', None, 'Sometown', 'US', '23455'],
-    ['212b Baker St.', None, 'London', 'UK', '12323'],
+    ['1313 Mockingbird Ln.', '', 'Sometown', 'US', '23455'],
+    ['212b Baker St.', '', 'London', 'UK', '12323'],
     ['2 shelter rd', 'Chumpy Estates', 'Geeseboro', 'PU', '12345'],
-    ['2a forgotten fairway', None, 'Whiffyville', 'PU', '12332']
+    ['2a forgotten fairway', '', 'Whiffyville', 'PU', '12332']
     ]
 
 default_desc = 'a default description'
@@ -63,15 +63,15 @@ def gen_all():
     return statements
 
 if __name__ == '__main__':
-    from konsultant.base import Config
+    import os
+    from paella.base.config import Configuration
     from konsultant.db import BasicConnection
     from konsultant.db import StatementCursor
     from konsultant.db.schema import create_schema
-    cfg = Config()
-    cfg.change('database')
+    cfg = Configuration('database', [os.path.expanduser('~/.kde/share/config/konsultantrc')])
     dbname = cfg['dbname']
     dbhost = cfg['dbhost']
-    dbuser = cfg['dbusername']
+    dbuser = cfg['dbuser']
     conn = BasicConnection(dbuser, dbhost, dbname)
     sl = gen_all()
     cursor = StatementCursor(conn)

@@ -3,7 +3,7 @@ from xml.dom.minidom import Element, Text
 
 from qt import QListViewItem, QSplitter, QString
 from qt import QStringList, QListView, QLabel
-from qt import QVariant, QPopupMenu, QPixmap
+from qt import QVariant, QPixmap
 from qt import SIGNAL, SLOT, Qt
 
 from qt import QMimeSourceFactory, QGridLayout
@@ -14,7 +14,7 @@ from qtsql import QSqlPropertyMap
 
 from kdecore import KShortcut, KMimeSourceFactory
 from kdeui import KDialogBase, KLineEdit, KLed
-from kdeui import KTextBrowser
+from kdeui import KTextBrowser, KPopupMenu
 from kdeui import KStdAction, KMessageBox
 from kdeui import KJanusWidget, KListViewItem
 from kdeui import KListView, KStatusBar
@@ -23,8 +23,10 @@ from kdeui import KAction, KGuiItem
 from paella.base import NoExistError, Error
 from paella.sqlgen.clause import Eq, In
 
+from konsultant.base.actions import EditAddresses, ConfigureKonsultant
 from konsultant.base.gui import MainWindow
-from konsultant.base.gui import EditAddresses
+from konsultant.base.gui import ConfigureDialog
+
 from konsultant.base.xmlgen import TextElement, Anchor, TableElement
 from konsultant.db import BaseDatabase
 from konsultant.db.gui import AddressSelectView, RecordSelector
@@ -157,15 +159,18 @@ class ClientManager(BaseManager):
         collection = self.actionCollection()
         self.newAction = KStdAction.openNew(self.slotNew, collection)
         self.editaddressAction = EditAddresses(self.slotEditAddresses, collection)
+        self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
+        
         print self.editaddressAction
 
     def initMenus(self):
-        mainMenu = QPopupMenu(self)
+        mainMenu = KPopupMenu(self)
         self.newAction.plug(mainMenu)
         self.editaddressAction.plug(mainMenu)
+        self.configureAction.plug(mainMenu)
         self.menuBar().insertItem('&Main', mainMenu)
         self.menuBar().insertItem('&Help', self.helpMenu(''))
-
+        
     def initlistView(self):
         self.listView.addColumn('client')
         self.listView.setRootIsDecorated(True)
@@ -175,6 +180,9 @@ class ClientManager(BaseManager):
             c = KListViewItem(clients, row['client'])
             c.clientid = row.clientid
 
+    def slotConfigure(self):
+        ConfigureDialog(self)
+    
     def slotNew(self):
         self.testAction('new')
 

@@ -8,8 +8,10 @@ from kdeui import KMessageBox, KAboutDialog
 from kdeui import KConfigDialog, KListView
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KTextBrowser
+from kdecore import KConfigDialogManager
 
 from konsultant.base.actions import EditAddresses, ManageClients
+from konsultant.base.config import DefaultSkeleton
 
 class MimeSources(QMimeSourceFactory):
     def __init__(self):
@@ -26,7 +28,8 @@ class AboutDialog(KAboutDialog):
 
 class MainWindow(KMainWindow):
     def __init__(self, parent, name='MainWindow'):
-        KMainWindow.__init__(self, parent, name, Qt.WType_Dialog)
+        #KMainWindow.__init__(self, parent, name, Qt.WType_Dialog)
+        KMainWindow.__init__(self, parent, name)
         
         
 class SimpleRecord(QGridLayout):
@@ -61,3 +64,11 @@ class SimpleRecordDialog(KDialogBase):
         self.setButtonOKText('insert', 'insert')
         self.show()
 
+class ConfigureDialog(KConfigDialog):
+    def __init__(self, parent, cfg, name='ConfigureDialog'):
+        print 'repreper'
+        skel = DefaultSkeleton(cfg)
+        skel.readConfig()
+        print skel
+        KConfigDialog.__init__(self, parent, name, skel)
+        #self.manager = KConfigDialogManager(self, skel, 'ConfigureDialogManager')

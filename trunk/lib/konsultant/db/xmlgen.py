@@ -20,6 +20,10 @@ class BaseDocument(BaseDbElement):
         self.db = db
         self.body = Body()
         self.appendChild(self.body)
+
+    def clear_body(self):
+        while self.body.hasChildNodes():
+            del self.body.childNodes[0]
         
 class BaseParagraph(BaseDbElement):
     def __init__(self, db, key, href=None):
@@ -52,8 +56,7 @@ class AddressLink(BaseParagraph):
 
 class AddressSelectDoc(BaseDocument):
     def set_clause(self, clause):
-        while self.body.hasChildNodes():
-            del self.body.childNodes[0]
+        self.clear_body()
         rows = self.db.mcursor.select(fields=['addressid'],
                                               table='addresses', clause=clause)
         for row in rows:
@@ -81,6 +84,17 @@ class ClientSectionHeader(BaseElement):
         p.appendChild(self.new)
         self.appendChild(p)
         
+class TicketHeader(BaseElement):
+    def __init__(self):
+        BaseElement.__init__(self, 'h2')
+        node = Text()
+        node.data = 'All Tickets'
+        self.appendChild(node)
+        p = BaseElement('p')
+        self.new = Anchor('new.ticket.noid')
+        p.appendChild(self.new)
+        self.appendChild(p)
+        
         
         
 class LocationTableElement(TableElement):
@@ -97,6 +111,15 @@ class TicketTableElement(TableElement):
     def __init__(self, db=None):
         cols = ['title', 'status']
         TableElement.__init__(self, cols)
+
+class TicketInfoDoc(BaseDocument):
+    def __init__(self, db):
+        BaseDocument.__init__(self, db)
+
+    def set_clause(self, clause):
+        self.clear_body()
+        rows = self.db.select(fields=['title'], table='tickets')
+        
         
 class ClientInfoDoc(BaseDocument):
     def __init__(self, db):
@@ -111,8 +134,7 @@ class ClientInfoDoc(BaseDocument):
         self.set_clause(clause)
         
     def set_clause(self, clause):
-        while self.body.hasChildNodes():
-            del self.body.childNodes[0]
+        self.clear_body()
         inforows = self.db.select(table='clientinfo', clause=clause)
 
         #make header
@@ -154,23 +176,20 @@ class ClientInfoDoc(BaseDocument):
                 element.appendRowElement(element, row)
             
     def appendLocations(self, locations):
-        if len(locations):
-            fields = ['addressid', 'isp', 'connection', 'ip', 'static', 'serviced']
-            table = 'locations'
-            element = self.locations
-            self._appendRows(locations, fields, table, 'locationid', element)
+        fields = ['addressid', 'isp', 'connection', 'ip', 'static', 'serviced']
+        table = 'locations'
+        element = self.locations
+        self._appendRows(locations, fields, table, 'locationid', element)
 
     def appendContacts(self, contacts):
-        if len(contacts):
-            fields = ['name', 'addressid', 'email', 'description']
-            table = 'contacts'
-            element = self.contacts
-            self._appendRows(contacts, fields, table, 'contactid', element)
+        fields = ['name', 'addressid', 'email', 'description']
+        table = 'contacts'
+        element = self.contacts
+        self._appendRows(contacts, fields, table, 'contactid', element)
 
     def appendTickets(self, tickets):
-        if len(tickets):
-            fields = ['title', 'status']
-            tables = ['tickets', 'ticketstatus']
-            table = ' natural join '.join(tables)
-            element = self.tickets
-            self._appendRows(tickets, fields, tables, 'ticketid', element)
+        fields = ['title', 'status']
+        tables = ['tickets', 'ticketstatus']
+        table = ' natural join '.join(tables)
+        element = self.tickets
+        self._appendRows(tickets, fields, tables, 'ticketid', element)

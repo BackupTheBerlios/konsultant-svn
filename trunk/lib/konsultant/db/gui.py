@@ -37,7 +37,9 @@ class BaseManager(MainWindow):
         self.statusbar.insertItem(QString('status'), 0, False)
         self.show()
         
-
+    def initMenus(self):
+        mainmenu = QPopupMenu(self)
+        
 class EditableRecord(QGridLayout):
     def __init__(self, parent, fields, text=None, name='EditableRecord'):
         QGridLayout.__init__(self, parent, len(fields) + 2, 2, 1, -1, name)

@@ -1,27 +1,30 @@
 #!/usr/bin/python
 import sys
 from qt import QApplication
+from qt import SIGNAL, SLOT, Qt
 from kdecore import KApplication, KCmdLineArgs, KAboutData
 from kdecore import KIconLoader
 from kdeui import KSystemTray, KMainWindow
 
 from konsultant.base.config import BaseConfig
-from konsultant.base.gui import MainWindow
-from konsultant.base.gui import EditAddresses, ManageClients
+from konsultant.base.gui import MainWindow, ConfigureDialog
+from konsultant.base.actions import EditAddresses, ManageClients
+from konsultant.base.actions import ManageTickets, ConfigureKonsultant
 
-from konsultant.db import BaseDatabase
+from konsultant.db import BaseDatabase, BaseObject
 from konsultant.db.gui import AddressSelector
 from konsultant.clientmanager import ClientManager
+from konsultant.ticketmanager import TicketManager
 
 class KonsultantMainApplication(KApplication):
     def __init__(self, *args):
         KApplication.__init__(self)
         cfg = BaseConfig()
         self.db = BaseDatabase(cfg, 'Konsultant', self)
-        
+        self.cfg = cfg
 
 class KonsultantMainWindow(KMainWindow):
-    def __init__(self, db, *args):
+    def __init__(self, app, *args):
         KMainWindow.__init__(self, *args)
         self.icons = KIconLoader()
         self.systray = KSystemTray(self)
@@ -29,17 +32,23 @@ class KonsultantMainWindow(KMainWindow):
         self.systray.show()
         self.initActions()
         self.initMenus()
-        self.db = db
+        self.app = app
+        self.db = app.db
+        self.cfg = app.cfg
         
     def initActions(self):
         collection = self.systray.actionCollection()
         self.editaddressAction = EditAddresses(self.slotEditAddresses, collection)
         self.manageclientsAction = ManageClients(self.slotManageClients, collection)
+        self.manageticketsAction = ManageTickets(self.slotManageTickets, collection)
+        self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
         
     def initMenus(self):
         mainMenu = self.systray.contextMenu()
         self.editaddressAction.plug(mainMenu)
         self.manageclientsAction.plug(mainMenu)
+        self.manageticketsAction.plug(mainMenu)
+        self.configureAction.plug(mainMenu)
         
     def slotEditAddresses(self):
         AddressSelector(self, self.db, 'AddressBrowser', modal=False)
@@ -47,14 +56,37 @@ class KonsultantMainWindow(KMainWindow):
     def slotManageClients(self):
         win = ClientManager(self, self.db)
         win.show()
+
+    def slotManageTickets(self):
+        win = TicketManager(self, self.db)
+        win.show()
+
+    def slotConfigure(self):
+        print 'Configure Konsultant'
+        c = ConfigureDialog(self, self.cfg)
+        c.show()
         
 if __name__ == '__main__':
     aboutData = KAboutData('', '', '0.0', 'test', 0, 'nobody')
     KCmdLineArgs.init(sys.argv, aboutData)
     #app = KApplication()
     app = KonsultantMainApplication()
+    app.connect(app, SIGNAL('lastWindowClosed()'), app.quit)
+    dcop = app.dcopClient()
+    appid = dcop.registerAs('konsultant')
+    bo = BaseObject('kon-default')
+    bo.db = app.db
     #app.db = BaseDatabase('Konsultant', app)
     #win = ClientManager(app.db)
-    win = KonsultantMainWindow(app.db)
+    win = KonsultantMainWindow(app)
+    win.show()
+    #win.lower()
+    
     #win.hide()
+    app.setMainWidget(win)
+    print app.mainWidget()
+    #win2 = ClientManager(win, win.db)
+    #win2.hide()
+    cfg = app.config()
+    print cfg
     app.exec_loop()
