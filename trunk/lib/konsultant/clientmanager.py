@@ -35,7 +35,8 @@ from konsultant.db.gui import WithAddressIdRecDialog, BaseManagerWidget
 from konsultant.db.gui import ViewBrowser
 
 from konsultant.db.xmlgen import ClientInfoDoc
-        
+from konsultant.db.client import ClientManager
+
 class ClientCursor(QSqlCursor):
     def __init__(self, db):
         QSqlCursor.__init__(self, 'clients', True, db)
@@ -72,10 +73,10 @@ class ClientView(ViewBrowser):
         doc = ClientInfoDoc(db)
         ViewBrowser.__init__(self, db, parent, ClientInfoDoc)
         self.dialogs = {}
-
+        self.manager = ClientManager(self.db)
+        
     def setSource(self, url):
         action, context, id = str(url).split('.')
-        #print 'action, context, id', action, context, id, url
         if context == 'contact':
             if action == 'new':
                 dlg = ContactDialog(self, self.db)
@@ -110,33 +111,13 @@ class ClientView(ViewBrowser):
     def insertContact(self):
         dlg = self.dialogs['new-contact']
         data = dict([(k,v.text()) for k,v in dlg.grid.entries.items()])
-        contactfields = ['name', 'email', 'description']
-        c_data = dict([(f, data[f]) for f in contactfields])
-        data['clientid'] = dlg.clientid
-        addressid = dlg.addressid
-
-        c_data['addressid'] = addressid
-        table = 'contacts'
-        row = self.db.identifyData('contactid', table, c_data)
-        contactid = row.contactid
-
-        cldata = {'clientid' : dlg.clientid, 'contactid' : contactid}
-        self._update_clientinfo(cldata)
+        contactid = self.manager.insertContact(dlg.clientid, dlg.addressid, data)
         self.set_client(dlg.clientid)
 
     def insertLocation(self):
         dlg = self.dialogs['new-location']
         data = dict([(k,v.text()) for k,v in dlg.grid.entries.items()])
-        locfields = ['isp', 'connection', 'ip', 'static', 'serviced']
-        ldata = dict([(f, data[f]) for f in locfields])
-        addressid = dlg.addressid
-
-        ldata['addressid'] = addressid
-        row = self.db.identifyData('locationid', 'locations', ldata)
-        locationid = row.locationid
-
-        cldata = {'clientid' : dlg.clientid, 'locationid' : locationid}
-        self._update_clientinfo(cldata)
+        locationid = self.manager.insertLocation(dlg.clientid, dlg.addressid, data)
         self.set_client(dlg.clientid)
 
 class ContactDialog(WithAddressIdRecDialog):

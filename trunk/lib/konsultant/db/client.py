@@ -5,9 +5,8 @@ class ClientManager(object):
         self.db = db
         self.addressfields = ['street1', 'street2', 'city', 'state', 'zip']
 
-    def _setup_insdata(self, fields, clientid, addressid):
+    def _setup_insdata(self, fields, clientid, addressid, data):
         insdata = dict([(f, data[f]) for f in fields])
-        insdata['clientid'] = clientid
         insdata['addressid'] = addressid
         return insdata
     
@@ -23,9 +22,16 @@ class ClientManager(object):
         row = self.db.identifyData('addressid', table, a_data)
         return row.addressid
 
+    
+    def _preparequeries(self, clientid, idcol, fields, table):
+        clientclause = Eq('clientid', clientid)
+        clause = '%s IN (select %s from clientinfo where %s)' % (idcol, idcol, clientclause)
+        addressid_query = self.db.stmt.select(fields=['addressid'], table=table, clause=clause)
+        return addressid_query, clause
+    
     def insertContact(self, clientid, addressid, data):
         fields = ['name', 'email', 'description']
-        insdata = self._setup_insdata(fields, clientid, addressid)
+        insdata = self._setup_insdata(fields, clientid, addressid, data)
         row = self.db.identifyData('contactid', 'contacts', insdata)
         contactid = row.contactid
         cldata = {'contactid' : contactid}
@@ -34,7 +40,7 @@ class ClientManager(object):
 
     def insertLocation(self, clientid, addressid, data):
         fields = ['isp', 'connection', 'ip', 'static', 'serviced']
-        insdata = self._setup_insdata(fields, clientid, addressid)
+        insdata = self._setup_insdata(fields, clientid, addressid, data)
         row = self.db.identifyData('locationid', 'locations', insdata)
         locationid = row.locationid
         cldata = {'locationid' : locationid}
@@ -53,13 +59,6 @@ class ClientManager(object):
         rows = self.db.select(fields=['addressid'] + self.addressfields,
                               table='addresses', clause=clause)
         return dict([(row.addressid, row) for row in rows])
-    
-    
-    def _preparequeries(self, clientid, idcol, fields, table):
-        clientclause = Eq('clientid', clientid)
-        clause = '%s IN (select %s from clientinfo where %s)' % (idcol, idcol, clientclause)
-        addressid_query = self.db.stmt.select(fields=['addressid'], table=table, clause=clause)
-        return addressid_query, clause
     
     def getLocations(self, clientid, addresses=True):
         fields = ['addressid', 'isp', 'connection', 'ip', 'static', 'serviced']

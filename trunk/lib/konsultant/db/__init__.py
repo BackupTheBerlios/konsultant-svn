@@ -103,8 +103,9 @@ class BaseDatabase(QSqlDatabase):
         except NoExistError:
             self.mcursor.insert(table=table, data=data)
             self.conn.commit()
-
+            
     def identifyData(self, idcol, table, data):
+        clause = self.stdclause(data)
         self.insertData(idcol, table, data)
         return self.mcursor.select_row(fields=['*'], table=table, clause=clause)
         
