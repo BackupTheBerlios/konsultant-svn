@@ -118,10 +118,10 @@ class WithAddressIdRecord(SimpleRecord):
     def _setupfields(self, parent):
         for f in range(len(self.fields)):
             if self.fields[f] == 'addressid':
-                self.selButton = KPushButton(KStdGuiItem.defaults(), parent)
-                self.addWidget(self.selButton, f + 1, 0)
-                self.insButton = KPushButton(KStdGuiItem.insert(), parent)
-                self.addWidget(self.insButton, f + 1, 1)
+                self.selButton = KPushButton('select/create', parent)
+                self.addWidget(self.selButton, f + 1, 1)
+                label = QLabel(entry, 'address', parent, self.fields[f])
+                self.addWidget(label, f + 1, 0)
             else:
                 entry = KLineEdit('', parent)
                 self.entries[self.fields[f]] = entry
@@ -138,7 +138,6 @@ class WithAddressIdRecDialog(KDialogBase):
         text = 'this is a <em>simple</em> record dialog'
         self.grid = WithAddressIdRecord(self.page, fields, text, name=name)
         self.connect(self.grid.selButton, SIGNAL('clicked()'), self.selButtonClicked)
-        self.connect(self.grid.insButton, SIGNAL('clicked()'), self.insButtonClicked)
         self.showButtonApply(False)
         self.setButtonOKText('insert', 'insert')
         self.enableButtonOK(False)
@@ -149,20 +148,17 @@ class WithAddressIdRecDialog(KDialogBase):
         dlg = AddressSelector(self, self.db)
         dlg.setSource(self.addressidSelected)
         self.dialogs['address'] = dlg
-    def insButtonClicked(self):
-        print 'insButtonClicked'
-        
+
     def addressidSelected(self, url):
         addressid = int(str(url).split('.')[2])
         self.enableButtonOK(True)
         self.dialogs['address'].done(0)
         self.grid.selButton.close()
-        self.grid.insButton.close()
         n = self.grid.fields.index('addressid') + 1
         text = AddressLink(self.db, addressid).toxml()
         lbl = QLabel(text, self.page)
         lbl.show()
-        self.grid.addMultiCellWidget(lbl, n, n, 0, 1)
+        self.grid.addMultiCellWidget(lbl, n, n, 1, 1)
         self.addressid = addressid
         
 class AddressSelector(KDialogBase):
