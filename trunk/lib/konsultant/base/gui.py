@@ -78,7 +78,10 @@ class SimpleRecord(QGridLayout):
             self.addWidget(entry, f + 1, 1)
             label = QLabel(entry, self.fields[f], parent, self.fields[f])
             self.addWidget(label, f + 1, 0)
-        
+
+    def getRecordData(self):
+        return dict([(k,v.text()) for k,v in self.entries.items()])
+
 class SimpleRecordDialog(KDialogBase):
     def __init__(self, parent, fields, name='SimpleRecordDialog'):
         KDialogBase.__init__(self, parent, name)
@@ -90,6 +93,18 @@ class SimpleRecordDialog(KDialogBase):
         self.setButtonOKText('insert', 'insert')
         self.show()
 
+    def getRecordData(self):
+        return self.grid.getRecordData()
+    
+
+class EditRecordDialog(SimpleRecordDialog):
+    def __init__(self, parent, fields, record, name):
+        SimpleRecordDialog.__init__(self, parent, fields, name=name)
+        self.record = record
+        for field in fields:
+            val = str(record[field])
+            self.grid.entries[field].setText(val)
+        
 class ConfigureDialog(KConfigDialog):
     def __init__(self, parent, cfg, name='ConfigureDialog'):
         print 'repreper'

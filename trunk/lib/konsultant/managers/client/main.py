@@ -84,13 +84,13 @@ class ClientView(ViewBrowser):
         
     def insertContact(self):
         dlg = self.dialogs['new-contact']
-        data = dict([(k,v.text()) for k,v in dlg.grid.entries.items()])
+        data = dlg.grid.getRecordData()
         contactid = self.manager.insertContact(dlg.clientid, dlg.addressid, data)
         self.set_client(dlg.clientid)
 
     def insertLocation(self):
         dlg = self.dialogs['new-location']
-        data = dict([(k,v.text()) for k,v in dlg.grid.entries.items()])
+        data = dlg.grid.getRecordData()
         locationid = self.manager.insertLocation(dlg.clientid, dlg.addressid, data)
         self.set_client(dlg.clientid)
 
@@ -191,7 +191,8 @@ class ClientManagerWidget(BaseManagerWidget):
     def insertClientok(self):
         dlg = self.dialogs['new-client']
         data = dict([(k,v.text()) for k,v in dlg.grid.entries.items()])
-        clientid = self.manager.insertClient(str(dlg.grid.entries['client'].text()))
+        client = str(dlg.grid.getRecordData()['client'])
+        clientid = self.manager.insertClient(client)
         self.setClientView(clientid)
         self.refreshlistView()
         
