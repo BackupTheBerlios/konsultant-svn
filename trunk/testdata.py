@@ -1,4 +1,4 @@
-from paella.sqlgen.statement import Statement
+from konsultant.sqlgen.statement import Statement
 
 stmt = Statement()
 
@@ -64,14 +64,17 @@ def gen_all():
 
 if __name__ == '__main__':
     import os
-    from paella.base.config import Configuration
+    from ConfigParser import ConfigParser
     from konsultant.db import BasicConnection
     from konsultant.db import StatementCursor
     from konsultant.db.schema import create_schema
-    cfg = Configuration('database', [os.path.expanduser('~/.kde/share/config/konsultantrc')])
-    dbname = cfg['dbname']
-    dbhost = cfg['dbhost']
-    dbuser = cfg['dbuser']
+    cfg = ConfigParser()
+    cfile = os.path.expanduser('~/.kde/share/config/konsultantrc')
+    cfg.read(cfile)
+    s = 'database'
+    dbname = cfg.get(s, 'dbname')
+    dbhost = cfg.get(s, 'dbhost')
+    dbuser = cfg.get(s, 'dbuser')
     conn = BasicConnection(dbuser, dbhost, dbname)
     sl = gen_all()
     cursor = StatementCursor(conn)
