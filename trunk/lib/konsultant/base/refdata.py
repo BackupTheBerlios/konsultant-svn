@@ -1,3 +1,4 @@
+from konsultant.sqlgen.classes import ColumnType, Column, Table
 from konsultant.sqlgen.statement import Statement
 from konsultant.sqlgen.clause import Eq, In, NotIn
 
@@ -146,10 +147,88 @@ class ClientDataObject(DataObject):
                             locations=LocationDataObject())
         self.hasMany_tables = dict(contacts='clientinfo',
                                    locations='clientinfo')
+
+class ObjectMaker(object):
+    def __init__(self, type_, idcol=None):
+        object.__init__(self)
+        if idcol is None:
+            idcol = Column('%sid' % type_, ColumnType('int'))
+            idcol.constraint.pk = True
+        self.idcol = idcol
+        self.type = type_
+        self.maintable = Table('%ss' % type_, [idcol])
+        self._maincols = {}
+        self._hasOneTables = {}
+        self._hasManyTables = {}
         
+    def set_maintablename(self, name):
+        self.maintable.name = name
+
+    def append_field(self, name, type='text', width=None):
+        coltype = ColumnType(type=type, width=width)
+        col = Column(name, coltype)
+        self.maintable.columns.append(col)
+        self._maincols[name] = col
+
+    def append_manyfield(self, name, type, tablename, reftable):
+        coltype = ColumnType(type='int')
+        maincol = Column(self.idcol.name, coltype)
+        maincol.set_fk(self.maintable.name)
+        rcol = Column(name, coltype)
+        rcol.set_fk(reftable)
+        self._hasManyTables[type] = Table(tablename, [maincol, rcol])
+
+    def append_manyObject(self, objekt, tablename=None):
+        if tablename is None:
+            tablename = '%s%s' % (self.type, objekt.type)
+        coltype = ColumnType(type='int')
+        maincol = Column(self.idcol.name, coltype)
+        maincol.set_fk(self.maintable.name)
+        rcol = Column(objekt.idcol.name, coltype)
+        rcol.set_fk(objekt.maintable.name)
+        self._hasManyTables[objekt.type] = Table(tablename, [maincol, rcol])
+
+    def append_oneObject(self, objekt):
+        ctype = objekt.idcol.type
+        coltype = ColumnType(ctype.type, ctype.width)
+        col = Column(objekt.idcol.name, coltype)
+        col.set_fk(objekt.maintable.name)
+        self.maintable.columns.append(col)
+        self._maincols[col.name] = col
+        
+        
+    def _reportme(self):
+        print self.maintable
+        for table in self._hasManyTables.values():
+            print table
+            
+    
 if __name__ == '__main__':
     s = Statement()
     c = ClientDataObject()
     l = LocationDataObject()
 
     a = AddressDataObject()
+    ao = ObjectMaker('address')
+    ao.append_field('street1', 'varchar', 200)
+    ao.append_field('street2', 'varchar', 200)
+    ao.append_field('city', 'varchar', 50)
+    ao.append_field('state', 'varchar', 2)
+    ao.append_field('zip', 'varchar', 5)
+    co = ObjectMaker('contact')
+    lo = ObjectMaker('location')
+    
+    o = ObjectMaker('client')
+    #o.set_name('clients')
+    o.append_field('name', 'varchar', 45)
+    co.append_field('name', 'varchar', 45)
+    co.append_oneObject(ao)
+    co.append_field('email', 'varchar', 122)
+    lo.append_field('name', 'varchar', 45)
+    lo.append_oneObject(ao)
+    lo.append_field('isp')
+    #o.append_manyfield('locationid', 'location', 'clientlocation', 'locations')
+    #o.append_manyfield('contactid', 'contact', 'clientcontact', 'contacts')
+    o.append_manyObject(co)
+    o.append_manyObject(lo)
+    
