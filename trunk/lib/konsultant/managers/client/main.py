@@ -111,7 +111,7 @@ class ClientManagerWidget(BaseManagerWidget):
         self.manager = ClientManager(self.app)
         self.initToolbar()
         self.resize(800, 600)
-        
+
     def initActions(self):
         collection = self.actionCollection()
         self.newAction = KStdAction.openNew(self.slotNew, collection)
@@ -160,8 +160,7 @@ class ClientManagerWidget(BaseManagerWidget):
         self.dialogs['new-client'] = dlg
         
     def slotEditAddresses(self):
-        print 'hello'
-        AddressSelector(self, self.db)
+        AddressSelector(self, self.app)
 
     def testAction(self, action):
         KMessageBox.error(self, QString('<html>action <b>%s</b> not ready</html>' % action))

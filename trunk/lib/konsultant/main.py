@@ -50,6 +50,7 @@ class KonsultantMainApplication(KApplication):
             dsn['host'] = self.cfg.readEntry('dbhost')
             dsn['port'] = self.cfg.readEntry('dbport')
         self.db = BaseDatabase(dsn, 'Konsultant', self)
+        self.db.app = self
         self.connect(self, SIGNAL('aboutToQuit()'), self.quit)
         
         

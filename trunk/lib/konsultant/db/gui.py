@@ -73,10 +73,11 @@ class currentobject(object):
       self.id = None
       
 class RecordSelector(QSplitter):
-    def __init__(self, parent, db, table, fields, idcol, groupfields, view, name='RecordSelector'):
+    def __init__(self, parent, app, table, fields, idcol, groupfields, view, name='RecordSelector'):
         QSplitter.__init__(self, parent, name)
         self.current = currentobject()
-        self.db = db
+        self.app = app
+        self.db = app.db
         self.table = table
         self.fields = fields
         self.idcol = idcol
@@ -84,7 +85,7 @@ class RecordSelector(QSplitter):
         self.listView = KListView(self)
         self.vsplit = QSplitter(self)
         self.vsplit.setOrientation(Qt.Vertical)
-        self.recView = view(db, self.vsplit)
+        self.recView = view(self.app, self.vsplit)
         frame = QFrame(self.vsplit)
         self.recForm = EditableRecord(frame, fields)
         self.connect(self.listView, SIGNAL('selectionChanged()'), self.groupChanged)
@@ -178,9 +179,9 @@ class ViewBrowser(KTextBrowser):
         self.setText(self.doc.toxml())
         
 class AddressSelectView(ViewBrowser):
-    def __init__(self, db, parent):
+    def __init__(self, app, parent):
         doc = AddressSelectDoc
-        ViewBrowser.__init__(self, db, parent, doc)
+        ViewBrowser.__init__(self, app, parent, doc)
 
     def set_city(self, city):
         clause = Eq('city', city)
@@ -223,7 +224,7 @@ class WithAddressIdRecDialog(KDialogBase):
         self.show()
         
     def selButtonClicked(self):
-        dlg = AddressSelector(self, self.db, modal=True)
+        dlg = AddressSelector(self, self.db.app, modal=True)
         dlg.setSource(self.addressidSelected)
         self.dialogs['address'] = dlg
 
@@ -240,11 +241,12 @@ class WithAddressIdRecDialog(KDialogBase):
         self.addressid = addressid
         
 class AddressSelector(KDialogBase):
-    def __init__(self, parent, db, name='AddressSelector', modal=True):
+    def __init__(self, parent, app, name='AddressSelector', modal=True):
         KDialogBase.__init__(self, parent, name, modal)
-        self.db = db
+        self.app = app
+        self.db = app.db
         self.fields = ['street1', 'street2', 'city', 'state', 'zip']
-        self.mainView = RecordSelector(self, self.db, 'addresses', self.fields,
+        self.mainView = RecordSelector(self, self.app, 'addresses', self.fields,
                                        'addressid', ['state', 'city'], AddressSelectView, name=name)
         self.setMainWidget(self.mainView)
         self.showButtonApply(False)
