@@ -35,6 +35,9 @@ class ConfigItem(BaseItem):
         BaseItem.__init__(self, 'Configure Konsultant', 'configure',
                           'Configure Konsultant', 'Configure Konsultant')
         
+class Assign:
+    pass
+
 class EditAddresses(KAction):
     def __init__(self, slot, parent):
         item = EditAddressesItem()

@@ -31,6 +31,13 @@ class TitleTable(BaseElement):
         td.appendChild(font)
         element = TextElement('b', title)
         font.appendChild(element)
+
+class CommandBar(BaseElement):
+    def __init__(self, ticketid):
+        BaseElement.__init__(self, 'table')
+        row = BaseElement('tr')
+        self.anchor = Anchor('show.ticket.%d' % ticketid, 'show')
+        self.assign = Anchor('assign.ticket.%d' % ticketid, 'assign')
         
 class SubjectTable(BaseElement):
     def __init__(self, subject, action, author, posted):
@@ -81,7 +88,10 @@ class TicketHeader(BaseElement):
         self.appendChild(self.author)
         p = BaseElement('p')
         refresh = Anchor('refresh.page.%d' % ticketid, 'refresh')
+        assign = Anchor('assign.ticket.%d' % ticketid, 'assign')
         p.appendChild(refresh)
+        p.appendChild(BaseElement('br'))
+        p.appendChild(assign)
         self.appendChild(p)
 
 class TicketFooter(BaseElement):
@@ -182,9 +192,18 @@ class TicketInfoElement(BaseElement):
         self.appendChild(self.author)
         self.appendChild(self.created)
         self.anchor = Anchor('show.ticket.%d' % ticketid, 'show')
-        self.appendChild(self.anchor)
-        
-        
+        self.assign = Anchor('assign.ticket.%d' % ticketid, 'assign')
+        node = BaseElement('table')
+        node.setAttribute('width', '100%')
+        node.setAttribute('align', 'center')
+        self.appendChild(node )
+        row = BaseElement('tr')
+        row.appendChild(TextElement('td', self.anchor))
+        td  = TextElement('td', self.assign)
+        td.setAttribute('align', 'right')
+        row.appendChild(td)
+        node.appendChild(row)
+        print self.toxml()
         
     
 

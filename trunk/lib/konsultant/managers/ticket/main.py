@@ -1,9 +1,10 @@
 from qt import SIGNAL, SLOT
 from qt import QVBoxLayout, QHBoxLayout, QFrame
+from qt import QListBoxItem, QListBoxText
 
 from kdeui import KStdAction, KPopupMenu
 from kdeui import KListViewItem
-from kdeui import KMessageBox
+from kdeui import KMessageBox, KActionSelector
 
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KTextEdit, KMainWindow
@@ -11,7 +12,8 @@ from kdeui import KTextEdit, KMainWindow
 from konsultant.base.gui import MainWindow
 from konsultant.db import BaseDatabase
 from konsultant.db.gui import BaseManagerWidget, ViewBrowser
-from konsultant.sqlgen.clause import Eq, In
+
+from konsultant.sqlgen.clause import Eq, In, NotIn
 
 from xmlgen import TicketInfoDoc
 from xmlgen import TicketDocument
@@ -52,6 +54,41 @@ class ActionDialog(VboxDialog):
         self.setButtonOKText('insert', 'insert')
         self.show()
 
+class TicketAssigner(VboxDialog):
+    def __init__(self, parent, app, ticketid):
+        KMainWindow.__init__(self, parent, 'TicketAssigner')
+        self.resize(400, 300)
+        self.listBox = KActionSelector(self)
+        self.listBox.setShowUpDownButtons(False)
+        self.setMainWidget(self.listBox)
+        self.app = app
+        self.db = app.db
+        self.manager = TicketManager(self.app)
+        self.ticketid = ticketid
+        self.initlistView()
+        self.show()
+        self.connect(self, SIGNAL('okClicked()'), self.update_clients)
+        
+    def initlistView(self):
+        rows = self.manager.get_clients(self.ticketid, assigned=False)
+        ubox = self.listBox.availableListBox()
+        abox = self.listBox.selectedListBox()
+        for row in rows:
+            if row.assigned:
+                c = QListBoxText(abox, row.client)
+            else:
+                c = QListBoxText(ubox, row.client)
+            c.clientid = row.clientid
+        #lbox.show()
+
+    def update_clients(self):
+        print 'updating clients'
+        ubox = self.listBox.availableListBox()
+        abox = self.listBox.selectedListBox()
+        ids = [abox.item(a).clientid for a in range(abox.numRows())]
+        self.manager.update_ticket_assignment(self.ticketid, ids)
+        
+        
 class TicketActionView(ViewBrowser):
     def __init__(self, app, parent, ticketid):
         ViewBrowser.__init__(self, app, parent, TicketInfoDoc)
@@ -82,6 +119,10 @@ class TicketActionView(ViewBrowser):
             if action == 'refresh':
                 self.setID(self.current)
                 print 'fresh page'
+        elif context == 'ticket':
+            if action == 'assign':
+                print 'assign in TicketActionView'
+                TicketAssigner(self, self.app, id)
                 
     def setID(self, ticketid):
         self.current = ticketid
@@ -122,17 +163,21 @@ class TicketView(ViewBrowser):
         
     def setSource(self, url):
         action, context, id = str(url).split('.')
+        id = int(id)
         print action, context, id
         if context == 'ticket':
             if action == 'show':
-                print 'showing ticket %s' % id
+                print 'showing ticket %d' % id
                 win = KMainWindow(self)
-                v = TicketActionView(self.app, win, int(id))
-                v.setID(int(id))
+                v = TicketActionView(self.app, win, id)
+                v.setID(id)
                 v.resize(700, 900)
                 win.setCentralWidget(v)
                 win.resize(700, 900)
                 win.show()
+            elif action == 'assign':
+                print 'need to assign ticket'
+                TicketAssigner(self, self.app, id)
                 
 class TicketManagerWidgetNew(BaseManagerWidget):
     def __init__(self, parent, app, *args):
@@ -140,6 +185,7 @@ class TicketManagerWidgetNew(BaseManagerWidget):
         self.manager = TicketManager(self.app)
         self.dialogs = {}
         print 'ticket app', app, self.app
+        self.resize(400, 600)
         
     def initActions(self):
         collection = self.actionCollection()
@@ -202,9 +248,14 @@ class TicketManagerWidgetNew(BaseManagerWidget):
             
             clause = In('ticketid', sel)
             self.view.setID(clause=clause)
-        else:
+        elif str(current.text(0)) == 'all':
             self.view.setID(None)
-
+        elif str(current.text(0)) == 'unassigned':
+            print 'hey hey hey'
+            sel = self.db.stmt.select(fields=['ticketid'], table='client_tickets')
+            clause = NotIn('ticketid', sel)
+            self.view.setID(clause=clause)
+            
             
 #################################################
         

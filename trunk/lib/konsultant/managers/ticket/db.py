@@ -51,7 +51,15 @@ class TicketManager(object):
         self.db.foobar()
         return new
     
-
+    def update_ticket_assignment(self, ticketid, assigned):
+        tdata = dict(ticketid=ticketid)
+        self.db.delete(table='client_tickets', clause=Eq('ticketid', ticketid))
+        for clientid in assigned:
+            tdata['clientid'] = clientid
+            self.db.insert(table='client_tickets', data=tdata)
+        self.db.conn.commit()
+        
+    
     def get_tickets(self, clause=None):
         fields = ['ticketid', 'title', 'author', 'created']
         print clause, type(clause)
@@ -104,3 +112,23 @@ class TicketManager(object):
         fields = ['data']
         row = self.db.select_row(fields=fields, table=table, clause=clause)
         return row.data
+
+    def get_clients(self, ticketid, assigned=False):
+        tclause = Eq('ticketid', ticketid)
+        cfields = ['clientid', 'client']
+        sub = self.db.stmt.select(fields=['clientid'], table='client_tickets',
+                                  clause=tclause)
+        if assigned:
+            clause = In('clientid', sub)
+            return self.db.select(fields=fields, table='clients', clause=clause)
+        else:
+            afields = cfields + ['TRUE as assigned']
+            ufields = cfields + ['FALSE as assigned']
+            asel = self.db.stmt.select(fields=afields, table='clients',
+                                       clause=In('clientid', sub))
+            usel = self.db.stmt.select(fields=ufields, table='clients',
+                                       clause=NotIn('clientid', sub))
+            self.db.mcursor.execute('%s UNION %s' % (asel, usel))
+            return self.db.mcursor.fetchall()
+
+    

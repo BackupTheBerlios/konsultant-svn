@@ -6,7 +6,7 @@ from konsultant.sqlgen.clause import Eq, In
 
 from konsultant.base.xmlgen import Html, Body, Anchor
 from konsultant.base.xmlgen import TableElement
-from konsultant.base.xmlgen import BaseElement
+from konsultant.base.xmlgen import BaseElement, TextElement
 from konsultant.db.xmlgen import BaseDocument
 from konsultant.db.xmlgen import AddressLink
 
@@ -15,11 +15,13 @@ from db import ClientManager
 
 class ClientHeaderElement(BaseElement):
     def __init__(self, client):
-        BaseElement.__init__(self, 'h3')
+        BaseElement.__init__(self, 'head')
         self.client = client
-        node = Text()
-        node.data = '%s:' % client
+        #node = Text()
+        #node.data = '%s:' % client
+        node = TextElement('h1', client)
         self.appendChild(node)
+        self.appendChild(BaseElement('hr'))
 
 class ClientSectionHeader(BaseElement):
     def __init__(self, clientid, section, text):
