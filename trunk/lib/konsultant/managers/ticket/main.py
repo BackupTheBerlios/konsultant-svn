@@ -80,7 +80,7 @@ class TicketManagerWidget(BaseManagerWidget):
         self.listView.clear()
         fields = ['title', 'author', 'created']
         rows = self.manager.get_tickets()
-        print len(rows)
+        print len(rows), rows
         for row in rows:
             drow = [str(row[field]) for field in fields]
             item = KListViewItem(self.listView, *drow)

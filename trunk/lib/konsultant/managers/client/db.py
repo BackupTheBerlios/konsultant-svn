@@ -23,12 +23,6 @@ class ClientManager(object):
         return row.addressid
 
     
-    def _preparequeries(self, clientid, idcol, fields, table):
-        clientclause = Eq('clientid', clientid)
-        clause = '%s IN (select %s from clientinfo where %s)' % (idcol, idcol, clientclause)
-        addressid_query = self.db.stmt.select(fields=['addressid'], table=table, clause=clause)
-        return addressid_query, clause
-    
     def insertContact(self, clientid, addressid, data):
         fields = ['name', 'email', 'description']
         insdata = self._setup_insdata(fields, clientid, addressid, data)
@@ -82,6 +76,13 @@ class ClientManager(object):
         contacts = self.db.select(fields=fields, table='contacts', clause=clause)
         return contacts, addresses
 
+    def _preparequeries(self, clientid, idcol, fields, table):
+        clientclause = Eq('clientid', clientid)
+        clause = '%s IN (select %s from clientinfo where %s)' % (idcol, idcol, clientclause)
+        addressid_query = self.db.stmt.select(fields=['addressid'],
+                                              table=table, clause=clause)
+        return addressid_query, clause
+    
     def getClientInfo(self, clientid):
         clause = Eq('clientid', clientid)
         client = self.db.select_row(fields=['client'], table='clients', clause=clause).client

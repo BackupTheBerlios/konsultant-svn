@@ -39,7 +39,51 @@ class TicketData(TextElement):
     def __init__(self, data):
         TextElement.__init__(self, 'p', data)
 
+
+class ListItem(TextElement):
+    def __init__(self, data):
+        TextElement.__init__(self, 'li', data)
+
+class UnorderedList(BaseElement):
+    def __init__(self):
+        BaseElement.__init__(self, 'ul')
         
+class ActionThreads(UnorderedList):
+    def __init__(self, parent, rows, trows, crows):
+        UnorderedList.__init__(self)
+        self.actions = {}
+        for row in trows:
+            element = UnorderedList()
+            li = ListItem('action-%d' % row.actionid)
+            element.appendChild(li)
+            self.actions[row.actionid] = element
+            self.appendChild(element)
+        self.make_threads(parent, crows)
+        
+    def make_threads(self, parent, rows):
+        print rows
+        while len(rows):
+            row = rows[0]
+            print 'row is', row.actionid, row.parent
+            element = UnorderedList()
+            #element = ListItem('actionid %d' % row.actionid)
+            if not row.parent:
+                print row.parent, 'is a not'
+                parent.appendChild(element)
+                #element.appendChild(ListItem('actionid--%d' % row.actionid))
+                print 'bumping back'
+            elif not self.actions.has_key(row.parent):
+                print row.parent, 'is not there'
+                rows.append(row)
+            else:
+                self.actions[row.parent].appendChild(element)
+                print row.actionid, 'appended to ', row.parent
+                element.appendChild(ListItem('actionid--%d' % row.actionid))
+            self.actions[row.actionid] = element
+            del rows[0]
+            
+            
+    
 class TicketInfoDoc(BaseDocument):
     def __init__(self, db):
         BaseDocument.__init__(self, db)
@@ -62,4 +106,7 @@ class TicketInfoDoc(BaseDocument):
         #append ticket footer
         self.tfooter = TicketFooter(ticketid)
         self.body.appendChild(self.tfooter)
+        rows, trows, crows = self.manager.get_actionids(ticketid)
+        athreads = ActionThreads(self.body, rows, trows, crows)
+        self.body.appendChild(athreads)
         
