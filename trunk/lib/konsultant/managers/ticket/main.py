@@ -173,6 +173,7 @@ class TicketView(ViewBrowser):
                 v.setID(id)
                 v.resize(700, 900)
                 win.setCentralWidget(v)
+                win.setCaption('TicketView')
                 win.resize(700, 900)
                 win.show()
             elif action == 'assign':
@@ -182,18 +183,22 @@ class TicketView(ViewBrowser):
 class TicketManagerWidgetNew(BaseManagerWidget):
     def __init__(self, parent, app, *args):
         BaseManagerWidget.__init__(self, parent, app, TicketView, 'TicketManager')
+        self.setCaption('TicketManager')
         self.manager = TicketManager(self.app)
         self.dialogs = {}
+        self.initToolbar()
         print 'ticket app', app, self.app
         self.resize(400, 600)
         
     def initActions(self):
         collection = self.actionCollection()
         self.newAction = KStdAction.openNew(self.slotNew, collection)
-
+        self.quitAction = KStdAction.quit(self.close, collection)
+        
     def initMenus(self):
         menu = KPopupMenu(self)
         self.newAction.plug(menu)
+        self.quitAction.plug(menu)
         self.menuBar().insertItem('&Main', menu)
         self.menuBar().insertItem('&Help', self.helpMenu(''))
 
@@ -202,6 +207,12 @@ class TicketManagerWidgetNew(BaseManagerWidget):
         self.listView.addColumn('ticket group')
         self.refreshlistView()
 
+    def initToolbar(self):
+        toolbar = self.toolBar()
+        actions = [self.newAction, self.quitAction]
+        for action in actions:
+            action.plug(toolbar)
+            
     def refreshlistView(self):
         self.listView.clear()
         all = KListViewItem(self.listView, 'all')

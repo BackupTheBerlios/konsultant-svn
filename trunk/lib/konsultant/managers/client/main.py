@@ -25,7 +25,7 @@ from kdeui import KAction, KGuiItem
 from konsultant.base import NoExistError, Error
 from konsultant.sqlgen.clause import Eq, In
 from konsultant.base.actions import EditAddresses, ConfigureKonsultant
-from konsultant.base.actions import ManageTickets
+from konsultant.base.actions import ManageTickets, AdministerDatabase
 from konsultant.base.gui import MainWindow
 from konsultant.base.gui import ConfigureDialog
 
@@ -35,6 +35,7 @@ from konsultant.db.gui import AddressSelectView, RecordSelector
 from konsultant.db.gui import SimpleRecordDialog, AddressSelector
 from konsultant.db.gui import WithAddressIdRecDialog, BaseManagerWidget
 from konsultant.db.gui import ViewBrowser
+from konsultant.db.admin import AdminWidget
 
 from konsultant.managers.ticket import TicketManagerWidget
 
@@ -108,6 +109,7 @@ class LocationDialog(WithAddressIdRecDialog):
 class ClientManagerWidget(BaseManagerWidget):
     def __init__(self, parent, app, *args):
         BaseManagerWidget.__init__(self, parent, app, ClientView, 'ClientManager')
+        self.setCaption('ClientManager')
         self.cfg = self.app.cfg
         self.cfg.setGroup('client-gui')
         size = self.cfg.readEntry('mainwinsize')
@@ -125,13 +127,16 @@ class ClientManagerWidget(BaseManagerWidget):
         self.editaddressAction = EditAddresses(self.slotEditAddresses, collection)
         self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
         self.manageTicketsAction = ManageTickets(self.slotManageTickets, collection)
-        print self.editaddressAction
+        self.admindbAction = AdministerDatabase(self.slotAdministerDatabase,
+                                                collection)
+        
 
     def initMenus(self):
         mainMenu = KPopupMenu(self)
         self.newAction.plug(mainMenu)
         self.manageTicketsAction.plug(mainMenu)
         self.editaddressAction.plug(mainMenu)
+        self.admindbAction.plug(mainMenu)
         self.quitAction.plug(mainMenu)
         self.configureAction.plug(mainMenu)
         self.menuBar().insertItem('&Main', mainMenu)
@@ -145,7 +150,7 @@ class ClientManagerWidget(BaseManagerWidget):
     def initToolbar(self):
         toolbar = self.toolBar()
         actions = [self.newAction, self.manageTicketsAction,
-                   self.editaddressAction, self.quitAction]
+                   self.editaddressAction, self.admindbAction, self.quitAction]
         for action in actions:
             action.plug(toolbar)
         
@@ -168,6 +173,9 @@ class ClientManagerWidget(BaseManagerWidget):
     def slotEditAddresses(self):
         AddressSelector(self, self.app)
 
+    def slotAdministerDatabase(self):
+        AdminWidget(self, self.app)
+        
     def testAction(self, action):
         KMessageBox.error(self, QString('<html>action <b>%s</b> not ready</html>' % action))
 
@@ -185,6 +193,7 @@ class ClientManagerWidget(BaseManagerWidget):
         clientid = self.manager.insertClient(str(dlg.grid.entries['client'].text()))
         self.setClientView(clientid)
         self.refreshlistView()
+        
     def setClientView(self, clientid):
         self.view.set_client(clientid)
 
