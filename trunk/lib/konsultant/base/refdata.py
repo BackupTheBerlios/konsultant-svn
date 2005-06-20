@@ -1,6 +1,6 @@
-from konsultant.sqlgen.classes import ColumnType, Column, Table
-from konsultant.sqlgen.statement import Statement
-from konsultant.sqlgen.clause import Eq, In, NotIn
+from useless.sqlgen.classes import ColumnType, Column, Table
+from useless.sqlgen.statement import Statement
+from useless.sqlgen.clause import Eq, In, NotIn
 
 #refcols is a  name, idcol paired dictionary
 #refdata[name] is a dictionary of id, record pairs

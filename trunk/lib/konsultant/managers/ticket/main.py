@@ -9,11 +9,11 @@ from kdeui import KMessageBox, KActionSelector
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KTextEdit, KMainWindow
 
-from kommon.base.gui import MainWindow
-from kommon.db import BaseDatabase
-from kommon.db.gui import BaseManagerWidget, ViewBrowser
+from useless.kbase.gui import MainWindow
+from useless.kdb import BaseDatabase
+from useless.kdb.gui import BaseManagerWidget, ViewBrowser
 
-from kommon.sqlgen.clause import Eq, In, NotIn
+from useless.sqlgen.clause import Eq, In, NotIn
 
 from xmlgen import TicketInfoDoc
 from xmlgen import TicketDocument

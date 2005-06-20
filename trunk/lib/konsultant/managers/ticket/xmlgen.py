@@ -1,16 +1,16 @@
 #from operator import and_
 from xml.dom.minidom import Element, Text
 
-from kommon.base import NoExistError
-from kommon.sqlgen.clause import Eq, In
+from useless.base import NoExistError
+from useless.sqlgen.clause import Eq, In
 
-from kommon.base.xmlgen import Html, Body, Anchor
-from kommon.base.xmlgen import TextElement
-from kommon.base.xmlgen import TableElement
-from kommon.base.xmlgen import BaseElement
-from kommon.base.xmlgen import UnorderedList, ListItem
-from kommon.db.xmlgen import BaseDocument
-from kommon.db.xmlgen import BaseParagraph
+from useless.xmlgen.base import Html, Body, Anchor
+from useless.xmlgen.base import TextElement
+from useless.xmlgen.base import TableElement
+from useless.xmlgen.base import BaseElement
+from useless.xmlgen.base import UnorderedList, ListItem
+from useless.kdb.xmlgen import BaseDocument
+from useless.kdb.xmlgen import BaseParagraph
 
 from db import TicketManager
 

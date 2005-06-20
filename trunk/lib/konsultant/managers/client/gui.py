@@ -1,9 +1,9 @@
 from qt import SIGNAL, SLOT, Qt
 
-from kommon.base.refdata import RefData
-from kommon.base.gui import EditRecordDialog
-from kommon.pdb.record import EmptyRefRecord
-from kommon.db.gui import SimpleRecordDialog
+from useless.kbase.refdata import RefData
+from useless.kbase.gui import EditRecordDialog
+from useless.db.record import EmptyRefRecord
+from useless.kdb.gui import SimpleRecordDialog
 
 from konsultant.db.gui import AddressSelector
 from konsultant.db.xmlgen import AddressLink

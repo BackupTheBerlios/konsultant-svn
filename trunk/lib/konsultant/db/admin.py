@@ -1,28 +1,20 @@
 from qt import SIGNAL, SLOT, Qt
 from qt import QSplitter
-#from qt import QGridLayout
-#from qt import QFrame, QPushButton
-#from qt import QLabel, QString
 
-#from kdeui import KDialogBase, KLineEdit
 from kdeui import KMainWindow, KPopupMenu
 from kdeui import KStdAction, KMessageBox
 from kdeui import KListViewItem
 from kdeui import KListView
-#from kdeui import KPushButton, KStatusBar
 
-#from konsultant.base import NoExistError
-#from konsultant.sqlgen.clause import Eq, In
+from useless.db.midlevel import StatementCursor
+from useless.sqlgen.clause import Eq, In
+from useless.sqlgen.admin import create_user, create_schema
 
 from konsultant.base.actions import AddDbUser, AddDbGroup
 from konsultant.base.actions import AddDbSchema
-from konsultant.sqlgen.clause import Eq, In
-from konsultant.sqlgen.admin import create_user, create_schema
 from konsultant.db import schema as kschema
-from konsultant.pdb.midlevel import StatementCursor
-#from konsultant.base.gui import MainWindow, MimeSources
 from konsultant.base.gui import SimpleRecordDialog
-#from konsultant.db.xmlgen import AddressSelectDoc, AddressLink
+
 class AdminDb(object):
     def __init__(self, app):
         object.__init__(self)

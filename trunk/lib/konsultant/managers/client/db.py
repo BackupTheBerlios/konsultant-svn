@@ -1,6 +1,6 @@
-from kommon.base.refdata import RefData
-from kommon.pdb.record import RefRecord
-from kommon.sqlgen.clause import Eq, In
+from useless.kbase.refdata import RefData
+from useless.db.record import RefRecord
+from useless.sqlgen.clause import Eq, In
 
 class ClientManager(object):
     def __init__(self, app):
@@ -129,3 +129,11 @@ class ClientManager(object):
         self.db.update(table='clients', data=data, clause=Eq('clientid', clientid))
         
         
+    def getTags(self, clientid):
+        clause = Eq('clientid', clientid)
+        tagrows = self.db.select(table='client_tags', clause=clause)
+        tagdict = {}
+        for row in tagrows:
+            tagdict[row.tag] = row.value
+        return tagdict
+    

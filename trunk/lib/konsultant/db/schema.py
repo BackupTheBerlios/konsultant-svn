@@ -1,9 +1,9 @@
-from konsultant.sqlgen.classes import Table, Sequence, ColumnType, Column
-from konsultant.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
-from konsultant.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
-from konsultant.sqlgen.defaults import DateTime
-from konsultant.sqlgen.statement import Statement
-from konsultant.sqlgen.admin import grant_public, grant_group
+from useless.sqlgen.classes import Table, Sequence, ColumnType, Column
+from useless.sqlgen.defaults import Pk, Text, DefaultNamed, Bool, PkNum
+from useless.sqlgen.defaults import PkBigname, Bigname, Name, Num, PkName
+from useless.sqlgen.defaults import DateTime
+from useless.sqlgen.statement import Statement
+from useless.sqlgen.admin import grant_public, grant_group
 
 
 ZipName = ColumnType('varchar', 5)
@@ -26,6 +26,15 @@ def Now(name):
     column.constraint.default = 'now()'
     return column
 
+class BasicTagTable(Table):
+    def __init__(self, idcol, idtable, name):
+        id_ = PkNum(idcol)
+        id_.set_fk(idtable)
+        tagname = PkName('tag')
+        tagval = Text('value')
+        cols = [id_, tagname, tagval]
+        Table.__init__(self, name, cols)
+        
 class ConfigTable(Table):
     def __init__(self):
         uname = PkName('username')
@@ -46,7 +55,9 @@ class AddressTable(Table):
         state.constraint.pk = True
         zip_ = Column('zip', ZipName)
         zip_.constraint.pk = True
-        cols = [idcol, s1, s2, city, state, zip_]
+        atype = Name('addresstype')
+        atype.constraint.default = 'office'
+        cols = [idcol, s1, s2, city, state, zip_, atype]
         Table.__init__(self, 'addresses', cols)
 
 class ContactTable(Table):
@@ -98,6 +109,10 @@ class TicketStatusTable(Table):
         status = Name('status')
         Table.__init__(self, 'ticketstatus', [ticketid, status])
 
+class TicketTagTable(BasicTagTable):
+    def __init__(self):
+        BasicTagTable.__init__(self, 'ticketid', 'tickets', 'ticket_tags')
+        
 class LocationTable(Table):
     def __init__(self):
         idcol = AutoId('locationid', 'location_ident')
@@ -131,7 +146,11 @@ class ClientTicketTable(Table):
         ticketid.set_fk('tickets')
         status = Name('status')
         Table.__init__(self, 'client_tickets', [clientid, ticketid, status])
-        
+
+class ClientTagTable(BasicTagTable):
+    def __init__(self):
+        BasicTagTable.__init__(self, 'clientid', 'clients', 'client_tags')
+
 class ClientInfoTable(Table):
     def __init__(self):
         clientid = Num('clientid')
@@ -181,7 +200,8 @@ class LocationTaskTable(Table):
 MAINTABLES = [AddressTable, ContactTable, TicketTable,
               TicketStatusTable, TicketActionTable, TicketActionParentTable,
               LocationTable, ClientTable, ClientTicketTable, ClientInfoTable,
-              ClientDataTable, TaskTable, ClientTaskTable, LocationTaskTable
+              ClientDataTable, TaskTable, ClientTaskTable, LocationTaskTable,
+              TicketTagTable, ClientTagTable
               ]
 
 def create_schema(cursor, group):
@@ -208,9 +228,10 @@ def create_schema(cursor, group):
     
 if __name__ == '__main__':
     import os
-    from konsultant.base.config import Config
-    from konsultant.db.lowlevel import BasicConnection
-    from konsultant.db.midlevel import StatementCursor
+    #from konsultant.base.config import Config
+    from useless.db.lowlevel import BasicConnection
+    from useless.db.midlevel import StatementCursor
+    from useless.base.config import Configuration
     from konsultant.base.config import BaseConfig
     from konsultant.db import BaseDatabase
     cfg = Configuration('database', os.path.expanduser('~/.kde/share/config/konsultantrc'))
@@ -222,6 +243,6 @@ if __name__ == '__main__':
     #b = BaseDatabase( cfg , 'schema maker')
     c = StatementCursor(conn)
     if not len(c.tables()):
-        create_schema(c)
+        create_schema(c, 'konsultant')
         conn.commit()
 

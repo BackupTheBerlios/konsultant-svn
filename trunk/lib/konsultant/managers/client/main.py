@@ -23,17 +23,17 @@ from kdeui import KJanusWidget, KListViewItem
 from kdeui import KListView, KStatusBar
 from kdeui import KAction, KGuiItem
 
-from kommon.base import NoExistError, Error
-from kommon.base.refdata import RefData
-from kommon.sqlgen.clause import Eq, In
-from kommon.base.gui import MainWindow
-from kommon.pdb.record import EmptyRefRecord
-from kommon.base.xmlgen import TextElement, Anchor, TableElement
-from kommon.db import BaseDatabase
-from kommon.db.gui import BaseManagerWidget, RecordSelector
-from kommon.db.gui import ViewBrowser, SimpleRecordDialog
-from kommon.db.admin import AdminWidget
-from kommon.base.actions import AdministerDatabase
+from useless.base import NoExistError, Error
+from useless.kbase.refdata import RefData
+from useless.sqlgen.clause import Eq, In
+from useless.kbase.gui import MainWindow
+from useless.db.record import EmptyRefRecord
+from useless.xmlgen.base import TextElement, Anchor, TableElement
+from useless.kdb import BaseDatabase
+from useless.kdb.gui import BaseManagerWidget, RecordSelector
+from useless.kdb.gui import ViewBrowser, SimpleRecordDialog
+from useless.kdb.admin import AdminWidget
+from useless.kbase.actions import AdministerDatabase
 
 from konsultant.base.actions import EditAddresses, ConfigureKonsultant
 from konsultant.base.actions import ManageTickets

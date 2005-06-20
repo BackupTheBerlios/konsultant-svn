@@ -3,9 +3,9 @@ from qt import PYSIGNAL
 from qt import QSplitter
 from kdeui import KStdAction, KPopupMenu
 
-from kommon.base.gui import EditRecordDialog
-from kommon.db.gui import ViewBrowser, RecordSelector
-from kommon.db.gui import SimpleWindow, RecordView
+from useless.kbase.gui import EditRecordDialog
+from useless.kdb.gui import ViewBrowser, RecordSelector
+from useless.kdb.gui import SimpleWindow, RecordView
 
 from xmlgen import ContactDoc
 from db import ClientManager

@@ -8,10 +8,10 @@ from kdecore import KLockFile
 from kdeui import KMainWindow, KSystemTray
 from kdeui import KPopupMenu, KStdAction
 
-from kommon.base.gui import MainWindow
-from kommon.base.actions import ManageClients
-from kommon.db import BaseDatabase, BaseObject
-from kommon.db.pgpool import PgPool
+from useless.kbase.gui import MainWindow
+from useless.kbase.actions import ManageClients
+from useless.kdb import BaseDatabase, BaseObject
+from useless.kdb.pgpool import PgPool
 
 from konsultant.base.config import BaseConfig
 from konsultant.base.gui import ConfigureDialog
