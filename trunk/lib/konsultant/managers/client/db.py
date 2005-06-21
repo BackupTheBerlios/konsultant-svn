@@ -136,4 +136,14 @@ class ClientManager(object):
         for row in tagrows:
             tagdict[row.tag] = row.value
         return tagdict
-    
+
+    def appendTag(self, clientid, name, value):
+        data = dict(clientid=clientid, tag=name, value=value)
+        self.db.insert(table='client_tags', data=data)
+
+    def updateTag(self, clientid, name, value):
+        data = dict(value=value)
+        clause = Eq('clientid', clientid) & Eq('tag', name)
+        self.db.update(table='client_tags', data=data, clause=clause)
+
+

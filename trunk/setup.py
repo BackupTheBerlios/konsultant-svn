@@ -8,7 +8,7 @@ author = 'Joseph Rawson'
 author_email = 'umeboshi@gregscomputerservice.com'
 url = 'http://developer.berlios.de/projects/konsultant'
 packages = ['konsultant']
-subpacks = ['base', 'db', 'managers', 'pdb', 'sqlgen']
+subpacks = ['base', 'db', 'managers']
 managers = ['client', 'ticket']
 
 packages += ['konsultant.%s' % p for p in subpacks]

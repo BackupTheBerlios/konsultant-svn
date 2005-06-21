@@ -173,7 +173,33 @@ class ClientTagTableElement(BaseElement):
         td = BaseElement('td')
         tr.appendChild(td)
         td.appendChild(element)
+        
+    def set_records(self, records, action='edit'):
+        print 'set_records'
+class ClientTagDoc(RecordDoc):
+    def __init__(self, app):
+        RecordDoc.__init__(self, app, ClientManager)
 
+    def set_records(self, records, action='edit'):
+        self.clear_body()
+        element = ClientTagTableRowsElement(records)
+        self.body.appendChild(element)
+        
+class LocationDoc2(RecordDoc):
+    def __init__(self, app):
+        RecordDoc.__init__(self, app, ClientManager)
+        
+    def set_records(self, records, action='edit'):
+        self.clear_body()
+        self.body.appendChild(LocationTitle(bgcolor='DarkSeaGreen4'))
+        self.body.appendChild(SepTable(bgcolor='DarkSeaGreen4'))
+        for row in records:
+            element = LocationElement(row, action)
+            self.body.appendChild(element)
+            self.body.appendChild(SepTable(bgcolor='DarkSeaGreen4'))
+            self.records[row.locationid] = element
+
+    
 class ClientInfoDoc(BaseDocument):
     def __init__(self, app):
         BaseDocument.__init__(self, app)

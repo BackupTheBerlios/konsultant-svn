@@ -47,6 +47,7 @@ from konsultant.managers.ticket import TicketManagerWidget
 from xmlgen import ClientInfoDoc
 from contact import ContactEditorWin
 from location import LocationEditorWin
+from tagedit import ClientTagEditorWin
 from db import ClientManager
 from gui import ClientDialog, ContactDialog, LocationDialog
 from gui import ClientEditDialog
@@ -97,6 +98,9 @@ class ClientView(ViewBrowser):
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.updateClient)
                 dlg.connect(dlg, PYSIGNAL('updated()'), self.set_client)
                 self.dialogs['edit-client'] = dlg
+        elif context == 'tags':
+            clientid = int(id)
+            ClientTagEditorWin(self.app, self, int(id))
         else:
             KMessageBox.error(self, 'bad call %s' % url)
 
