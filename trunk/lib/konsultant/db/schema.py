@@ -9,7 +9,8 @@ from useless.sqlgen.admin import grant_public, grant_group
 ZipName = ColumnType('varchar', 5)
 StateName = ColumnType('varchar', 2)
 sequences = ['address_ident', 'contact_ident', 'ticket_ident',
-             'location_ident', 'client_ident', 'action_ident', 'task_ident']
+             'location_ident', 'client_ident', 'action_ident', 'task_ident',
+             'trouble_ident', 'troubleaction_ident']
 
 def AutoId(name, seqname, pk=False):
     column = Num(name)
@@ -26,11 +27,17 @@ def Now(name):
     column.constraint.default = 'now()'
     return column
 
+class TagNameTable(Table):
+    def __init__(self):
+        tag = PkName('tag')
+        Table.__init__(self, 'tagnames', [tag])
+        
 class BasicTagTable(Table):
     def __init__(self, idcol, idtable, name):
         id_ = PkNum(idcol)
         id_.set_fk(idtable)
         tagname = PkName('tag')
+        tagname.set_fk('tagnames')
         tagval = Text('value')
         cols = [id_, tagname, tagval]
         Table.__init__(self, name, cols)
@@ -195,14 +202,52 @@ class LocationTaskTable(Table):
         locationid = PkNum('locationid')
         locationid.set_fk('locations', 'locationid')
         Table.__init__(self, 'locationtask', [taskid, locationid])
+
+class TroubleStatusTable(Table):
+    def __init__(self):
+        status = PkName('status')
+        Table.__init__(self, 'trouble_status', [status])
         
+
+class TroubleTable(Table):
+    def __init__(self):
+        troubleid = AutoId('troubleid', 'trouble_ident', pk=True)
+        clientid = Num('clientid')
+        clientid.set_fk('clients')
+        problem = Name('problem')
+        worktodo= Text('worktodo')
+        posted = Now('posted')
+        status = Name('status')
+        status.set_fk('trouble_status')
+        cols = [troubleid, clientid, problem, worktodo, posted, status]
+        Table.__init__(self, 'troubles', cols)
+
+class TroubleActionTable(Table):
+    def __init__(self):
+        troubleid = PkNum('troubleid')
+        troubleid.set_fk('troubles')
+        actionid = AutoId('actionid', 'troubleaction_ident', pk=True)
+        instatus = Name('instatus')
+        outstatus = Name('outstatus')
+        action = Name('action')
+        workdone = Text('workdone')
+        posted = Now('posted')
+        cols = [troubleid, actionid, instatus, outstatus, action, workdone, posted]
+        Table.__init__(self, 'troubleaction', cols)
+        
+        
+    
         
 MAINTABLES = [AddressTable, ContactTable, TicketTable,
               TicketStatusTable, TicketActionTable, TicketActionParentTable,
               LocationTable, ClientTable, ClientTicketTable, ClientInfoTable,
               ClientDataTable, TaskTable, ClientTaskTable, LocationTaskTable,
-              TicketTagTable, ClientTagTable
+              TagNameTable, TicketTagTable, ClientTagTable, TroubleStatusTable,
+              TroubleTable, TroubleActionTable
               ]
+
+TR_STATUS = ['untouched', 'diagnosed', 'in_repair', 'waiting_for_parts',
+             'ready_for_pickup', 'done']
 
 def create_schema(cursor, group):
     newseqs = [s for s in sequences if  s not in cursor.sequences()]
@@ -214,15 +259,19 @@ def create_schema(cursor, group):
     tables = [t().name for t in MAINTABLES]
     full = [ClientInfoTable, ClientTicketTable, ClientTaskTable, LocationTaskTable]
     insup = [AddressTable, ContactTable, TicketStatusTable,
-             LocationTable, ClientTable, TaskTable]
-    ins = [TicketTable, TicketActionTable, TicketActionParentTable]
-
+             LocationTable, ClientTable, TaskTable,
+             ClientTagTable, TicketTagTable]
+    ins = [TicketTable, TicketActionTable, TicketActionParentTable, TagNameTable]
+    
     execute = cursor.execute
     execute(grant_public(tables))
     execute(grant_group('ALL', sequences, group))
     execute(grant_group('ALL', [t().name for t in full], group))
     execute(grant_group('INSERT', [t().name for t in ins + insup], group))
     execute(grant_group('UPDATE', [t().name for t in insup], group))
+    for status in TR_STATUS:
+        cursor.insert(table='trouble_status', data=dict(status=status))
+        
     
     
     

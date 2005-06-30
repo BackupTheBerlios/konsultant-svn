@@ -247,3 +247,6 @@ class ClientInfoDoc(BaseDocument):
         tagdoc = ClientTagTableElement(clientid, tags)
         row.appendChild(tagdoc)
         self.mtable.appendChild(row)
+        newtrouble = Anchor('new.trouble.%s' % clientid, 'new trouble')
+        
+        self.body.appendChild(newtrouble)

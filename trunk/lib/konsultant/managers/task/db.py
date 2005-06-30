@@ -1,6 +1,14 @@
 from konsultant.sqlgen.clause import Eq, In, NotIn
 
 
+class TroubleManager(object):
+    def __init__(self, app):
+        self.app = app
+        self.db  = app.db
+
+    def create_new_trouble(self, problem, worktodo):
+        pass
+    
 class TaskManager(object):
     def __init__(self, app):
         self.app = app

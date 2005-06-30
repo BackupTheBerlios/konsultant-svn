@@ -17,8 +17,8 @@ from konsultant.base.config import BaseConfig
 from konsultant.base.gui import ConfigureDialog
 from konsultant.base.actions import EditAddresses
 from konsultant.base.actions import ManageTickets, ConfigureKonsultant
-#from konsultant.db import BaseDatabase, BaseObject
-#from konsultant.db.pgpool import PgPool
+from konsultant.base.actions import ManageTroubles
+
 from konsultant.db.gui import AddressSelector
 
 from konsultant.managers.client import ClientManagerWidget

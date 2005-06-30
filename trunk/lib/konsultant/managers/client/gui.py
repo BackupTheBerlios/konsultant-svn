@@ -1,4 +1,8 @@
 from qt import SIGNAL, SLOT, Qt
+from qt import QFrame, QVBoxLayout
+
+from kdeui import KDialogBase
+from kdeui import KLineEdit, KTextEdit
 
 from useless.kbase.refdata import RefData
 from useless.kbase.gui import EditRecordDialog
@@ -7,6 +11,46 @@ from useless.kdb.gui import SimpleRecordDialog
 
 from konsultant.db.gui import AddressSelector
 from konsultant.db.xmlgen import AddressLink
+
+class VboxDialog(KDialogBase):
+    def __init__(self, parent, name='VboxDialog'):
+        KDialogBase.__init__(self, parent, name)
+        self.page = QFrame(self)
+        self.setMainWidget(self.page)
+        self.vbox = QVBoxLayout(self.page, 5, 7)
+        
+
+
+class TroubleDialog(VboxDialog):
+    def __init__(self, parent, clientid, name='TroubleDialog'):
+        VboxDialog.__init__(self, parent, name)
+        self.clientid = clientid
+        self.problemEdit = KLineEdit('', self.page)
+        self.worktodoEdit = KTextEdit(self.page)
+        self.vbox.addWidget(self.problemEdit)
+        self.vbox.addWidget(self.worktodoEdit)
+        self.showButtonApply(False)
+        self.setButtonOKText('insert', 'insert')
+        self.show()
+
+    def getRecordData(self):
+        problem = str(self.problemEdit.text())
+        worktodo = str(self.worktodoEdit.text())
+        return dict(problem=problem,
+                    worktodo=worktodo, clientid=self.clientid)
+    
+class ActionDialog(VboxDialog):
+    def __init__(self, parent, name='ActionDialog'):
+        VboxDialog.__init__(self, parent, name)
+        self.subjEdit = KLineEdit('', self.page)
+        self.actionEdit = KLineEdit('comment', self.page)
+        self.dataEdit = KTextEdit(self.page)
+        self.vbox.addWidget(self.subjEdit)
+        self.vbox.addWidget(self.actionEdit)
+        self.vbox.addWidget(self.dataEdit)
+        self.showButtonApply(False)
+        self.setButtonOKText('insert', 'insert')
+        self.show()
 
 class AddressData(RefData):
     def __init__(self):

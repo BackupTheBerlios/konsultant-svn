@@ -37,12 +37,13 @@ from useless.kbase.actions import AdministerDatabase
 
 from konsultant.base.actions import EditAddresses, ConfigureKonsultant
 from konsultant.base.actions import ManageTickets
-from konsultant.base.actions import ManageTasks
+from konsultant.base.actions import ManageTasks, ManageTroubles
 from konsultant.base.gui import ConfigureDialog
 
 from konsultant.db.gui import AddressSelectView, AddressSelector
 from konsultant.db.xmlgen import AddressLink
 from konsultant.managers.ticket import TicketManagerWidget
+from konsultant.managers.trouble import TroubleManagerWidget
 
 from xmlgen import ClientInfoDoc
 from contact import ContactEditorWin
@@ -51,6 +52,7 @@ from tagedit import ClientTagEditorWin
 from db import ClientManager
 from gui import ClientDialog, ContactDialog, LocationDialog
 from gui import ClientEditDialog
+from gui import TroubleDialog
 
 class AddressData(RefData):
     def __init__(self):
@@ -101,6 +103,11 @@ class ClientView(ViewBrowser):
         elif context == 'tags':
             clientid = int(id)
             ClientTagEditorWin(self.app, self, int(id))
+        elif context == 'trouble':
+            if action == 'new':
+                dlg = TroubleDialog(self, int(id))
+                dlg.connect(dlg, SIGNAL('okClicked()'), self.slotNewTrouble)
+                self.dialogs['new-trouble'] = dlg
         else:
             KMessageBox.error(self, 'bad call %s' % url)
 
@@ -117,6 +124,12 @@ class ClientView(ViewBrowser):
         contactid = self.manager.insertContact(dlg.clientid, dlg.addressid, data)
         self.set_client(dlg.clientid)
 
+    def slotNewTrouble(self):
+        dlg = self.dialogs['new-trouble']
+        data = dlg.getRecordData()
+        self.manager.addTrouble(data['clientid'], data['problem'],
+                                data['worktodo'])
+        
     def insertLocation(self):
         dlg = self.dialogs['new-location']
         data = dlg.grid.getRecordData()
@@ -151,6 +164,7 @@ class ClientManagerWidget(BaseManagerWidget):
         self.configureAction = ConfigureKonsultant(self.slotConfigure, collection)
         self.manageTicketsAction = ManageTickets(self.slotManageTickets, collection)
         self.manageTasksAction = ManageTasks(self.slotManageTasks, collection)
+        self.manageTroublesAction = ManageTroubles(self.slotManageTroubles, collection)
         self.admindbAction = AdministerDatabase(self.slotAdministerDatabase,
                                                 collection)
         BaseManagerWidget.initActions(self, collection=collection)
@@ -160,6 +174,7 @@ class ClientManagerWidget(BaseManagerWidget):
         self.newAction.plug(mainMenu)
         self.manageTicketsAction.plug(mainMenu)
         self.manageTasksAction.plug(mainMenu)
+        self.manageTroublesAction.plug(mainMenu)
         self.editaddressAction.plug(mainMenu)
         self.admindbAction.plug(mainMenu)
         self.configureAction.plug(mainMenu)
@@ -173,7 +188,7 @@ class ClientManagerWidget(BaseManagerWidget):
     def initToolbar(self):
         toolbar = self.toolBar()
         actions = [self.newAction, self.manageTicketsAction,
-                   self.manageTasksAction,
+                   self.manageTasksAction, self.manageTroublesAction,
                    self.editaddressAction, self.admindbAction,
                    self.configureAction, self.quitAction]
         for action in actions:
@@ -229,4 +244,8 @@ class ClientManagerWidget(BaseManagerWidget):
 
     def slotManageTasks(self):
         print 'Manage Tasks'
+
+    def slotManageTroubles(self):
+        print 'Manage Troubles'
+        TroubleManagerWidget(self.app, self, self.db)
         

@@ -1,6 +1,6 @@
 from useless.kbase.refdata import RefData
 from useless.db.record import RefRecord
-from useless.sqlgen.clause import Eq, In
+from useless.sqlgen.clause import Eq, In, Neq
 
 class ClientManager(object):
     def __init__(self, app):
@@ -127,8 +127,13 @@ class ClientManager(object):
     def updateClient(self, clientid, name):
         data = dict(client=name)
         self.db.update(table='clients', data=data, clause=Eq('clientid', clientid))
+        self.db.conn.commit()
         
-        
+
+    def getTagNames(self):
+        rows = self.db.select(table='tagnames', order='tag')
+        return [r.tag for r in rows]
+    
     def getTags(self, clientid):
         clause = Eq('clientid', clientid)
         tagrows = self.db.select(table='client_tags', clause=clause)
@@ -139,11 +144,59 @@ class ClientManager(object):
 
     def appendTag(self, clientid, name, value):
         data = dict(clientid=clientid, tag=name, value=value)
+        row = self.db.select(table='tagnames', clause=Eq('tag', name))
+        if not len(row):
+            self.db.insert(table='tagnames', data=dict(tag=name))
+            self.db.conn.commit()
         self.db.insert(table='client_tags', data=data)
+        self.db.conn.commit()
 
     def updateTag(self, clientid, name, value):
         data = dict(value=value)
         clause = Eq('clientid', clientid) & Eq('tag', name)
         self.db.update(table='client_tags', data=data, clause=clause)
+        self.db.conn.commit()
 
+    def getClientTroubles(self, clientid, done=False):
+        if not done:
+            clause = Eq('clientid', clientid) & Neq('status', 'done')
+        else:
+            clause = Eq('clientid', clientid)
+        rows = self.db.select(table='troubles', clause=clause, order=['posted'])
+        return rows
+    
+
+    def addTrouble(self, clientid, problem, worktodo):
+        data = dict(clientid=clientid, problem=problem,
+                    worktodo=worktodo, status='untouched')
+        self.db.insert(table='troubles', data=data)
+        self.db.conn.commit()
+
+    def getTroubleStatus(self, troubleid):
+        clause = Eq('troubleid', troubleid)
+        row = self.db.select_row(table='troubles', clause=clause)
+        rows = self.db.select(table='troubleaction', clause=clause,
+                              order=['actionid'])
+        #this will check for action on the trouble
+        if len(rows):
+            return rows[-1].outstatus
+        else:
+            return 'untouched'
+        
+    def updateTrouble(self, troubleid, action, workdone, newstatus=None):
+        instatus = self.getTroubleStatus(troubleid)
+        outstatus = newstatus
+        if outstatus is None:
+            if instatus == 'untouched':
+                raise Error, 'unable to update this action without changing status'
+            else:
+                outstatus = instatus
+        data = dict(troubleid=troubleid, action=action, workdone=workdone,
+                    instatus=instatus, outstatus=outstatus)
+        self.db.insert(table='troubleaction', data=data)
+        self.db.conn.commit()
+        
+
+        
+        
 

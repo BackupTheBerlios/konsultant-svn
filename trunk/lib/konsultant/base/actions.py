@@ -60,6 +60,20 @@ class ManageTasks(KAction):
         KAction.__init__(self, item, cut, slot, parent, name)
 
 
+class ManageTroublesItem(BaseItem):
+    def __init__(self):
+        BaseItem.__init__(self, 'Manage Troubles', 'attach',
+                          'Manage Troubles', 'manage or brouse Troubles')
+
+class ManageTroubles(KAction):
+    def __init__(self, slot, parent):
+        item = ManageTasksItem()
+        name = 'ManageTroubles'
+        cut = KShortcut()
+        KAction.__init__(self, item, cut, slot, parent, name)
+
+
+
 class ConfigItem(BaseItem):
     def __init__(self):
         BaseItem.__init__(self, 'Configure Konsultant', 'configure',
