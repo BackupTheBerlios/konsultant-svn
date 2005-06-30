@@ -8,7 +8,7 @@ from useless.xmlgen.base import Html, Body, Anchor
 from useless.xmlgen.base import TextElement
 from useless.xmlgen.base import TableElement
 from useless.xmlgen.base import BaseElement
-from useless.xmlgen.base import UnorderedList, ListItem
+from useless.xmlgen.base import UnorderedList, ListItem, BR, HR
 from useless.kdb.xmlgen import BaseDocument
 from useless.kdb.xmlgen import BaseParagraph
 
@@ -36,98 +36,11 @@ class TitleTable(BaseElement):
         element = TextElement('b', title)
         font.appendChild(element)
 
-class CommandBar(BaseElement):
-    def __init__(self, troubleid):
-        BaseElement.__init__(self, 'table')
-        row = BaseElement('tr')
-        self.anchor = Anchor('show.ticket.%d' % troubleid, 'show')
-        self.assign = Anchor('assign.ticket.%d' % troubleid, 'assign')
-        
-class SubjectTable(BaseElement):
-    def __init__(self, subject, action, author, posted):
-        BaseElement.__init__(self, 'table')
-        #self.app  = app
-        self.setAttribute('border', '0')
-        self.setAttribute('width', '100%')
-        self.setAttribute('cellpadding', '2')
-        self.setAttribute('cellspacing', '0')
-        self.setAttribute('bgcolor', 'cornsilk4')
-        row = BaseElement('tr')
-        self.appendChild(row)
-        td = self._subjectdata(subject, action)
-        row.appendChild(td)
-        
-        row = BaseElement('tr')
-        self.appendChild(row)
-        row.setAttribute('bgcolor', 'bisque4')
-        td = self._subjectdata(author, posted)
-        row.appendChild(td)
-        
-
-    def _subjectdata(self, subject, action):
-        td = BaseElement('td')
-
-        font = BaseElement('font')
-        font.setAttribute('color', 'gold')
-        element = TextElement('b', subject)
-        font.appendChild(element)
-        td.appendChild(font)
-
-        font = BaseElement('font')
-        font.setAttribute('color', 'yellow')
-        element = Text()
-        font.appendChild(element)
-        element.data = '(%s)' % action
-        td.appendChild(font)
-        return td
-    
-class TroubleTable(BaseElement):
-    def __init__(self, problem, worktodo, status, posted):
-        BaseElement.__init__(self, 'table')
-        #self.app  = app
-        self.setAttribute('border', '0')
-        self.setAttribute('width', '100%')
-        self.setAttribute('cellpadding', '2')
-        self.setAttribute('cellspacing', '0')
-        self.setAttribute('bgcolor', 'cornsilk4')
-        row = BaseElement('tr')
-        self.appendChild(row)
-        td = self._subjectdata(subject, action)
-        row.appendChild(td)
-        
-        row = BaseElement('tr')
-        self.appendChild(row)
-        row.setAttribute('bgcolor', 'bisque4')
-        td = self._subjectdata(author, posted)
-        row.appendChild(td)
-        
-
-    def _subjectdata(self, subject, action):
-        td = BaseElement('td')
-
-        font = BaseElement('font')
-        font.setAttribute('color', 'gold')
-        element = TextElement('b', subject)
-        font.appendChild(element)
-        td.appendChild(font)
-
-        font = BaseElement('font')
-        font.setAttribute('color', 'yellow')
-        element = Text()
-        font.appendChild(element)
-        element.data = '(%s)' % action
-        td.appendChild(font)
-        return td
-    
 class TroubleHeader(BaseElement):
     def __init__(self, troubleid, info):
         BaseElement.__init__(self, 'p')
-        #self.author = TextElement('h5', 'Author: %s' % row.author)
         self.created = TextElement('h4', 'Created: %s' % info['posted'])
-        #node = TextElement('h2', row.title)
-        #self.appendChild(node)
         self.appendChild(self.created)
-        #self.appendChild(self.author)
         p = BaseElement('p')
         refresh = Anchor('refresh.page.%d' % troubleid, 'refresh')
         p.appendChild(refresh)
@@ -177,50 +90,6 @@ class ActionTableRow(BaseElement):
         if row.instatus != row.outstatus:
             bottom.setAttribute('bgcolor', 'GoldenRod')
             
-class ActionItem(BaseElement):
-    def __init__(self, row):
-        BaseElement.__init__(self, 'li')
-        self.actionid = row.actionid
-        action = TextElement('h3', row.action)
-        posted = TextElement('h2', 'Posted: %s' % row.posted)
-        workdone = TextElement('p', row.workdone)
-        l = 'in: %s' % row.instatus
-        r = 'out: %s' % row.outstatus
-        status = self._lrtable(l, r)
-        actpost = self._lrtable(row.action, 'Posted: %s' % row.posted)
-        #self.appendChild(posted)
-        #self.appendChild(action)
-        self.appendChild(actpost)
-        self.appendChild(workdone)
-        self.appendChild(status)
-        
-
-    def _lrtable(self, left, right):
-        table = BaseElement('table')
-        tr = BaseElement('tr')
-        table.appendChild(tr)
-        tdl = BaseElement('td', align='left')
-        tr.appendChild(tdl)
-        tdr = BaseElement('td', align='right')
-        tr.appendChild(tdr)
-        left_part = Text()
-        left_part.data = left
-        right_part = Text()
-        right_part.data = right
-        tdl.appendChild(left_part)
-        tdr.appendChild(right_part)
-        return table
-        
-    def show_data(self, data):
-        anchor = self.anchor
-        child = self.lastChild
-        anchor.setAttribute('href', 'hide.action.%d' % self.actionid)
-        self.data = data
-        self.insertBefore(TextElement('p', data), child)
-
-    def hide_data(self):
-        self.anchor.setAttribute('href', 'show.action.%d' % self.actionid)
-        del self.childNodes[1]
 
 class ActionTable(BaseElement):
     def __init__(self, actionrows):
@@ -229,18 +98,22 @@ class ActionTable(BaseElement):
             self.appendChild(ActionTableRow(row))
             
 class TroubleInfoElement(BaseElement):
-    def __init__(self, troubleid, problem, worktodo,
-                 status, posted):
+    def __init__(self, info):
+        troubleid  = info['troubleid']
+        problem = info['problem']
+        worktodo = info['worktodo']
+        status = info['status']
+        posted = info['posted']
         BaseElement.__init__(self, 'div')
         self.setAttribute('id', 'trouble-%d' % troubleid)
         self.setAttribute('class', 'troubleinfo')
         self.title = TitleTable(problem)
-        #self.title = TextElement('h4', title)
-        #self.author = TextElement('h5', 'Author: %s' % author)
-        self.posted = TextElement('h4', 'Created: %s' % posted)
+        self.client = TextElement('h3', 'Client: %s' % info['client'])
+        self.posted = TextElement('b', 'Created: %s' % posted)
         self.worktodo = TextElement('p', worktodo)
         self.appendChild(self.title)
-        #self.appendChild(self.author)
+        self.appendChild(self.client)
+        self.appendChild(BR())
         self.appendChild(self.posted)
         self.appendChild(self.worktodo)
         self.anchor = Anchor('show.trouble.%d' % troubleid, 'show')
@@ -266,9 +139,12 @@ class TroubleDocument(BaseDocument):
         self.clear_body()
         rows = self.manager.getTroubles(clause=clause)
         for row in rows:
-            element = TroubleInfoElement(row.troubleid, row.problem,
-                                         row.worktodo, row.status, row.posted)
+            info = dict(row)
+            crow = self.db.select_row(table='clients', clause=Eq('clientid', row.clientid))
+            info['client'] = crow.client
+            element = TroubleInfoElement(info)
             self.body.appendChild(element)
+            self.body.appendChild(HR())
 
 class TroubleInfoDoc(BaseDocument):
     def __init__(self, app):

@@ -6,11 +6,6 @@ class TroubleManager(object):
     def __init__(self, app):
         self.app = app
         self.db = app.db
-        #self.atable = 'ticketactions'
-        #self.aptable = 'ticketactionparent'
-        #self.apfields = ['actionid', 'parent'] 
-        #self.afields = ['actionid', 'subject', 'action', 'author', 'posted']
-
         
     def _setup_insdata(self, fields, data):
         return dict([(f, data[f]) for f in fields])
@@ -22,7 +17,6 @@ class TroubleManager(object):
             clause = Eq('clientid', clientid)
         rows = self.db.select(table='troubles', clause=clause, order=['posted'])
         return rows
-    
 
     def addTrouble(self, clientid, problem, worktodo):
         data = dict(clientid=clientid, problem=problem,
@@ -66,6 +60,8 @@ class TroubleManager(object):
     def getTroubleInfo(self, troubleid):
         row = self.db.select_row(table='troubles', clause=Eq('troubleid', troubleid))
         info = dict(row)
+        row = self.db.select_row(table='clients', clause=Eq('clientid', row.clientid))
+        info['client'] = row.client
         info['actions'] = self.getTroubleActions(troubleid)
         return info
     
