@@ -8,6 +8,7 @@ from kdeui import KMessageBox, KActionSelector
 
 from kdeui import KDialogBase, KLineEdit
 from kdeui import KTextEdit, KMainWindow
+from kdeui import KComboBox
 
 from useless.kbase.gui import MainWindow
 from useless.kdb import BaseDatabase
@@ -18,6 +19,7 @@ from useless.sqlgen.clause import Neq
 #from xmlgen import TicketInfoDoc
 #from xmlgen import TicketDocument
 from xmlgen import TroubleDocument
+from xmlgen import TroubleInfoDoc
 from db import TroubleManager
 
 class VboxDialog(KDialogBase):
@@ -42,12 +44,12 @@ class TicketDialog(VboxDialog):
 class ActionDialog(VboxDialog):
     def __init__(self, parent, name='ActionDialog'):
         VboxDialog.__init__(self, parent, name)
-        self.subjEdit = KLineEdit('', self.page)
-        self.actionEdit = KLineEdit('comment', self.page)
-        self.dataEdit = KTextEdit(self.page)
-        self.vbox.addWidget(self.subjEdit)
+        self.actionEdit = KLineEdit('', self.page)
+        self.statusEdit = KComboBox(self.page)
+        self.workdoneEdit = KTextEdit(self.page)
         self.vbox.addWidget(self.actionEdit)
-        self.vbox.addWidget(self.dataEdit)
+        self.vbox.addWidget(self.statusEdit)
+        self.vbox.addWidget(self.workdoneEdit)
         self.showButtonApply(False)
         self.setButtonOKText('insert', 'insert')
         self.show()
@@ -87,11 +89,11 @@ class TicketAssigner(VboxDialog):
         self.manager.update_ticket_assignment(self.ticketid, ids)
         
         
-class TicketActionView(ViewBrowser):
-    def __init__(self, app, parent, ticketid):
-        ViewBrowser.__init__(self, app, parent, TicketInfoDoc)
+class TroubleActionView(ViewBrowser):
+    def __init__(self, app, parent, troubleid):
+        ViewBrowser.__init__(self, app, parent, TroubleInfoDoc)
         self.dialogs = {}
-        self.manager = TicketManager(self.app)
+        self.manager = TroubleManager(self.app)
 
     def setSource(self, url):
         action, context, id = str(url).split('.')
@@ -100,7 +102,12 @@ class TicketActionView(ViewBrowser):
             if action == 'new':
                 dlg = ActionDialog(self, 'ActionDialog')
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.insertAction)
-                dlg.ticketid = self.doc.current
+                dlg.troubleid = self.doc.current
+                statustypes = [r.status for r in self.manager.db.select(table='trouble_status')]
+                for idx in range(len(statustypes)):
+                    dlg.statusEdit.setCurrentItem(statustypes[idx], True, idx)
+                status = self.manager.getTroubleStatus(self.doc.current)
+                dlg.statusEdit.setCurrentItem(status)
                 if id == 'none':
                     dlg.actionid = None
                 else:
@@ -122,20 +129,19 @@ class TicketActionView(ViewBrowser):
                 print 'assign in TicketActionView'
                 TicketAssigner(self.app, self, id)
                 
-    def setID(self, ticketid):
-        self.current = ticketid
-        self.doc.setID(ticketid)
+    def setID(self, troubleid):
+        self.current = troubleid
+        self.doc.setID(troubleid)
         self.setText(self.doc.toxml())
 
     def insertAction(self):
         dlg = self.dialogs['new-action']
-        subject = str(dlg.subjEdit.text())
         action = str(dlg.actionEdit.text())
-        data = str(dlg.dataEdit.text())
-        ticketid = dlg.ticketid
-        actionid = self.manager.append_action(ticketid, subject, action,
-                                              data, parent=dlg.actionid)
-        self.setID(ticketid)
+        status = str(dlg.statusEdit.currentText())
+        workdone = str(dlg.workdoneEdit.text())
+        troubleid = dlg.troubleid
+        self.manager.updateTrouble(troubleid, action, workdone, status)
+        self.setID(troubleid)
         
         
         
@@ -145,33 +151,34 @@ class TroubleView(ViewBrowser):
         self.dialogs = {}
         self.manager = TroubleManager(self.app)
 
-    def setID(self, ticketid=None, clause=None):
+    def setID(self, troubleid=None, clause=None):
         self.doc.setID(clause=clause)
         self.setText(self.doc.toxml())
 
     def insertAction(self):
-        dlg = self.dialogs['new-action']
-        subject = str(dlg.subjEdit.text())
-        action = str(dlg.actionEdit.text())
-        data = str(dlg.dataEdit.text())
-        ticketid = dlg.ticketid
-        actionid = self.manager.append_action(ticketid, subject, action,
-                                              data, parent=dlg.actionid)
-        self.setID(ticketid)
+        raise Error, "don't call me yet"
+        #dlg = self.dialogs['new-action']
+        #subject = str(dlg.subjEdit.text())
+        #action = str(dlg.actionEdit.text())
+        #data = str(dlg.dataEdit.text())
+        #troubleid = dlg.troubleid
+        #actionid = self.manager.append_action(troubleid, subject, action,
+        #                                     data, parent=dlg.actionid)
+        #self.setID(troubleid)
         
     def setSource(self, url):
         action, context, id = str(url).split('.')
         id = int(id)
         print action, context, id
-        if context == 'ticket':
+        if context == 'trouble':
             if action == 'show':
                 print 'showing ticket %d' % id
                 win = KMainWindow(self)
-                v = TicketActionView(self.app, win, id)
+                v = TroubleActionView(self.app, win, id)
                 v.setID(id)
                 v.resize(700, 900)
                 win.setCentralWidget(v)
-                win.setCaption('TicketView')
+                win.setCaption('TroubleView')
                 win.resize(700, 900)
                 win.show()
             elif action == 'assign':
@@ -256,15 +263,13 @@ class TroubleManagerWidget(BaseManagerWidget):
     def selectionChanged(self):
         current = self.listView.currentItem()
         print current
-        if hasattr(current, 'ticketid'):
-            self.view.setID(current.ticketid)
+        if hasattr(current, 'troubleid'):
+            self.view.setID(current.troubleid)
         elif hasattr(current, 'clientid'):
             clientid = current.clientid
-            sel = self.db.stmt.select(fields=['ticketid'], table='client_tickets',
-                                   clause=Eq('clientid', clientid))
-            
-            clause = In('ticketid', sel)
             self.view.setID(clause=Eq('clientid', clientid))
+        elif hasattr(current, 'status'):
+            self.view.setID(clause=Eq('status', current.status))
         elif str(current.text(0)) == 'all':
             self.view.setID(None)
         elif str(current.text(0)) == 'untouched':

@@ -14,6 +14,10 @@ from useless.kdb.xmlgen import BaseParagraph
 
 from db import TroubleManager
 
+class P(TextElement):
+    def __init__(self, text):
+        TextElement.__init__(self, 'p', text)
+        
 class TitleTable(BaseElement):
     def __init__(self, title):
         BaseElement.__init__(self, 'table')
@@ -21,7 +25,7 @@ class TitleTable(BaseElement):
         #self.setAttribute('width', '100%')
         self.setAttribute('cellpadding', '2')
         self.setAttribute('cellspacing', '0')
-        self.setAttribute('bgcolor', 'cornsilk4')
+        self.setAttribute('bgcolor', 'IndianRed')
         row = BaseElement('tr')
         td = BaseElement('td')
         self.appendChild(row)
@@ -115,51 +119,98 @@ class TroubleTable(BaseElement):
         td.appendChild(font)
         return td
     
-class TicketHeader(BaseElement):
-    def __init__(self, troubleid, row):
+class TroubleHeader(BaseElement):
+    def __init__(self, troubleid, info):
         BaseElement.__init__(self, 'p')
-        self.author = TextElement('h5', 'Author: %s' % row.author)
-        self.created = TextElement('h5', 'Created: %s' % row.created)
+        #self.author = TextElement('h5', 'Author: %s' % row.author)
+        self.created = TextElement('h4', 'Created: %s' % info['posted'])
         #node = TextElement('h2', row.title)
         #self.appendChild(node)
         self.appendChild(self.created)
-        self.appendChild(self.author)
+        #self.appendChild(self.author)
         p = BaseElement('p')
         refresh = Anchor('refresh.page.%d' % troubleid, 'refresh')
-        assign = Anchor('assign.ticket.%d' % troubleid, 'assign')
         p.appendChild(refresh)
-        p.appendChild(BaseElement('br'))
-        p.appendChild(assign)
         self.appendChild(p)
 
-class TicketFooter(BaseElement):
+class TroubleFooter(BaseElement):
     def __init__(self, troubleid):
         BaseElement.__init__(self, 'h3')
-        self.respond = Anchor('new.action.none', 'respond')
-        self.appendChild(self.respond)
+        self.append = Anchor('new.action.none', 'append')
+        self.appendChild(self.append)
         
 class TicketTableElement(TableElement):
     def __init__(self, db=None):
         cols = ['title', 'status']
         TableElement.__init__(self, cols)
 
-class TicketData(TextElement):
+class TroubleData(TextElement):
     def __init__(self, data):
         TextElement.__init__(self, 'p', data)
 
-class ActionItem(ListItem):
+class ActionTableRow(BaseElement):
     def __init__(self, row):
+        BaseElement.__init__(self, 'tr')
+        table = BaseElement('table')
+        top = BaseElement('tr', bgcolor='DarkSeaGreen')
+        table.appendChild(top)
+        mid = BaseElement('tr', bgcolor='DarkSeaGreen3')
+        table.appendChild(mid)
+        bottom = BaseElement('tr', bgcolor='DarkSeaGreen2')
+        table.appendChild(bottom)
+        action = TextElement('td', row.action)
+        action.setAttribute('align', 'left')
+        posted = TextElement('td', row.posted)
+        posted.setAttribute('align', 'right')
+        top.appendChild(action)
+        top.appendChild(posted)
+        mid.appendChild(TextElement('td', row.workdone))
+        instatus = TextElement('td', row.instatus)
+        outstatus = TextElement('td', row.outstatus)
+        instatus.setAttribute('align', 'left')
+        outstatus.setAttribute('align', 'right')
+        bottom.appendChild(instatus)
+        bottom.appendChild(outstatus)
+        self.appendChild(top)
+        self.appendChild(mid)
+        self.appendChild(bottom)
+        if row.instatus != row.outstatus:
+            bottom.setAttribute('bgcolor', 'GoldenRod')
+            
+class ActionItem(BaseElement):
+    def __init__(self, row):
+        BaseElement.__init__(self, 'li')
         self.actionid = row.actionid
-        url = 'show.action.%d' % self.actionid
-        self.anchor = Anchor(url, row.subject)
-        #element = TitleTable(self.anchor)
-        element = SubjectTable(self.anchor, row.action, row.author, row.posted)
-        element.setAttribute('width', '100%')
-        element.setAttribute('border', '0')
-        url = 'new.action.%d' % self.actionid
-        ListItem.__init__(self, element)
-        self.appendChild(Anchor(url, ' (respond)'))
+        action = TextElement('h3', row.action)
+        posted = TextElement('h2', 'Posted: %s' % row.posted)
+        workdone = TextElement('p', row.workdone)
+        l = 'in: %s' % row.instatus
+        r = 'out: %s' % row.outstatus
+        status = self._lrtable(l, r)
+        actpost = self._lrtable(row.action, 'Posted: %s' % row.posted)
+        #self.appendChild(posted)
+        #self.appendChild(action)
+        self.appendChild(actpost)
+        self.appendChild(workdone)
+        self.appendChild(status)
+        
 
+    def _lrtable(self, left, right):
+        table = BaseElement('table')
+        tr = BaseElement('tr')
+        table.appendChild(tr)
+        tdl = BaseElement('td', align='left')
+        tr.appendChild(tdl)
+        tdr = BaseElement('td', align='right')
+        tr.appendChild(tdr)
+        left_part = Text()
+        left_part.data = left
+        right_part = Text()
+        right_part.data = right
+        tdl.appendChild(left_part)
+        tdr.appendChild(right_part)
+        return table
+        
     def show_data(self, data):
         anchor = self.anchor
         child = self.lastChild
@@ -170,48 +221,13 @@ class ActionItem(ListItem):
     def hide_data(self):
         self.anchor.setAttribute('href', 'show.action.%d' % self.actionid)
         del self.childNodes[1]
-        
-        
-class ActionThreads(UnorderedList):
-    def __init__(self, parent, actions, trows, crows):
-        UnorderedList.__init__(self)
-        self._actiondata = {}
-        for a in actions:
-            self._actiondata[a.actionid] = a
-        self.actions = {}
-        for row in trows:
-            element = UnorderedList()
-            #li = ListItem('action-%d' % row.actionid)
-            li = ActionItem(self._actiondata[row.actionid])
-            element.appendChild(li)
-            self.actions[row.actionid] = element
-            self.appendChild(element)
-        self.make_threads(parent, crows)
-        
-    def make_threads(self, parent, rows):
-        while len(rows):
-            row = rows[0]
-            element = UnorderedList()
-            #element = ListItem('actionid %d' % row.actionid)
-            if not row.parent:
-                parent.appendChild(element)
-                #element.appendChild(ListItem('actionid--%d' % row.actionid))
-            elif not self.actions.has_key(row.parent):
-                rows.append(row)
-            else:
-                self.actions[row.parent].appendChild(element)
-                element.appendChild(ActionItem(self._actiondata[row.actionid]))
-            self.actions[row.actionid] = element
-            del rows[0]
 
-    def show_data(self, actionid, data):
-        element = self.actions[actionid].firstChild
-        element.show_data(data)
-
-    def hide_data(self, actionid):
-        element = self.actions[actionid].firstChild
-        element.hide_data()
-        
+class ActionTable(BaseElement):
+    def __init__(self, actionrows):
+        BaseElement.__init__(self, 'table')
+        for row in actionrows:
+            self.appendChild(ActionTableRow(row))
+            
 class TroubleInfoElement(BaseElement):
     def __init__(self, troubleid, problem, worktodo,
                  status, posted):
@@ -221,10 +237,12 @@ class TroubleInfoElement(BaseElement):
         self.title = TitleTable(problem)
         #self.title = TextElement('h4', title)
         #self.author = TextElement('h5', 'Author: %s' % author)
-        self.posted = TextElement('h5', 'Created: %s' % posted)
+        self.posted = TextElement('h4', 'Created: %s' % posted)
+        self.worktodo = TextElement('p', worktodo)
         self.appendChild(self.title)
         #self.appendChild(self.author)
         self.appendChild(self.posted)
+        self.appendChild(self.worktodo)
         self.anchor = Anchor('show.trouble.%d' % troubleid, 'show')
         self.assign = Anchor('assign.trouble.%d' % troubleid, 'assign')
         node = BaseElement('table')
@@ -262,28 +280,32 @@ class TroubleInfoDoc(BaseDocument):
         rows = self.db.select(fields=['title'], table='tickets')
 
     def setID(self, troubleid):
-        row = self.manager.get_ticket(troubleid, data=True)
+        #row = self.manager.get_ticket(troubleid, data=True)
+        info = self.manager.getTroubleInfo(troubleid)
         self.current = troubleid
         self.clear_body()
         #make header
-        self.body.appendChild(TitleTable(row.title))
-        self.header = TicketHeader(troubleid, row)
+        self.body.appendChild(TitleTable(info['problem']))
+        self.header = TroubleHeader(troubleid, info)
         self.body.appendChild(self.header)
         hr = BaseElement('hr')
         self.body.appendChild(hr)
         #append ticket data
-        tdata = TicketData(row.data)
+        tdata = TroubleData(info['worktodo'])
         self.body.appendChild(tdata)
         hr = BaseElement('hr')
         self.body.appendChild(hr)
         #append ticket footer
-        self.tfooter = TicketFooter(troubleid)
+        self.tfooter = TroubleFooter(troubleid)
         self.body.appendChild(self.tfooter)
-        actions, rows, trows, crows = self.manager.get_actions(troubleid, True)
-        athreads = ActionThreads(self.body, actions, trows, crows)
-        self.body.appendChild(athreads)
-        self.threads = athreads
-
+        #actions, rows, trows, crows = self.manager.get_actions(troubleid, True)
+        #athreads = ActionThreads(self.body, actions, trows, crows)
+        #self.body.appendChild(athreads)
+        #self.threads = athreads
+        actionrows = info['actions']
+        print actionrows
+        self.body.appendChild(ActionTable(actionrows))
+                                                                   
     def showActionData(self, actionid):
         data = self.manager.get_actiondata(self.current, actionid)
         self.threads.show_data(actionid, data)

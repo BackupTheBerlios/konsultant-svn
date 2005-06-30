@@ -33,25 +33,19 @@ class TroubleManager(object):
     def getTroubleStatus(self, troubleid):
         clause = Eq('troubleid', troubleid)
         row = self.db.select_row(table='troubles', clause=clause)
-        rows = self.db.select(table='troubleaction', clause=clause,
-                              order=['actionid'])
-        #this will check for action on the trouble
-        if len(rows):
-            return rows[-1].outstatus
-        else:
-            return 'untouched'
+        return row.status
         
-    def updateTrouble(self, troubleid, action, workdone, newstatus=None):
+    def updateTrouble(self, troubleid, action, workdone, newstatus):
         instatus = self.getTroubleStatus(troubleid)
         outstatus = newstatus
-        if outstatus is None:
-            if instatus == 'untouched':
-                raise Error, 'unable to update this action without changing status'
-            else:
-                outstatus = instatus
+        if outstatus == 'untouched':
+            raise Error, 'unable to update this action without changing status'
         data = dict(troubleid=troubleid, action=action, workdone=workdone,
                     instatus=instatus, outstatus=outstatus)
         self.db.insert(table='troubleaction', data=data)
+        if outstatus != instatus and instatus != 'done':
+            self.db.update(table='troubles', data={'status' : outstatus},
+                           clause=Eq('troubleid', troubleid))
         self.db.conn.commit()
         
     def getTroubles(self, clause=None, done=False):
@@ -61,7 +55,7 @@ class TroubleManager(object):
             clause = Neq('status', 'done')
         else:
             clause = clause
-        rows = self.db.select(table='troubles', clause=clause)
+        rows = self.db.select(table='troubles', clause=clause, order=['posted'])
         return rows
 
     def getTroubleActions(self, troubleid):
