@@ -107,7 +107,7 @@ class TroubleInfoElement(BaseElement):
         BaseElement.__init__(self, 'div')
         self.setAttribute('id', 'trouble-%d' % troubleid)
         self.setAttribute('class', 'troubleinfo')
-        self.title = TitleTable(problem)
+        self.title = TitleTable('%s\nStatus: %s' % (problem, status))
         self.client = TextElement('h3', 'Client: %s' % info['client'])
         self.posted = TextElement('b', 'Created: %s' % posted)
         self.worktodo = TextElement('p', worktodo)

@@ -157,14 +157,6 @@ class TroubleView(ViewBrowser):
 
     def insertAction(self):
         raise Error, "don't call me yet"
-        #dlg = self.dialogs['new-action']
-        #subject = str(dlg.subjEdit.text())
-        #action = str(dlg.actionEdit.text())
-        #data = str(dlg.dataEdit.text())
-        #troubleid = dlg.troubleid
-        #actionid = self.manager.append_action(troubleid, subject, action,
-        #                                     data, parent=dlg.actionid)
-        #self.setID(troubleid)
         
     def setSource(self, url):
         action, context, id = str(url).split('.')
