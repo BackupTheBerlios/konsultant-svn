@@ -146,6 +146,15 @@ class TroubleDocument(BaseDocument):
             self.body.appendChild(element)
             self.body.appendChild(HR())
 
+    def setStatusReport(self):
+        counts = self.manager.getStatusCounts()
+        hd = TextElement('h1', 'Status Report')
+        self.body.appendChild(hd)
+        for status, count in counts.items():
+            st = TextElement('p', 'Status:  %s\t\t\tNumber: %d' % (status, count))
+            self.body.appendChild(st)
+            self.body.appendChild(BR())
+    
 class TroubleInfoDoc(BaseDocument):
     def __init__(self, app):
         BaseDocument.__init__(self, app)

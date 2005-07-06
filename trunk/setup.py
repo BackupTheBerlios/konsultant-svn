@@ -9,7 +9,7 @@ author_email = 'umeboshi@gregscomputerservice.com'
 url = 'http://developer.berlios.de/projects/konsultant'
 packages = ['konsultant']
 subpacks = ['base', 'db', 'managers']
-managers = ['client', 'ticket']
+managers = ['client', 'ticket', 'trouble']
 
 packages += ['konsultant.%s' % p for p in subpacks]
 packages += ['konsultant.managers.%s' % p for p in managers]

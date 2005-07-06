@@ -7,7 +7,7 @@ Standards-Version: 3.6.1
 
 Package: konsultant
 Architecture: any
-Depends: python-pgsql, python-kde3, libqt3c102-mt-psql
+Depends: useless-kdb
 Recommends: postgresql-client, pgpool
 Description: a simple kde application to manage clients
  Konsultant is a blablabla.

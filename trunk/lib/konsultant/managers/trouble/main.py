@@ -155,6 +155,11 @@ class TroubleView(ViewBrowser):
         self.doc.setID(clause=clause)
         self.setText(self.doc.toxml())
 
+    def showStatusReport(self):
+        self.doc.setStatusReport()
+        self.setText(self.doc.toxml())
+    
+
     def insertAction(self):
         raise Error, "don't call me yet"
         
@@ -227,6 +232,7 @@ class TroubleManagerWidget(BaseManagerWidget):
             c = KListViewItem(client, row.client)
             c.clientid = row.clientid
         untouched = KListViewItem(self.listView, 'untouched')
+        statreport = KListViewItem(self.listView, 'status report')
         
     def slotNew(self, title='', data=''):
         dlg = TroubleDialog(self)
@@ -267,5 +273,6 @@ class TroubleManagerWidget(BaseManagerWidget):
         elif str(current.text(0)) == 'untouched':
             print 'hey hey hey, untouched'
             self.view.setID(clause=Eq('status', 'untouched'))
-            
+        elif str(current.text(0)) == 'status report':
+            self.view.showStatusReport()
             

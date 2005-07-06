@@ -64,6 +64,14 @@ class TroubleManager(object):
         info['client'] = row.client
         info['actions'] = self.getTroubleActions(troubleid)
         return info
-    
-        
+
+    def getStatusCounts(self):
+        statustypes = [r.status for r in self.db.select(table='trouble_status')]
+        field = 'count(troubleid) as number'
+        counts = {}
+        for status in statustypes:
+            clause = Eq('status', status)
+            row = self.db.select_row(fields=[field], table='troubles', clause=clause)
+            counts[status] = row.number
+        return counts
 
