@@ -234,7 +234,21 @@ class TroubleActionTable(Table):
         posted = Now('posted')
         cols = [troubleid, actionid, instatus, outstatus, action, workdone, posted]
         Table.__init__(self, 'troubleaction', cols)
-        
+
+class MagnetTable(Table):
+    def __init__(self):
+        magnet = PkName('magnet')
+        Table.__init__('magnets', [magnet])
+
+class MagnetTroubleTable(Table):
+    def __init__(self):
+        magnet = PkName('magnet')
+        magnet.set_fk('magnets')
+        troubleid = Num('troubleid')
+        troubleid.set_fk('troubles')
+        Table.__init__('trouble_magnets', [magnet, troubleid])
+
+
         
     
         
@@ -243,7 +257,7 @@ MAINTABLES = [AddressTable, ContactTable, TicketTable,
               LocationTable, ClientTable, ClientTicketTable, ClientInfoTable,
               ClientDataTable, TaskTable, ClientTaskTable, LocationTaskTable,
               TagNameTable, TicketTagTable, ClientTagTable, TroubleStatusTable,
-              TroubleTable, TroubleActionTable
+              TroubleTable, TroubleActionTable, MagnetTable, MagnetTroubleTable
               ]
 
 TR_STATUS = ['untouched', 'diagnosed', 'in_repair', 'waiting_for_parts',
@@ -257,11 +271,13 @@ def create_schema(cursor, group):
         cursor.create_table(t())
 
     tables = [t().name for t in MAINTABLES]
-    full = [ClientInfoTable, ClientTicketTable, ClientTaskTable, LocationTaskTable]
-    insup = [AddressTable, ContactTable, TicketStatusTable,
+    full = [ClientInfoTable, ClientTicketTable, ClientTaskTable, LocationTaskTable,
+            MagnetTroubleTable]
+    insup = [AddressTable, ContactTable, TicketStatusTable, 
              LocationTable, ClientTable, TaskTable,
-             ClientTagTable, TicketTagTable]
-    ins = [TicketTable, TicketActionTable, TicketActionParentTable, TagNameTable]
+             ClientTagTable, TicketTagTable, TroubleTable]
+    ins = [TicketTable, TicketActionTable, TicketActionParentTable, TagNameTable,
+           TroubleActionTable, MagnetTable]
     
     execute = cursor.execute
     execute(grant_public(tables))
