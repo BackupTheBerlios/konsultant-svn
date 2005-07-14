@@ -18,12 +18,17 @@ class TroubleManager(object):
         rows = self.db.select(table='troubles', clause=clause, order=['posted'])
         return rows
 
-    def addTrouble(self, clientid, problem, worktodo):
+    def addTrouble(self, clientid, problem, worktodo, magnet=None):
         data = dict(clientid=clientid, problem=problem,
                     worktodo=worktodo, status='untouched')
+        troubleid = self.db.select_row(fields=["nextval('trouble_ident')"], table=None)[0]
+        data['troubleid'] = troubleid
         self.db.insert(table='troubles', data=data)
+        if magnet is not None:
+            self.db.insert(table='trouble_magnets',
+                           data=dict(troubleid=troubleid, magnet=magnet))
         self.db.conn.commit()
-
+        
     def getTroubleStatus(self, troubleid):
         clause = Eq('troubleid', troubleid)
         row = self.db.select_row(table='troubles', clause=clause)
@@ -40,6 +45,9 @@ class TroubleManager(object):
         if outstatus != instatus and instatus != 'done':
             self.db.update(table='troubles', data={'status' : outstatus},
                            clause=Eq('troubleid', troubleid))
+        if outstatus == 'done':
+            clause = Eq('troubleid', troubleid)
+            self.db.delete(table='trouble_magnets', clause=clause)
         self.db.conn.commit()
         
     def getTroubles(self, clause=None, done=False):
@@ -52,6 +60,27 @@ class TroubleManager(object):
         rows = self.db.select(table='troubles', clause=clause, order=['posted'])
         return rows
 
+    def getMagnetTroubles(self):
+        magtroubles_query = self.db.stmt.select(fields=['troubleid'],
+                                                table='trouble_magnets')
+        clause = In('troubleid', magtroubles_query)
+        return self.getTroubles(clause=clause)
+
+    def getUsedMagnets(self):
+        rows = self.db.select(fields=['magnet'], table='trouble_magnets')
+        return [row.magnet for row in rows]
+
+    def getTroubleIdByMagnet(self, magnet):
+        clause = Eq('magnet', magnet)
+        row = self.db.select_row(table='trouble_magnets', clause=clause)
+        return row.troubleid
+    def getAvailableMagnets(self):
+        magtroubles_query = self.db.stmt.select(fields=['magnet'],
+                                                table='trouble_magnets')
+        clause = NotIn('magnet', magtroubles_query)
+        rows = self.db.select(table='magnets', clause=clause)
+        return [row.magnet for row in rows]
+    
     def getTroubleActions(self, troubleid):
         clause = Eq('troubleid', troubleid)
         rows = self.db.select(table='troubleaction', clause=clause)

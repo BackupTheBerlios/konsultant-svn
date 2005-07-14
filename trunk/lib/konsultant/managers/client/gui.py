@@ -6,28 +6,23 @@ from kdeui import KLineEdit, KTextEdit
 
 from useless.kbase.refdata import RefData
 from useless.kbase.gui import EditRecordDialog
+from useless.kbase.gui import MyCombo
+from useless.kbase.gui import VboxDialog
 from useless.db.record import EmptyRefRecord
 from useless.kdb.gui import SimpleRecordDialog
 
 from konsultant.db.gui import AddressSelector
 from konsultant.db.xmlgen import AddressLink
 
-class VboxDialog(KDialogBase):
-    def __init__(self, parent, name='VboxDialog'):
-        KDialogBase.__init__(self, parent, name)
-        self.page = QFrame(self)
-        self.setMainWidget(self.page)
-        self.vbox = QVBoxLayout(self.page, 5, 7)
-        
-
-
 class TroubleDialog(VboxDialog):
     def __init__(self, parent, clientid, name='TroubleDialog'):
         VboxDialog.__init__(self, parent, name)
         self.clientid = clientid
         self.problemEdit = KLineEdit('', self.page)
+        self.magnetBox = MyCombo(self.page)
         self.worktodoEdit = KTextEdit(self.page)
         self.vbox.addWidget(self.problemEdit)
+        self.vbox.addWidget(self.magnetBox)
         self.vbox.addWidget(self.worktodoEdit)
         self.showButtonApply(False)
         self.setButtonOKText('insert', 'insert')

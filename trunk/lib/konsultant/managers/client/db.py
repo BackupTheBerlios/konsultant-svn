@@ -2,6 +2,8 @@ from useless.kbase.refdata import RefData
 from useless.db.record import RefRecord
 from useless.sqlgen.clause import Eq, In, Neq
 
+from konsultant.managers.trouble.db import TroubleManager
+
 class ClientManager(object):
     def __init__(self, app):
         self.app = app
@@ -166,37 +168,9 @@ class ClientManager(object):
         return rows
     
 
-    def addTrouble(self, clientid, problem, worktodo):
-        data = dict(clientid=clientid, problem=problem,
-                    worktodo=worktodo, status='untouched')
-        self.db.insert(table='troubles', data=data)
-        self.db.conn.commit()
+    def addTrouble(self, clientid, problem, worktodo, magnet=None):
+        tmanager = TroubleManager(self.app)
+        tmanager.addTrouble(clientid, problem, worktodo, magnet=magnet)
 
-    def getTroubleStatus(self, troubleid):
-        clause = Eq('troubleid', troubleid)
-        row = self.db.select_row(table='troubles', clause=clause)
-        rows = self.db.select(table='troubleaction', clause=clause,
-                              order=['actionid'])
-        #this will check for action on the trouble
-        if len(rows):
-            return rows[-1].outstatus
-        else:
-            return 'untouched'
-        
     def updateTrouble(self, troubleid, action, workdone, newstatus=None):
-        instatus = self.getTroubleStatus(troubleid)
-        outstatus = newstatus
-        if outstatus is None:
-            if instatus == 'untouched':
-                raise Error, 'unable to update this action without changing status'
-            else:
-                outstatus = instatus
-        data = dict(troubleid=troubleid, action=action, workdone=workdone,
-                    instatus=instatus, outstatus=outstatus)
-        self.db.insert(table='troubleaction', data=data)
-        self.db.conn.commit()
-        
-
-        
-        
-
+        raise Error, 'updateTrouble should be called from TroubleManager'

@@ -11,24 +11,15 @@ from kdeui import KTextEdit, KMainWindow
 from kdeui import KComboBox
 
 from useless.kbase.gui import MainWindow
+from useless.kbase.gui import VboxDialog
 from useless.kdb import BaseDatabase
 from useless.kdb.gui import BaseManagerWidget, ViewBrowser
 
 from useless.sqlgen.clause import Eq, In, NotIn
 from useless.sqlgen.clause import Neq
-#from xmlgen import TicketInfoDoc
-#from xmlgen import TicketDocument
 from xmlgen import TroubleDocument
 from xmlgen import TroubleInfoDoc
 from db import TroubleManager
-
-class VboxDialog(KDialogBase):
-    def __init__(self, parent, name='VboxDialog'):
-        KDialogBase.__init__(self, parent, name)
-        self.page = QFrame(self)
-        self.setMainWidget(self.page)
-        self.vbox = QVBoxLayout(self.page, 5, 7)
-        
 
 class TicketDialog(VboxDialog):
     def __init__(self, parent, name='TicketDialog'):
@@ -54,41 +45,6 @@ class ActionDialog(VboxDialog):
         self.setButtonOKText('insert', 'insert')
         self.show()
 
-class TicketAssigner(VboxDialog):
-    def __init__(self, app, parent, ticketid):
-        KMainWindow.__init__(self, parent, 'TicketAssigner')
-        self.resize(400, 300)
-        self.listBox = KActionSelector(self)
-        self.listBox.setShowUpDownButtons(False)
-        self.setMainWidget(self.listBox)
-        self.app = app
-        self.db = app.db
-        self.manager = TicketManager(self.app)
-        self.ticketid = ticketid
-        self.initlistView()
-        self.show()
-        self.connect(self, SIGNAL('okClicked()'), self.update_clients)
-        
-    def initlistView(self):
-        rows = self.manager.get_clients(self.ticketid, assigned=False)
-        ubox = self.listBox.availableListBox()
-        abox = self.listBox.selectedListBox()
-        for row in rows:
-            if row.assigned:
-                c = QListBoxText(abox, row.client)
-            else:
-                c = QListBoxText(ubox, row.client)
-            c.clientid = row.clientid
-        #lbox.show()
-
-    def update_clients(self):
-        print 'updating clients'
-        ubox = self.listBox.availableListBox()
-        abox = self.listBox.selectedListBox()
-        ids = [abox.item(a).clientid for a in range(abox.numRows())]
-        self.manager.update_ticket_assignment(self.ticketid, ids)
-        
-        
 class TroubleActionView(ViewBrowser):
     def __init__(self, app, parent, troubleid):
         ViewBrowser.__init__(self, app, parent, TroubleInfoDoc)
@@ -100,34 +56,24 @@ class TroubleActionView(ViewBrowser):
         print action, context, id
         if context == 'action':
             if action == 'new':
-                dlg = ActionDialog(self, 'ActionDialog')
-                dlg.connect(dlg, SIGNAL('okClicked()'), self.insertAction)
-                dlg.troubleid = self.doc.current
-                statustypes = [r.status for r in self.manager.db.select(table='trouble_status')]
-                for idx in range(len(statustypes)):
-                    dlg.statusEdit.setCurrentItem(statustypes[idx], True, idx)
                 status = self.manager.getTroubleStatus(self.doc.current)
-                dlg.statusEdit.setCurrentItem(status)
-                if id == 'none':
-                    dlg.actionid = None
-                else:
-                    dlg.actionid = int(id)
-                self.dialogs['new-action'] = dlg
-            elif action == 'show':
-                element = self.doc.threads.actions[int(id)]
-                self.doc.showActionData(int(id))
-                self.setText(self.doc.toxml())
-            elif action == 'hide':
-                self.doc.hideActionData(int(id))
-                self.setText(self.doc.toxml())
+                if status != 'done':
+                    dlg = ActionDialog(self, 'ActionDialog')
+                    dlg.connect(dlg, SIGNAL('okClicked()'), self.insertAction)
+                    dlg.troubleid = self.doc.current
+                    statustypes = [r.status for r in self.manager.db.select(table='trouble_status')]
+                    for idx in range(len(statustypes)):
+                        dlg.statusEdit.setCurrentItem(statustypes[idx], True, idx)
+                    dlg.statusEdit.setCurrentItem(status)
+                    if id == 'none':
+                        dlg.actionid = None
+                    else:
+                        dlg.actionid = int(id)
+                    self.dialogs['new-action'] = dlg
         elif context == 'page':
             if action == 'refresh':
                 self.setID(self.current)
                 print 'fresh page'
-        elif context == 'ticket':
-            if action == 'assign':
-                print 'assign in TicketActionView'
-                TicketAssigner(self.app, self, id)
                 
     def setID(self, troubleid):
         self.current = troubleid
@@ -187,6 +133,7 @@ class TroubleManagerWidget(BaseManagerWidget):
         BaseManagerWidget.__init__(self, app, parent, TroubleView, 'TroubleManager')
         self.setCaption('TroubleManager')
         self.manager = TroubleManager(self.app)
+        self.refreshlistView()
         self.dialogs = {}
         print 'trouble app', app, self.app
         self.resize(400, 600)
@@ -206,7 +153,7 @@ class TroubleManagerWidget(BaseManagerWidget):
     def initlistView(self):
         self.listView.setRootIsDecorated(True)
         self.listView.addColumn('trouble group')
-        self.refreshlistView()
+
 
     def initToolbar(self):
         toolbar = self.toolBar()
@@ -231,6 +178,10 @@ class TroubleManagerWidget(BaseManagerWidget):
         for row in rows:
             c = KListViewItem(client, row.client)
             c.clientid = row.clientid
+        magnet = KListViewItem(self.listView, 'magnet')
+        for m in self.manager.getUsedMagnets():
+            item = KListViewItem(magnet, m)
+            item.magnet = m
         untouched = KListViewItem(self.listView, 'untouched')
         statreport = KListViewItem(self.listView, 'status report')
         
@@ -268,6 +219,9 @@ class TroubleManagerWidget(BaseManagerWidget):
             self.view.setID(clause=Eq('clientid', clientid))
         elif hasattr(current, 'status'):
             self.view.setID(clause=Eq('status', current.status))
+        elif hasattr(current, 'magnet'):
+            troubleid = self.manager.getTroubleIdByMagnet(current.magnet)
+            self.view.setID(clause=Eq('troubleid', troubleid))
         elif str(current.text(0)) == 'all':
             self.view.setID(None)
         elif str(current.text(0)) == 'untouched':

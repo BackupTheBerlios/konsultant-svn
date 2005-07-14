@@ -9,12 +9,12 @@ from kdeui import KMainWindow, KSystemTray
 from kdeui import KPopupMenu, KStdAction
 
 from useless.kbase.gui import MainWindow
+from useless.kbase.gui import ConfigureDialog
 from useless.kbase.actions import ManageClients
 from useless.kdb import BaseDatabase, BaseObject
 from useless.kdb.pgpool import PgPool
 
 from konsultant.base.config import BaseConfig
-from konsultant.base.gui import ConfigureDialog
 from konsultant.base.actions import EditAddresses
 from konsultant.base.actions import ManageTickets, ConfigureKonsultant
 from konsultant.base.actions import ManageTroubles

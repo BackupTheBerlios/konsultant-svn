@@ -238,7 +238,7 @@ class TroubleActionTable(Table):
 class MagnetTable(Table):
     def __init__(self):
         magnet = PkName('magnet')
-        Table.__init__('magnets', [magnet])
+        Table.__init__(self, 'magnets', [magnet])
 
 class MagnetTroubleTable(Table):
     def __init__(self):
@@ -246,7 +246,7 @@ class MagnetTroubleTable(Table):
         magnet.set_fk('magnets')
         troubleid = Num('troubleid')
         troubleid.set_fk('troubles')
-        Table.__init__('trouble_magnets', [magnet, troubleid])
+        Table.__init__(self, 'trouble_magnets', [magnet, troubleid])
 
 
         
@@ -293,7 +293,6 @@ def create_schema(cursor, group):
     
 if __name__ == '__main__':
     import os
-    #from konsultant.base.config import Config
     from useless.db.lowlevel import BasicConnection
     from useless.db.midlevel import StatementCursor
     from useless.base.config import Configuration

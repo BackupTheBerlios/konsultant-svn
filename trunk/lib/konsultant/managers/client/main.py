@@ -24,8 +24,9 @@ from kdeui import KListView, KStatusBar
 from kdeui import KAction, KGuiItem
 
 from useless.base import NoExistError, Error
-from useless.kbase.refdata import RefData
 from useless.sqlgen.clause import Eq, In
+from useless.kbase.refdata import RefData
+from useless.kbase.gui import ConfigureDialog
 from useless.kbase.gui import MainWindow
 from useless.db.record import EmptyRefRecord
 from useless.xmlgen.base import TextElement, Anchor, TableElement
@@ -38,7 +39,6 @@ from useless.kbase.actions import AdministerDatabase
 from konsultant.base.actions import EditAddresses, ConfigureKonsultant
 from konsultant.base.actions import ManageTickets
 from konsultant.base.actions import ManageTasks, ManageTroubles
-from konsultant.base.gui import ConfigureDialog
 
 from konsultant.db.gui import AddressSelectView, AddressSelector
 from konsultant.db.xmlgen import AddressLink
@@ -52,7 +52,7 @@ from tagedit import ClientTagEditorWin
 from db import ClientManager
 from gui import ClientDialog, ContactDialog, LocationDialog
 from gui import ClientEditDialog
-from gui import TroubleDialog
+from konsultant.managers.trouble.gui import TroubleDialog
 
 class AddressData(RefData):
     def __init__(self):
@@ -105,7 +105,7 @@ class ClientView(ViewBrowser):
             ClientTagEditorWin(self.app, self, int(id))
         elif context == 'trouble':
             if action == 'new':
-                dlg = TroubleDialog(self, int(id))
+                dlg = TroubleDialog(self.app, self, int(id))
                 dlg.connect(dlg, SIGNAL('okClicked()'), self.slotNewTrouble)
                 self.dialogs['new-trouble'] = dlg
         else:
@@ -128,7 +128,7 @@ class ClientView(ViewBrowser):
         dlg = self.dialogs['new-trouble']
         data = dlg.getRecordData()
         self.manager.addTrouble(data['clientid'], data['problem'],
-                                data['worktodo'])
+                                data['worktodo'], magnet=data['magnet'])
         
     def insertLocation(self):
         dlg = self.dialogs['new-location']
