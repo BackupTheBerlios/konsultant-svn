@@ -2,12 +2,11 @@ from useless.kbase.refdata import RefData
 from useless.db.record import RefRecord
 from useless.sqlgen.clause import Eq, In, Neq
 
-from konsultant.managers.trouble.db import TroubleManager
+from konsultant.newdb.managers.trouble  import TroubleManager
 
 class ClientManager(object):
-    def __init__(self, app):
-        self.app = app
-        self.db = app.db
+    def __init__(self, db):
+        self.db = db
         self.addressfields = ['street1', 'street2', 'city', 'state', 'zip']
 
     def _setup_insdata(self, fields, clientid, addressid, data):
@@ -169,8 +168,16 @@ class ClientManager(object):
     
 
     def addTrouble(self, clientid, problem, worktodo, magnet=None):
-        tmanager = TroubleManager(self.app)
+        tmanager = TroubleManager(self.db)
         tmanager.addTrouble(clientid, problem, worktodo, magnet=magnet)
 
     def updateTrouble(self, troubleid, action, workdone, newstatus=None):
         raise Error, 'updateTrouble should be called from TroubleManager'
+
+    def getClientList(self, clause=None):
+        fields = ['clientid', 'client']
+        return self.db.mcursor.select(fields=fields, table='clients', clause=clause)
+    
+    
+
+    

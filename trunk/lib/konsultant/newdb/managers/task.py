@@ -1,18 +1,9 @@
 from konsultant.sqlgen.clause import Eq, In, NotIn
 
 
-class TroubleManager(object):
-    def __init__(self, app):
-        self.app = app
-        self.db  = app.db
-
-    def create_new_trouble(self, problem, worktodo):
-        pass
-    
 class TaskManager(object):
-    def __init__(self, app):
-        self.app = app
-        self.db = app.db
+    def __init__(self, db):
+        self.db = db
         
     def _setup_insdata(self, fields, data):
         return dict([(f, data[f]) for f in fields])

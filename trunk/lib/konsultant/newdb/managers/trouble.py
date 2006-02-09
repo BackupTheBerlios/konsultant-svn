@@ -3,9 +3,8 @@ from useless.sqlgen.clause import Neq
 
 
 class TroubleManager(object):
-    def __init__(self, app):
-        self.app = app
-        self.db = app.db
+    def __init__(self, db):
+        self.db = db
         
     def _setup_insdata(self, fields, data):
         return dict([(f, data[f]) for f in fields])

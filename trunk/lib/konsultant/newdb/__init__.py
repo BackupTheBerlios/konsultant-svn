@@ -1,3 +1,4 @@
+import os
 from operator import and_
 
 from useless.kbase import NoExistError
@@ -6,16 +7,20 @@ from useless.sqlgen.statement import Statement
 from useless.db.lowlevel import BasicConnection
 from useless.db.midlevel import StatementCursor
 
-class KonsultantConnection(BasicConnection):
-    pass
 
+class KonsultantConnection(BasicConnection):
+    def __init__(self):
+        dsn = dict(user='umeboshi', host='bard', dbname='konsultant')
+        BasicConnection.__init__(self, **dsn)
+        
+
+# this class will eventually disappear        
 class BaseDatabase(object):
-    def __init__(self, dsn, name, parent=None, objname=None):
-        self.conn = BasicConnection(**dsn)
-        self.setDatabaseName(dsn['dbname'])
-        self.setHostName(dsn['host'])
-        self.dbuser = dsn['user']
-        self.setUserName(self.dbuser)
+    def __init__(self, conn=None):
+        if conn is None:
+            self.conn = KonsultantConnection()
+        else:
+            self.conn = conn
         self.stmt = Statement()
         self.mcursor = StatementCursor(self.conn)
         
