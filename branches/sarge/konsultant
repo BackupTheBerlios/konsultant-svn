@@ -1,0 +1,26 @@
+#!/usr/bin/python
+import sys
+from qt import QApplication
+from qt import SIGNAL, SLOT, Qt
+from kdecore import KApplication, KCmdLineArgs, KAboutData
+from kdecore import KIconLoader
+from kdeui import KSystemTray, KMainWindow
+
+from konsultant.base import DeadParrotObject
+from konsultant.base.gui import AboutData
+from konsultant.main import KonsultantMainApplication
+from konsultant.main import KonsultantMainWindow
+from konsultant.managers.client import ClientManagerWidget
+        
+if __name__ == '__main__':
+    aboutData = AboutData()
+    KCmdLineArgs.init(sys.argv, aboutData)
+    #app = KApplication()
+    app = KonsultantMainApplication()
+    #app.connect(app, SIGNAL('lastWindowClosed()'), app.quit)
+    dcop = app.dcopClient()
+    appid = dcop.registerAs('konsultant')
+    win = ClientManagerWidget(app, None)
+    win.show()
+    app.setMainWidget(win)
+    app.exec_loop()

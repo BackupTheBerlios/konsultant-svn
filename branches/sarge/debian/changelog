@@ -1,0 +1,42 @@
+konsultant (0.2-3) common; urgency=low
+
+  * added menu entry for debian, still need to make kde entry
+
+ -- Joseph Rawson <umeboshi@bard>  Wed,  6 Jul 2005 15:52:16 -0500
+
+konsultant (0.2-2) common; urgency=low
+
+  * added some trouble management
+
+ -- Joseph Rawson <umeboshi@bard>  Wed,  6 Jul 2005 13:37:35 -0500
+
+konsultant (0.2-1) common; urgency=low
+
+  * new release, no config dialog yet
+
+ -- Joseph Rawson <umeboshi@gregscomputerservice.com>  Sun,  3 Oct 2004 03:49:16 -0500
+
+konsultant (0.1-3) common; urgency=low
+
+  * oops, bugfix in plsql
+  * made ticket manager
+  * changed layout a bit
+
+
+ -- Joseph Rawson <umeboshi@gregscomputerservice.com>  Sun,  3 Oct 2004 03:48:26 -0500
+
+konsultant (0.1-2) common; urgency=low
+
+  * fixed depends
+
+
+ -- Joseph Rawson <umeboshi@gregscomputerservice.com>  Mon, 27 Sep 2004 22:07:47 -0500
+
+konsultant (0.1-1) common; urgency=low
+
+  * Initial Release.
+  * moving to common
+  * using cdbs
+
+ -- Joseph Rawson <umeboshi@gregscomputerservice.com>  Mon, 27 Sep 2004 19:41:43 -0500
+

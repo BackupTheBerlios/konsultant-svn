@@ -1,0 +1,82 @@
+<!DOCTYPE kcfg SYSTEM "http://www.kde.org/standards/kcfg/1.0/kcfg.dtd">
+<kcfg>
+ <kcfgfile name="konsultant.cfg" />
+ <group name="database" >
+  <entry key="dbhost" type="String" >
+   <label>host</label>
+   <whatsthis>Database Host</whatsthis>
+   <default>localhost</default>
+  </entry>
+  <entry key="dbname" type="String" >
+   <label>database</label>
+   <whatsthis>Database Name</whatsthis>
+   <default>konsultant</default>
+  </entry>
+  <entry key="dbuser" type="String" >
+   <label>username</label>
+   <whatsthis>Database User</whatsthis>
+   <default>konsultant</default>
+  </entry>
+  <entry key="dbpass" type="String" >
+   <label>password</label>
+   <whatsthis>Password for Database Server</whatsthis>
+  </entry>
+  <entry key="dbport" type="UInt" >
+   <label>port</label>
+   <whatsthis>Database Port</whatsthis>
+   <default>5432</default>
+  </entry>
+ </group>
+ <group name="pgpool" >
+  <entry key="usepgpool" type="Bool" >
+   <label>use pgpool</label>
+   <whatsthis>Use pgpool to pool database connections</whatsthis>
+   <default>false</default>
+  </entry>
+  <entry key="command" type="Path" >
+   <label>pgpool command</label>
+   <whatsthis>Full path to pgpool.  Pgpool is in /usr/sbin on debian.
+</whatsthis>
+   <default>/usr/sbin/pgpool</default>
+  </entry>
+  <entry key="max_pool" type="UInt" >
+   <label>max pool</label>
+   <whatsthis>set this to the number of databases you will be using on the server +1 or 2.
+</whatsthis>
+   <default>4</default>
+  </entry>
+  <entry key="connection_life_time" type="UInt" >
+   <label>Connection lifetime</label>
+   <whatsthis>Idle lifetime in seconds. 0 is forever.
+
+</whatsthis>
+   <default>0</default>
+  </entry>
+  <entry key="num_init_children" type="String" >
+   <label>number initial chidren</label>
+   <whatsthis>Number of child processes forked on initlialization.
+</whatsthis>
+   <default>32</default>
+  </entry>
+ </group>
+ <group name="client-gui" >
+  <entry key="contactdlgsize" type="Size" >
+   <label>Contact Dialog Size</label>
+   <whatsthis>Size of the Contact DIalog.
+</whatsthis>
+   <default>200,300</default>
+  </entry>
+  <entry key="locationdlgsize" type="Size" >
+   <label>Location Dialog Size</label>
+   <whatsthis>Size of the Location Dialog.
+</whatsthis>
+   <default>200,400</default>
+  </entry>
+  <entry key="mainwinsize" type="Size" >
+   <label>MainWindow size</label>
+   <whatsthis>Size of the Main Window.
+</whatsthis>
+   <default>500,400</default>
+  </entry>
+ </group>
+</kcfg>
